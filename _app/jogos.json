@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e só abrem com a família logada. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
+  "games": [
+    {
+      "slug": "dragoes-e-blocos",
+      "title": "Dragões & Blocos",
+      "category": "Ação",
+      "description": "Cuspa fogo e derrube a muralha de blocos antes que ela chegue no seu dragão!",
+      "cover": "dragoes-e-blocos.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Celular ou tablet: arraste o dedo para mover o dragão.",
+        "Computador: setas ou A/D, ou o mouse. P pausa.",
+        "O dragão cospe fogo sozinho. Pegue as gemas 💎 e os poderes ⚡ 🔱 🛡️!"
+      ],
+      "input": ["touch", "mouse", "keyboard"],
+      "status": "pronto",
+      "novo": true,
+      "version": "1.0"
+    },
+    {
+      "slug": "caca-as-estrelas",
+      "title": "Caça às estrelas",
+      "category": "Descobertas",
+      "description": "Uma pequena missão com muito brilho pelo caminho.",
+      "cover": "caca-as-estrelas.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Toque ou clique nas estrelas que aparecem no espaço.",
+        "No teclado: Tab para escolher a estrela e Enter para pegar.",
+        "Pegue todas para cumprir a missão. Cada missão tem mais estrelas!"
+      ],
+      "input": ["touch", "mouse", "keyboard"],
+      "status": "pronto",
+      "version": "1.0"
+    },
+    {
+      "slug": "a-turma-dos-pets",
+      "title": "A turma dos pets",
+      "category": "Criatividade",
+      "description": "Um Jack Russell, um gatinho e mil histórias para inventar.",
+      "cover": "turma-dos-pets.webp",
+      "status": "em-breve"
+    },
+    {
+      "slug": "ilha-dos-blocos",
+      "title": "Ilha dos blocos",
+      "category": "Exploração",
+      "description": "Um mundo de ilhas e caminhos para soltar a imaginação.",
+      "cover": "ilha-dos-blocos.webp",
+      "status": "em-breve"
+    }
+  ]
+}

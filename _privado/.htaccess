@@ -1,0 +1,8 @@
+# Pasta interna: acesso direto proibido. Só o PHP do site lê estes arquivos.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

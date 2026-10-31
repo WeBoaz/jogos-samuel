@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Caça às estrelas</title>
+<style>
+  :root{--ink:#193337;--paper:#f5f2e8;--green:#b9ed80;--orange:#ff9d52;--purple:#ceb7ef;--gold:#ffd56b;--mono:'Courier New',monospace}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  body{background:#1b1440 url('/assets/img/caca-as-estrelas.webp') center/cover no-repeat}
+  body::before{content:'';position:fixed;inset:0;background:linear-gradient(#0d0a2a99,#1b144066 40%,#0d0a2acc)}
+  .hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;z-index:3}
+  .pill{background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:8px 14px;font:bold 16px var(--mono)}
+  .pill button{all:unset;cursor:pointer}
+  .som{width:44px;height:44px;display:grid;place-items:center;font-size:20px;padding:0}
+  #ceu{position:fixed;inset:0;z-index:2}
+  .estrela{position:absolute;width:var(--t,76px);height:var(--t,76px);margin:calc(var(--t,76px)/-2) 0 0 calc(var(--t,76px)/-2);
+    border:0;background:none;padding:0;cursor:pointer;font-size:calc(var(--t,76px)*.82);line-height:1;color:var(--gold);
+    text-shadow:0 0 12px #ffe9a0,0 0 26px #ffb13b,3px 3px 0 #b86a00;animation:brilha 1.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+  .estrela:focus-visible{outline:3px dashed #fff;outline-offset:6px;border-radius:50%}
+  .estrela.pega{animation:pega .45s ease-out forwards;pointer-events:none}
+  @keyframes brilha{0%,100%{transform:scale(1) rotate(-6deg)}50%{transform:scale(1.12) rotate(6deg)}}
+  @keyframes pega{to{transform:scale(2.2) rotate(40deg);opacity:0}}
+  .faisca{position:absolute;width:10px;height:10px;background:#fff6c2;box-shadow:0 0 8px #ffd56b;pointer-events:none;animation:faisca .6s ease-out forwards}
+  @keyframes faisca{to{transform:translate(var(--x),var(--y)) scale(.2);opacity:0}}
+  .tela{position:fixed;inset:0;display:grid;place-items:center;padding:20px;z-index:4}
+  .tela[hidden]{display:none}
+  .cartao{background:var(--paper);border:2px solid var(--ink);box-shadow:7px 7px 0 var(--ink);max-width:420px;width:100%;text-align:center}
+  .barra{background:#e8e7db;border-bottom:2px solid var(--ink);padding:9px 13px;font:12px var(--mono);text-align:left}
+  .corpo{padding:26px 24px}
+  h1,h2{font-family:var(--mono);font-weight:900;letter-spacing:-2px;margin:0 0 10px;line-height:1.05}
+  h1{font-size:36px}h2{font-size:32px}
+  p{margin:0 0 18px;color:#526568;line-height:1.5}
+  .grande{font-size:56px;line-height:1;margin-bottom:12px}
+  .btn{border:2px solid var(--ink);background:var(--green);box-shadow:4px 4px 0 var(--ink);padding:13px 22px;font:800 17px Arial,sans-serif;cursor:pointer;min-height:52px;color:var(--ink)}
+  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.sec{background:var(--paper);margin-top:12px}
+  .acoes{display:flex;flex-direction:column;align-items:center;gap:4px}
+  @media (prefers-reduced-motion:reduce){.estrela{animation:none}.estrela.pega{animation:none;opacity:0}.faisca{display:none}}
+</style>
+</head>
+<body>
+  <div class="hud" aria-live="polite">
+    <span class="pill" id="missao">Missão 1</span>
+    <span class="pill" id="placar">★ 0 / 6</span>
+    <span class="pill som"><button id="btnSom" aria-label="Desligar som">🔊</button></span>
+  </div>
+  <div id="ceu" aria-label="Céu com estrelas"></div>
+
+  <div class="tela" id="inicio">
+    <div class="cartao"><div class="barra">caca_as_estrelas.exe</div><div class="corpo">
+      <div class="grande" aria-hidden="true">⭐</div>
+      <h1>Caça às estrelas</h1>
+      <p>As estrelas se espalharam pelo espaço! Toque em todas para levar de volta para a nave.</p>
+      <button class="btn" id="btnComecar">▶ Começar</button>
+    </div></div>
+  </div>
+
+  <div class="tela" id="fim" hidden>
+    <div class="cartao"><div class="barra">missao_cumprida.exe</div><div class="corpo">
+      <div class="grande" aria-hidden="true">🚀</div>
+      <h2 id="fimTitulo">Missão cumprida!</h2>
+      <p id="fimTexto">Você brilhou!</p>
+      <div class="acoes">
+        <button class="btn" id="btnProxima">Próxima missão ▶</button>
+        <button class="btn sec" id="btnDeNovo">↻ Começar do início</button>
+      </div>
+    </div></div>
+  </div>
+
+<script>
+'use strict';
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const ceu = $('ceu');
+  const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let missao = 1, total = 6, pegas = 0, inicioT = 0;
+
+  // ---------- Som (só depois de um toque) ----------
+  let audio = null;
+  let som = (() => { try { return localStorage.getItem('estrelas-som') !== '0'; } catch { return true; } })();
+  function bip(freq, dur = 0.12) {
+    if (!som) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audio.currentTime, o = audio.createOscillator(), g = audio.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur);
+    } catch {}
+  }
+  const NOTAS = [523, 587, 659, 698, 784, 880, 988, 1047];
+  function atualizarSom() { $('btnSom').textContent = som ? '🔊' : '🔇'; $('btnSom').setAttribute('aria-label', som ? 'Desligar som' : 'Ligar som'); }
+  $('btnSom').onclick = () => { som = !som; try { localStorage.setItem('estrelas-som', som ? '1' : '0'); } catch {} atualizarSom(); };
+  atualizarSom();
+
+  // ---------- Estrelas ----------
+  function posicoes(n) {
+    const W = innerWidth, H = innerHeight, tam = Math.max(56, Math.min(92, Math.min(W, H) / 7));
+    const pts = [], margem = tam * 0.7, topo = 80 + tam / 2;
+    let tentativas = 0;
+    while (pts.length < n && tentativas < 3000) {
+      tentativas++;
+      const x = margem + Math.random() * (W - 2 * margem);
+      const y = topo + Math.random() * (H - topo - margem);
+      const minDist = tentativas < 2000 ? tam * 1.25 : tam * 0.9;
+      if (pts.every((p) => Math.hypot(p.x - x, p.y - y) > minDist)) pts.push({ x, y });
+    }
+    return { pts, tam };
+  }
+
+  function montar() {
+    pegas = 0; ceu.innerHTML = '';
+    total = Math.min(6 + (missao - 1) * 2, 16);
+    $('missao').textContent = 'Missão ' + missao;
+    placar();
+    const { pts, tam } = posicoes(total);
+    pts.forEach((p, i) => {
+      const b = document.createElement('button');
+      b.className = 'estrela'; b.textContent = '★';
+      b.setAttribute('aria-label', 'Pegar estrela ' + (i + 1));
+      b.style.left = p.x + 'px'; b.style.top = p.y + 'px';
+      b.style.setProperty('--t', tam + 'px');
+      b.style.setProperty('--d', (Math.random() * 1.6).toFixed(2) + 's');
+      ceu.appendChild(b);
+    });
+    inicioT = performance.now();
+    const primeira = ceu.querySelector('.estrela');
+    if (primeira) primeira.focus({ preventScroll: true });
+  }
+
+  function placar() { $('placar').textContent = '★ ' + pegas + ' / ' + total; }
+
+  function faiscas(x, y) {
+    if (reduzido) return;
+    for (let i = 0; i < 8; i++) {
+      const f = document.createElement('i');
+      f.className = 'faisca';
+      const a = (Math.PI * 2 * i) / 8, d = 40 + Math.random() * 30;
+      f.style.left = x + 'px'; f.style.top = y + 'px';
+      f.style.setProperty('--x', Math.cos(a) * d + 'px'); f.style.setProperty('--y', Math.sin(a) * d + 'px');
+      ceu.appendChild(f);
+      setTimeout(() => f.remove(), 650);
+    }
+  }
+
+  ceu.addEventListener('click', (e) => {
+    const b = e.target.closest('.estrela');
+    if (!b || b.classList.contains('pega')) return;
+    b.classList.add('pega');
+    const r = b.getBoundingClientRect();
+    faiscas(r.left + r.width / 2, r.top + r.height / 2);
+    bip(NOTAS[pegas % NOTAS.length]);
+    pegas++; placar();
+    const proxima = ceu.querySelector('.estrela:not(.pega)');
+    if (proxima) proxima.focus({ preventScroll: true });
+    if (pegas === total) setTimeout(terminar, 500);
+  });
+
+  function terminar() {
+    const seg = Math.round((performance.now() - inicioT) / 1000);
+    [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => bip(f, 0.16), i * 120));
+    $('fimTitulo').textContent = 'Missão ' + missao + ' cumprida!';
+    $('fimTexto').textContent = 'Você pegou ' + total + ' estrelas em ' + seg + ' segundos. Você brilhou!';
+    $('fim').hidden = false;
+    $('btnProxima').focus();
+  }
+
+  $('btnComecar').onclick = () => { $('inicio').hidden = true; bip(660); montar(); };
+  $('btnProxima').onclick = () => { $('fim').hidden = true; missao++; montar(); };
+  $('btnDeNovo').onclick = () => { $('fim').hidden = true; missao = 1; montar(); };
+  addEventListener('resize', () => {
+    // reposiciona as estrelas que faltam quando a tela gira
+    if (!$('inicio').hidden || !$('fim').hidden) return;
+    const restantes = [...ceu.querySelectorAll('.estrela:not(.pega)')];
+    const { pts, tam } = posicoes(restantes.length);
+    restantes.forEach((b, i) => { if (pts[i]) { b.style.left = pts[i].x + 'px'; b.style.top = pts[i].y + 'px'; b.style.setProperty('--t', tam + 'px'); } });
+  });
+})();
+</script>
+</body>
+</html>

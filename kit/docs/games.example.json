@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "demoOnly": true,
+  "games": [
+    {"id":"ilha","slug":"ilha-dos-blocos","title":"Ilha dos blocos","category":"Exploração","description":"Conceito ilustrativo para um futuro jogo de exploração.","cover":null,"entry":null,"instructions":[],"input":[],"status":"concept","visibility":"family","version":null},
+    {"id":"estrelas","slug":"caca-as-estrelas","title":"Caça às estrelas","category":"Descobertas","description":"Mini demo incorporada ao protótipo: coletar seis estrelas.","cover":null,"entry":null,"instructions":["Toque ou clique nas seis estrelas."],"input":["mouse","touch","keyboard"],"status":"inline-demo","visibility":"family","version":"prototype-1"},
+    {"id":"pets","slug":"a-turma-dos-pets","title":"A turma dos pets","category":"Criatividade","description":"Conceito ilustrativo com Jack Russell e gato amarelo.","cover":null,"entry":null,"instructions":[],"input":[],"status":"concept","visibility":"family","version":null}
+  ]
+}

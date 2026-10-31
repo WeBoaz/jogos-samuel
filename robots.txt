@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /entrar/
+Disallow: /exploradores/
+Disallow: /jogos/
+Disallow: /jogar/
+Disallow: /jogo/
+Disallow: /conta/
+Disallow: /sair/
