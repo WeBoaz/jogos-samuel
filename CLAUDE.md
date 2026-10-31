@@ -55,6 +55,20 @@ ferramentas/gerar_pixel_art.py   Gera TODAS as imagens a partir de grades ASCII
 > Usar paleta e fontes do kit de marca, sons 8-bit, botão de som e de pausa.
 > Ao terminar: adicionar no `assets/js/catalogo.js`.
 
+## Publicação (Hostinger)
+O samuel.tech fica na **Hostinger** (conta `u401945237`, pasta `public_html`). O app do GitHub conectado
+à Hostinger não enxerga `WeBoaz/jogos-samuel`, então **não há deploy automático**. Para publicar:
+1. Juntar as mudanças na `main`.
+2. `ferramentas/empacotar.sh` → gera `samuel-site.zip` (só arquivos públicos).
+3. Atualizar a branch órfã **`publicacao`** do repositório com o novo `samuel-site.zip` (+ `LEIA-ME.md`) e dar push.
+4. Hostinger (MCP): `hosting_git_deploy-website-repository` com
+   `https://github.com/WeBoaz/jogos-samuel.git`, branch `publicacao`, directory `_publicacao`
+   (se a pasta já existir, isso faz pull).
+5. Hostinger: `hosting_websites_deploy-static-site-archive` com `archive_path: "_publicacao/samuel-site.zip"`.
+6. Conferir com `hosting_files_list-website-and-directories`.
+Alternativa definitiva: no hPanel (Sites → samuel.tech → Avançado → Git) conectar a conta GitHub WeBoaz;
+aí `hosting_deploy` com `WeBoaz/jogos-samuel`, branch `main`, `type: static` liga o deploy automático.
+
 ## Login (importante)
 O login é uma **“porta de brincadeira”** guardada no `localStorage`: escolhe o herói e toca 3 blocos
 (senhas em `assets/js/config.js`). **Não é segurança de verdade**: o site é estático e qualquer pessoa
