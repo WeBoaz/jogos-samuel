@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meus jogos — samuel.tech</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1B1036">
+<link rel="icon" type="image/svg+xml" href="../assets/img/marca/icone.svg">
+<link rel="apple-touch-icon" href="../assets/img/marca/icone-180.png">
+<link rel="stylesheet" href="../assets/css/samuel.css">
+<style>
+  .chip { display: flex; align-items: center; gap: 10px; font-family: var(--fonte-titulo); font-size: 11px; }
+  .chip img { width: 40px; height: 40px; image-rendering: pixelated; box-shadow: 0 0 0 3px var(--noite); }
+
+  .perfil { padding: 40px 0 0; }
+  .perfil__grade { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: end; position: relative; z-index: 1; }
+  .perfil__corpo { width: 150px; image-rendering: pixelated; display: block; margin-bottom: -4px; }
+  .perfil .janela { margin-bottom: 40px; }
+  .perfil h1 { font-size: clamp(16px, 3.4vw, 26px); margin-bottom: 6px; }
+  .perfil .subtitulo { font-size: 26px; color: var(--azul-janela); margin-bottom: 18px; }
+  .continuar { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+
+  .conquistas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+  .conquista { display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; background: #E8E3F3; box-shadow: 0 0 0 3px var(--noite); font-size: 20px; }
+  .conquista img { width: 32px; height: 32px; image-rendering: pixelated; }
+  .conquista.bloqueada { filter: grayscale(1); opacity: .5; }
+
+  .bau { padding: 56px 0 72px; }
+  .bau__titulo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+  .bau__titulo h2 { margin: 0; }
+  .slot .contagem { font-size: 20px; color: #2B2540; }
+
+  @media (max-width: 720px) {
+    .perfil__grade { grid-template-columns: 1fr; }
+    .perfil__corpo { width: 110px; margin: 0 auto -4px; }
+    .chip span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="container topo__dentro">
+    <a class="topo__logo" href="../" aria-label="samuel.tech — início"><img src="../assets/img/marca/logo-horizontal.svg" alt="samuel.tech"></a>
+    <nav aria-label="Conta">
+      <div class="chip"><img id="chipAvatar" src="" alt=""><span id="chipNome"></span></div>
+      <button class="btn btn--pequeno btn--perigo" type="button" id="btnSair" data-som>Sair</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- PERFIL -->
+  <section class="ceu perfil" aria-labelledby="ola">
+    <img class="sol" src="../assets/img/icones/sol.svg" alt="" style="top:24px; right:5%; width:72px;">
+    <img class="nuvem" src="../assets/img/icones/nuvem.svg" alt="" style="top:40px; animation-duration:70s;">
+    <div class="container perfil__grade">
+      <img class="perfil__corpo balanca" id="perfilCorpo" src="" alt="">
+      <div class="janela">
+        <div class="janela__barra"><span id="perfilJanela">PERFIL.EXE</span><span class="janela__botoes" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+        <div class="janela__corpo">
+          <h1 id="ola">Olá!</h1>
+          <p class="subtitulo" id="perfilTitulo"></p>
+          <div class="xp">
+            <span class="nivel" id="nivel" title="Nível">1</span>
+            <div class="xp__barra" role="progressbar" aria-label="Experiência até o próximo nível" aria-valuemin="0" aria-valuemax="100" id="xpBarra"><i></i></div>
+            <span id="xpTexto">0 XP</span>
+          </div>
+          <div class="conquistas" id="conquistas"></div>
+          <div class="continuar" id="continuar"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chao chao--fino"></div>
+  </section>
+
+  <!-- BAÚ DE JOGOS -->
+  <section class="bau ceu--noite" aria-labelledby="t-bau">
+    <div class="container">
+      <div class="bau__titulo">
+        <h2 id="t-bau" class="texto-3d">Baú de jogos</h2>
+        <span class="etiqueta" id="contagemJogos"></span>
+      </div>
+      <div class="inventario" id="inventario"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="container">
+    <div class="linha"><span>Visitante nº</span><span class="contador" data-contador></span></div>
+    <p>Feito com 💛 para o Samuel · <a href="../">Início</a></p>
+  </div>
+</footer>
+
+<button class="btn btn--pedra btn-som" type="button" data-botao-som aria-label="Som">🔊</button>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/catalogo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+  (function () {
+    const S = window.Samuel;
+    const $ = (id) => document.getElementById(id);
+    const jogador = S.sessao.exigir();
+    if (!jogador) return;
+
+    // Topo + perfil
+    $("chipAvatar").src = S.url(jogador.avatar);
+    $("chipNome").textContent = jogador.nome;
+    $("perfilCorpo").src = S.url(jogador.corpo);
+    $("perfilCorpo").alt = `${jogador.nome} em pixel art`;
+    $("perfilJanela").textContent = jogador.nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase() + ".EXE";
+    $("ola").textContent = `Olá, ${jogador.nome}!`;
+    $("perfilTitulo").textContent = `${jogador.titulo} · ${jogador.idade} anos`;
+    document.title = `Jogos de ${jogador.nome} — samuel.tech`;
+
+    const jogos = S.jogos.filter((j) => !j.jogadores || j.jogadores.includes(jogador.id));
+    const prontos = jogos.filter((j) => j.status === "pronto");
+
+    function desenharPerfil() {
+      const p = S.progresso.ler(jogador.id);
+      const { nivel, pct } = S.progresso.nivel(p.xp);
+      $("nivel").textContent = nivel;
+      $("xpBarra").style.setProperty("--xp", pct + "%");
+      $("xpBarra").setAttribute("aria-valuenow", pct);
+      $("xpTexto").textContent = `${p.xp} XP`;
+
+      const total = Object.values(p.jogadas).reduce((a, b) => a + b, 0);
+      const conquistas = [
+        { icone: "estrela", nome: "Primeira partida", ok: total >= 1 },
+        { icone: "moeda", nome: "10 partidas", ok: total >= 10 },
+        { icone: "trofeu", nome: "Nível 5", ok: nivel >= 5 },
+        { icone: "coracao", nome: "Jogou todos", ok: prontos.length > 0 && prontos.every((j) => p.jogadas[j.id]) },
+      ];
+      $("conquistas").innerHTML = conquistas.map((c) => `
+        <span class="conquista ${c.ok ? "" : "bloqueada"}" title="${c.ok ? "Conquistado!" : "Ainda não"}">
+          <img src="${S.url(`assets/img/icones/${c.icone}.svg`)}" alt="">${c.nome}
+        </span>`).join("");
+
+      const ultimo = p.ultimo && prontos.find((j) => j.id === p.ultimo);
+      $("continuar").innerHTML = ultimo
+        ? `<a class="btn" href="${S.url(ultimo.url)}" data-jogo="${ultimo.id}" data-som="bloco">▶ Continuar: ${ultimo.titulo}</a>`
+        : `<span style="font-size:24px">Escolha um jogo no baú aqui embaixo! ⬇</span>`;
+    }
+
+    function desenharBau() {
+      const p = S.progresso.ler(jogador.id);
+      $("contagemJogos").textContent = `${prontos.length} ${prontos.length === 1 ? "JOGO" : "JOGOS"}`;
+      $("inventario").innerHTML = jogos.map((j) => {
+        const pronto = j.status === "pronto";
+        const vezes = p.jogadas[j.id] || 0;
+        const tag = pronto && j.novo && !vezes ? '<span class="etiqueta etiqueta--novo">NOVO!</span>'
+                  : !pronto ? '<span class="etiqueta etiqueta--breve">EM BREVE</span>' : "";
+        const corpo = `
+          ${tag}
+          <div class="slot__capa" style="--cor:${j.cor}"><img src="${S.url(j.icone)}" alt=""></div>
+          <div class="slot__info"><h3>${j.titulo}</h3><p>${j.descricao}</p></div>
+          <div class="slot__rodape">
+            <span class="etiqueta">${pronto ? "▶ Jogar" : "🔒 Trancado"}</span>
+            ${pronto ? `<span class="contagem">${vezes ? `jogado ${vezes}×` : "nunca jogado"}</span>` : ""}
+          </div>`;
+        return pronto
+          ? `<a class="slot" href="${S.url(j.url)}" data-jogo="${j.id}" data-som="moeda">${corpo}</a>`
+          : `<div class="slot slot--trancado" aria-disabled="true">${corpo}</div>`;
+      }).join("");
+    }
+
+    // Registrar XP ao abrir um jogo
+    document.addEventListener("click", (e) => {
+      const link = e.target.closest("[data-jogo]");
+      if (link) S.progresso.registrarJogada(jogador.id, link.dataset.jogo);
+    });
+
+    $("btnSair").addEventListener("click", () => {
+      S.sessao.sair();
+      location.assign(S.url(""));
+    });
+
+    desenharPerfil();
+    desenharBau();
+    // Voltando de um jogo com o botão "voltar" do navegador: atualiza XP
+    window.addEventListener("pageshow", () => { desenharPerfil(); desenharBau(); });
+  })();
+</script>
+</body>
+</html>

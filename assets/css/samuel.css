@@ -1,0 +1,364 @@
+/* ==========================================================================
+   samuel.tech — Design System "Blocos 90"
+   Mistura: mundo de blocos (grama, terra, minérios) + internet anos 90
+   (janelas com bisel, letreiro rolando, contador de visitas, selos 88x31).
+   Documentação completa em /marca/  e  marca/MARCA.md
+   ========================================================================== */
+
+/* ---------- 0. Fontes (locais, licença OFL — ver assets/fonts/LEIA-ME.txt) */
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("../fonts/press-start-2p.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "VT323";
+  src: url("../fonts/vt323.woff2") format("woff2");
+  font-display: swap;
+}
+
+/* ---------- 1. Tokens ---------------------------------------------------- */
+:root {
+  /* Mundo de blocos */
+  --grama: #5DBB3F;
+  --grama-esc: #3E8E2A;
+  --terra: #8B5A2B;
+  --terra-esc: #5E3A1A;
+  --pedra: #8C8C8C;
+  --pedra-esc: #5C5C5C;
+  --diamante: #4EE6E0;
+  --diamante-esc: #1FA7B5;
+  --ouro: #FFC93C;
+  --ouro-esc: #D9901A;
+  --redstone: #E8333A;
+  --madeira: #B98A4E;
+
+  /* Anos 90 */
+  --neon-rosa: #FF4FD8;
+  --neon-roxo: #8A4FFF;
+  --azul-janela: #1F3A93;
+  --cinza-janela: #C9C3D9;
+
+  /* Base */
+  --noite: #1B1036;     /* fundo escuro + contorno de tudo */
+  --noite-2: #2A1858;
+  --tinta: #140B26;
+  --papel: #FFF7E6;     /* texto claro */
+  --ceu: #7EC8F5;
+  --ceu-topo: #4FA8F0;
+
+  /* Personagens */
+  --cor-samuel: #8FD3F0;
+  --cor-heloisa: #FFB3D9;
+
+  /* Tipografia */
+  --fonte-titulo: "Press Start 2P", "Courier New", monospace;
+  --fonte-texto: "VT323", "Courier New", monospace;
+
+  /* Grade de pixel: tudo anda em múltiplos de 4px */
+  --px: 4px;
+  --borda: 4px;
+  --raio: 0;            /* nada de cantos redondos: é tudo bloco! */
+  --sombra-bloco: 6px 6px 0 rgba(0, 0, 0, .35);
+}
+
+/* ---------- 2. Base ------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--noite);
+  color: var(--papel);
+  font-family: var(--fonte-texto);
+  font-size: 24px;           /* VT323 é pequena: 22px é o mínimo de leitura */
+  line-height: 1.25;
+}
+img { max-width: 100%; }
+img.pixel, .pixel img, svg.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+a { color: var(--diamante); }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 4px dashed var(--ouro);
+  outline-offset: 4px;
+}
+h1, h2, h3, .titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  line-height: 1.35;
+  letter-spacing: 1px;
+  margin: 0 0 .6em;
+}
+h1 { font-size: clamp(22px, 4.5vw, 40px); }
+h2 { font-size: clamp(16px, 3vw, 24px); }
+h3 { font-size: 14px; }
+p { margin: 0 0 .7em; }
+.container { width: min(1100px, 100% - 32px); margin-inline: auto; }
+.so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.centro { text-align: center; }
+
+/* texto com "extrusão" de bloco */
+.texto-3d {
+  color: var(--ouro);
+  text-shadow:
+    2px 2px 0 var(--ouro-esc), 4px 4px 0 var(--terra-esc),
+    6px 6px 0 var(--noite);
+}
+
+/* ---------- 3. Botões de bloco ------------------------------------------ */
+.btn {
+  --cor: var(--grama);
+  --cor-texto: var(--tinta);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 56px; padding: 14px 22px;
+  font-family: var(--fonte-titulo); font-size: 14px; line-height: 1.3;
+  text-transform: uppercase; text-decoration: none;
+  color: var(--cor-texto); background: var(--cor);
+  border: 0; border-radius: 0; cursor: pointer;
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, .3),
+    inset 4px 4px 0 rgba(255, 255, 255, .45),
+    0 0 0 4px var(--noite),
+    var(--sombra-bloco);
+  transition: transform .06s steps(2);
+  user-select: none;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active, .btn.apertado {
+  transform: translate(4px, 4px);
+  box-shadow:
+    inset 4px 4px 0 rgba(0, 0, 0, .3),
+    0 0 0 4px var(--noite),
+    2px 2px 0 rgba(0, 0, 0, .35);
+}
+.btn img { width: 24px; height: 24px; image-rendering: pixelated; }
+.btn--grande { min-height: 72px; font-size: 18px; padding: 18px 30px; }
+.btn--pequeno { min-height: 44px; font-size: 11px; padding: 10px 14px; }
+.btn--ouro { --cor: var(--ouro); }
+.btn--diamante { --cor: var(--diamante); }
+.btn--rosa { --cor: var(--neon-rosa); }
+.btn--pedra { --cor: var(--cinza-janela); }
+.btn--perigo { --cor: var(--redstone); --cor-texto: var(--papel); }
+.btn[disabled], .btn[aria-disabled="true"] { filter: grayscale(1) brightness(.8); cursor: not-allowed; }
+
+/* ---------- 4. Janela estilo anos 90 ------------------------------------ */
+.janela {
+  background: var(--cinza-janela);
+  color: var(--tinta);
+  box-shadow:
+    inset -4px -4px 0 #6E6688,
+    inset 4px 4px 0 #FFFFFF,
+    0 0 0 4px var(--noite),
+    10px 10px 0 rgba(0, 0, 0, .35);
+  padding: 4px;
+}
+.janela__barra {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: linear-gradient(90deg, var(--azul-janela), var(--neon-roxo));
+  color: #fff;
+  font-family: var(--fonte-titulo); font-size: 11px;
+  padding: 8px 8px 8px 12px;
+}
+.janela__barra .icone { width: 20px; height: 20px; image-rendering: pixelated; vertical-align: middle; margin-right: 8px; }
+.janela__botoes { display: flex; gap: 4px; }
+.janela__botoes span, .janela__botoes button, .janela__botoes a {
+  display: grid; place-items: center;
+  width: 26px; height: 24px; padding: 0;
+  font-family: var(--fonte-titulo); font-size: 10px; color: var(--tinta); text-decoration: none;
+  background: var(--cinza-janela); border: 0; cursor: pointer;
+  box-shadow: inset -3px -3px 0 #6E6688, inset 3px 3px 0 #fff;
+}
+.janela__corpo { padding: 20px; }
+.janela__status {
+  display: flex; gap: 4px; margin-top: 4px; font-size: 20px;
+}
+.janela__status > * {
+  flex: 1; padding: 2px 8px;
+  box-shadow: inset 3px 3px 0 #6E6688, inset -3px -3px 0 #fff;
+}
+
+/* ---------- 5. Céu, nuvens e chão de blocos ---------------------------- */
+.ceu {
+  position: relative; overflow: hidden;
+  background: linear-gradient(var(--ceu-topo), #BFE6FF);
+  color: var(--tinta);
+}
+.ceu--noite {
+  background:
+    radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 70% 20%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 40% 70%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 85% 60%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 10% 85%, #fff 50%, transparent 51%),
+    linear-gradient(#0E0820, var(--noite) 60%, var(--noite-2));
+  color: var(--papel);
+}
+.nuvem {
+  position: absolute; width: 192px; image-rendering: pixelated;
+  animation: nuvem-anda linear infinite; pointer-events: none;
+}
+@keyframes nuvem-anda {
+  from { transform: translateX(-260px); }
+  to   { transform: translateX(calc(100vw + 60px)); }
+}
+.sol { position: absolute; width: 96px; image-rendering: pixelated; pointer-events: none; }
+.chao {
+  height: 128px;
+  background:
+    url("../img/blocos/grama.svg") 0 0 / 64px 64px repeat-x,
+    url("../img/blocos/terra.svg") 0 64px / 64px 64px repeat;
+  image-rendering: pixelated;
+  border-top: 4px solid var(--noite);
+}
+.chao--fino { height: 64px; }
+.faixa-pedra {
+  height: 32px;
+  background: url("../img/blocos/pedra.svg") 0 0 / 32px 32px repeat-x;
+  image-rendering: pixelated;
+}
+
+/* ---------- 6. Letreiro rolando (marquee anos 90) ---------------------- */
+.letreiro {
+  overflow: hidden; white-space: nowrap;
+  background: var(--tinta); color: var(--ouro);
+  border-block: 4px solid var(--neon-rosa);
+  font-family: var(--fonte-titulo); font-size: 12px;
+  padding: 10px 0;
+}
+.letreiro__trilho {
+  display: inline-block; padding-left: 100%;
+  animation: letreiro 22s linear infinite;
+}
+.letreiro__trilho span { margin-right: 48px; }
+@keyframes letreiro { to { transform: translateX(-100%); } }
+
+/* ---------- 7. Selos, etiquetas e contador ----------------------------- */
+.etiqueta {
+  display: inline-block;
+  font-family: var(--fonte-titulo); font-size: 10px;
+  padding: 6px 8px; color: var(--tinta); background: var(--ouro);
+  box-shadow: 0 0 0 3px var(--noite);
+}
+.etiqueta--novo { background: var(--neon-rosa); color: #fff; animation: pisca 1s steps(1) infinite; }
+.etiqueta--breve { background: var(--cinza-janela); }
+@keyframes pisca { 50% { opacity: .35; } }
+
+.selos { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.selo-88 {
+  width: 88px; height: 31px; display: grid; place-items: center;
+  font-family: var(--fonte-titulo); font-size: 6px; line-height: 1.4; text-align: center;
+  border: 2px solid; border-color: #fff #555 #555 #fff;
+  padding: 2px;
+}
+.em-construcao {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 14px; color: var(--tinta);
+  font-family: var(--fonte-titulo); font-size: 10px;
+  background: repeating-linear-gradient(45deg, var(--ouro) 0 12px, var(--tinta) 12px 24px);
+  box-shadow: 0 0 0 4px var(--noite);
+}
+.em-construcao span { background: var(--ouro); padding: 6px 8px; }
+
+.contador { display: inline-flex; gap: 3px; }
+.contador b {
+  display: grid; place-items: center; width: 24px; height: 34px;
+  background: #000; color: #39FF14; font-family: var(--fonte-titulo); font-size: 14px; font-weight: normal;
+  box-shadow: inset 0 -16px 0 rgba(255,255,255,.06), 0 0 0 2px #444;
+}
+
+/* ---------- 8. Inventário / slots de jogos ----------------------------- */
+.inventario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+.slot {
+  position: relative; display: flex; flex-direction: column;
+  background: #8B8B8B; color: var(--tinta); text-decoration: none;
+  box-shadow:
+    inset 4px 4px 0 #373737, inset -4px -4px 0 #FFFFFF,
+    0 0 0 4px var(--noite);
+  padding: 12px;
+  transition: transform .08s steps(2);
+}
+a.slot:hover, a.slot:focus-visible { transform: translateY(-6px); outline: none; box-shadow: inset 4px 4px 0 #373737, inset -4px -4px 0 #fff, 0 0 0 4px var(--ouro), var(--sombra-bloco); }
+.slot__capa {
+  display: grid; place-items: center; height: 150px; position: relative; overflow: hidden;
+  background: var(--cor, var(--grama));
+  box-shadow: inset 0 0 0 4px rgba(0,0,0,.25);
+}
+.slot__capa::after {   /* textura de pixel na capa */
+  content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(0,0,0,.08) 50%, transparent 50%), linear-gradient(90deg, rgba(0,0,0,.08) 50%, transparent 50%);
+  background-size: 16px 16px; mix-blend-mode: multiply;
+}
+.slot__capa img { width: 96px; height: 96px; image-rendering: pixelated; position: relative; z-index: 1; filter: drop-shadow(4px 4px 0 rgba(0,0,0,.35)); }
+.slot__info { padding: 12px 4px 4px; }
+.slot__info h3 { font-size: 13px; margin: 0 0 8px; }
+.slot__info p { font-size: 22px; margin: 0; color: #1E1830; }
+.slot__rodape { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; }
+.slot .etiqueta { position: absolute; top: 8px; right: 8px; z-index: 2; }
+.slot--trancado .slot__capa { filter: grayscale(1) brightness(.7); }
+.slot--trancado { opacity: .85; }
+
+/* barra de XP */
+.xp { display: flex; align-items: center; gap: 12px; font-family: var(--fonte-titulo); font-size: 11px; }
+.xp__barra {
+  flex: 1; height: 20px; background: var(--tinta);
+  box-shadow: 0 0 0 3px var(--noite); position: relative;
+}
+.xp__barra i {
+  position: absolute; inset: 0 auto 0 0; width: var(--xp, 0%);
+  background: repeating-linear-gradient(90deg, #7CFC3A 0 12px, #4FCB1F 12px 16px);
+  transition: width .6s steps(10);
+}
+.nivel {
+  display: grid; place-items: center; min-width: 40px; height: 40px; padding: 0 6px;
+  color: #7CFC3A; background: var(--tinta); text-shadow: 2px 2px 0 #1F5F0A;
+  box-shadow: 0 0 0 3px var(--noite);
+}
+
+/* ---------- 9. Cabeçalho e rodapé -------------------------------------- */
+.topo {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--cinza-janela); color: var(--tinta);
+  box-shadow: inset 0 -4px 0 #6E6688, 0 4px 0 var(--noite);
+}
+.topo__dentro { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; }
+.topo__logo img { height: 40px; display: block; image-rendering: pixelated; }
+.topo nav { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.topo__link { font-family: var(--fonte-titulo); font-size: 11px; color: var(--tinta); text-decoration: none; padding: 8px 4px; }
+.topo__link:hover { color: var(--azul-janela); text-decoration: underline; text-underline-offset: 6px; }
+
+.rodape {
+  background: var(--tinta); color: var(--cinza-janela);
+  padding: 32px 0 40px; text-align: center; font-size: 22px;
+}
+.rodape .linha { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; margin-bottom: 20px; }
+
+.btn-som {
+  position: fixed; right: 16px; bottom: 16px; z-index: 30;
+  width: 52px; height: 52px; padding: 0; font-size: 22px;
+}
+
+/* ---------- 10. Efeito CRT (tela de TV antiga) ------------------------- */
+.crt { position: relative; }
+.crt::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(rgba(0,0,0,.18) 0 2px, transparent 2px 4px);
+  mix-blend-mode: multiply;
+}
+
+/* ---------- 11. Animações dos personagens ------------------------------ */
+.pula { animation: pula 1.2s steps(4) infinite; }
+.pula--atraso { animation-delay: .6s; }
+@keyframes pula {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.balanca { animation: balanca 2s steps(4) infinite; transform-origin: 50% 100%; }
+@keyframes balanca { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .letreiro__trilho { padding-left: 0; }
+}

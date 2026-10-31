@@ -1,0 +1,7 @@
+Fontes hospedadas localmente (sem depender do Google, funciona offline):
+
+- Press Start 2P — por CodeMan38 — SIL Open Font License 1.1
+- VT323 — por Peter Hull — SIL Open Font License 1.1
+
+Licença: https://openfontlicense.org  (pode usar, embutir e redistribuir).
+Subconjunto "latin" (cobre português com acentos).

@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit de marca — samuel.tech</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="../assets/img/marca/icone.svg">
+<link rel="stylesheet" href="../assets/css/samuel.css">
+<style>
+  body { background: var(--noite); }
+  .capa { padding: 56px 0 0; text-align: center; }
+  .capa img.logo { width: min(560px, 90%); image-rendering: pixelated; }
+  .capa p { font-size: 28px; color: var(--tinta); max-width: 46ch; margin: 16px auto 24px; }
+  .indice { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding-bottom: 32px; }
+
+  .bloco-secao { padding: 64px 0; border-bottom: 4px dashed var(--noite-2); }
+  .bloco-secao > .container > h2 { display: flex; align-items: center; gap: 16px; }
+  .bloco-secao > .container > h2 small { font-family: var(--fonte-texto); font-size: 26px; color: var(--diamante); }
+  .lead { font-size: 26px; max-width: 64ch; opacity: .9; margin-bottom: 32px; }
+
+  .grade { display: grid; gap: 24px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+  .palco { display: grid; place-items: center; min-height: 220px; padding: 24px; box-shadow: 0 0 0 4px var(--noite-2); }
+  .palco img { image-rendering: pixelated; max-width: 100%; }
+  .legenda { font-size: 22px; margin-top: 10px; opacity: .85; }
+  .claro { background: var(--papel); }
+  .escuro { background: var(--tinta); }
+  .ceu-bg { background: linear-gradient(var(--ceu-topo), #BFE6FF); }
+  .respiro { outline: 3px dashed var(--neon-rosa); outline-offset: 24px; }
+
+  .cor { box-shadow: 0 0 0 4px var(--noite-2); background: var(--noite-2); }
+  .cor__amostra { height: 110px; background: var(--c); box-shadow: inset 0 -12px 0 rgba(0,0,0,.18); }
+  .cor__info { padding: 10px 12px 12px; font-size: 22px; }
+  .cor__info b { display: block; font-family: var(--fonte-titulo); font-size: 10px; font-weight: normal; margin-bottom: 6px; }
+  .cor__info code { color: var(--ouro); font-family: var(--fonte-texto); font-size: 22px; }
+  .grupo-cor { font-family: var(--fonte-titulo); font-size: 12px; color: var(--ouro); margin: 32px 0 16px; }
+
+  .tipo { padding: 24px; background: var(--noite-2); box-shadow: 0 0 0 4px #3A2670; }
+  .tipo .exemplo-titulo { font-family: var(--fonte-titulo); font-size: 28px; line-height: 1.4; }
+  .tipo .exemplo-texto { font-family: var(--fonte-texto); font-size: 40px; line-height: 1.1; }
+  .tipo dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 22px; margin: 16px 0 0; }
+  .tipo dt { color: var(--diamante); }
+  .tipo dd { margin: 0; }
+  .escala p { margin: 0 0 10px; }
+
+  .personagem-ficha .janela__corpo { display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: start; }
+  .personagem-ficha .fundo { background: var(--cor); display: flex; justify-content: center; align-items: flex-end; padding-top: 16px; height: 300px; box-shadow: inset 0 0 0 4px rgba(0,0,0,.2); }
+  .personagem-ficha .fundo img { width: 140px; image-rendering: pixelated; }
+  .personagem-ficha ul { margin: 0; padding-left: 20px; font-size: 22px; }
+  .personagem-ficha h3 { font-size: 16px; }
+  .swatches { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+  .swatches i { width: 28px; height: 28px; background: var(--c); box-shadow: 0 0 0 2px var(--noite); }
+
+  .item { text-align: center; padding: 18px 10px; background: var(--noite-2); box-shadow: 0 0 0 4px #3A2670; }
+  .item img { width: 64px; height: 64px; image-rendering: pixelated; display: block; margin: 0 auto 10px; }
+  .item span { font-size: 22px; }
+
+  .vitrine-comp { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; padding: 28px; background: var(--noite-2); box-shadow: 0 0 0 4px #3A2670; }
+
+  .voz { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .voz .janela__corpo { font-size: 24px; }
+  .sim, .nao { padding: 16px 18px; font-size: 22px; box-shadow: 0 0 0 4px var(--noite); }
+  .sim { background: #DFF6D5; color: #18350F; }
+  .nao { background: #FFE0E0; color: #4A0E0E; }
+  .sim h3, .nao h3 { font-size: 12px; }
+  .sim ul, .nao ul { margin: 0; padding-left: 22px; }
+
+  .downloads a { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--noite-2); color: var(--papel); text-decoration: none; box-shadow: 0 0 0 4px #3A2670; font-size: 22px; }
+  .downloads a:hover { box-shadow: 0 0 0 4px var(--ouro); }
+  .downloads img { width: 40px; height: 40px; image-rendering: pixelated; object-fit: contain; }
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<header class="ceu capa">
+  <img class="nuvem" src="../assets/img/icones/nuvem.svg" alt="" style="top:40px; animation-duration:60s;">
+  <img class="sol" src="../assets/img/icones/sol.svg" alt="" style="top:24px; right:6%; width:72px;">
+  <div class="container" style="position:relative; z-index:1">
+    <span class="etiqueta">KIT DE MARCA · v1.0</span>
+    <h1 class="so-leitor">Kit de marca samuel.tech</h1>
+    <p style="margin-top:24px"><img class="logo" src="../assets/img/marca/logo-empilhado.svg" alt="Jogos do Samuel — samuel.tech"></p>
+    <p>O estilo <b>“Blocos 90”</b>: um mundo feito de blocos de grama, terra e diamante, visto pela tela de um computador dos anos 90.</p>
+    <nav class="indice" aria-label="Seções">
+      <a class="btn btn--pequeno" href="#logo">Logo</a>
+      <a class="btn btn--pequeno btn--ouro" href="#cores">Cores</a>
+      <a class="btn btn--pequeno btn--diamante" href="#tipografia">Tipografia</a>
+      <a class="btn btn--pequeno btn--rosa" href="#personagens">Personagens</a>
+      <a class="btn btn--pequeno btn--pedra" href="#blocos">Blocos e ícones</a>
+      <a class="btn btn--pequeno btn--pedra" href="#componentes">Componentes</a>
+      <a class="btn btn--pequeno btn--pedra" href="#voz">Voz</a>
+      <a class="btn btn--pequeno btn--pedra" href="#downloads">Arquivos</a>
+    </nav>
+  </div>
+  <div class="chao chao--fino"></div>
+</header>
+
+<main>
+  <!-- 1. CONCEITO -->
+  <section class="bloco-secao">
+    <div class="container">
+      <h2 class="texto-3d">01 · Conceito <small>a ideia em 1 frase</small></h2>
+      <p class="lead">“<b>Um mundo de blocos onde cada jogo foi construído à mão para o Samuel.</b>” Juntamos duas coisas: o <b>mundo de blocos</b> que crianças amam (grama, terra, minérios brilhando) e a <b>internet dos anos 90</b> dos pais (janelas com bisel, letreiros rolando, contador de visitas, selos 88×31). O resultado é colorido, nítido, alegre e sem nada de assustador.</p>
+      <div class="grade g4">
+        <div class="item"><img src="../assets/img/blocos/grama.svg" alt=""><span>Construir</span></div>
+        <div class="item"><img src="../assets/img/icones/controle.svg" alt=""><span>Brincar</span></div>
+        <div class="item"><img src="../assets/img/blocos/diamante.svg" alt=""><span>Descobrir</span></div>
+        <div class="item"><img src="../assets/img/icones/coracao.svg" alt=""><span>Feito com amor</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. LOGO -->
+  <section class="bloco-secao" id="logo">
+    <div class="container">
+      <h2 class="texto-3d">02 · Logo <small>fonte própria “Bloquinho”</small></h2>
+      <p class="lead">As letras são desenhadas pixel a pixel numa fonte própria 5×7. <b>SAMUEL</b> é feito de blocos de grama (grama em cima, terra embaixo). <b>.TECH</b> é de diamante. <b>JOGOS DO</b> é de ouro. Sempre com contorno roxo-noite e sombra 3D para a direita/baixo.</p>
+      <div class="grade g2">
+        <div><div class="palco ceu-bg"><img class="respiro" src="../assets/img/marca/logo-horizontal.svg" alt="Logo horizontal" style="width:420px"></div><p class="legenda">Horizontal — cabeçalho, rodapé, assinaturas. A linha tracejada mostra a área de respiro mínima (≈ altura de uma letra).</p></div>
+        <div><div class="palco escuro"><img src="../assets/img/marca/logo-empilhado.svg" alt="Logo empilhado" style="width:340px"></div><p class="legenda">Empilhado — capa, tela inicial, imagem de compartilhamento.</p></div>
+        <div><div class="palco claro"><img src="../assets/img/marca/logo-horizontal.svg" alt="" style="width:360px"></div><p class="legenda">Funciona em fundo claro…</p></div>
+        <div class="grade" style="grid-template-columns:1fr 1fr">
+          <div><div class="palco escuro"><img src="../assets/img/marca/icone.svg" alt="Ícone" style="width:128px"></div><p class="legenda">Ícone / favicon — “S” de grama no bloco neon.</p></div>
+          <div><div class="palco" style="background:var(--grama)"><img src="../assets/img/marca/icone.svg" alt="" style="width:64px"></div><p class="legenda">Mínimo: 32px.</p></div>
+        </div>
+      </div>
+      <div class="grade g2" style="margin-top:24px">
+        <div class="sim"><h3>✔ Pode</h3><ul><li>Ampliar sempre em múltiplos inteiros (2×, 3×, 4×) com <code>image-rendering: pixelated</code>.</li><li>Usar sobre céu, noite roxa, papel creme ou grama.</li></ul></div>
+        <div class="nao"><h3>✘ Não pode</h3><ul><li>Esticar, girar, borrar ou suavizar as bordas.</li><li>Trocar as cores das letras ou tirar o contorno.</li><li>Colocar em cima de foto ou fundo muito poluído.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. CORES -->
+  <section class="bloco-secao" id="cores">
+    <div class="container">
+      <h2 class="texto-3d">03 · Cores <small>blocos + neon + noite</small></h2>
+      <p class="lead">Três famílias. As cores de <b>bloco</b> são a base; o <b>neon 90s</b> é tempero (destaques, “NOVO!”, bordas); a <b>noite</b> é o fundo e o contorno de tudo. Todos os tokens estão em <code>assets/css/samuel.css</code>.</p>
+      <div id="paleta"></div>
+    </div>
+  </section>
+
+  <!-- 4. TIPOGRAFIA -->
+  <section class="bloco-secao" id="tipografia">
+    <div class="container">
+      <h2 class="texto-3d">04 · Tipografia <small>duas fontes, só isso</small></h2>
+      <div class="grade g2">
+        <div class="tipo">
+          <p class="exemplo-titulo">PRESS START 2P</p>
+          <p class="exemplo-titulo" style="font-size:16px">Aa Bb Cc 123 ▶ ★</p>
+          <dl><dt>Uso</dt><dd>Títulos, botões, etiquetas, barras de janela.</dd><dt>Tamanhos</dt><dd>10 · 12 · 14 · 18 · 24 · 40px</dd><dt>Regra</dt><dd>Frases curtas (até ~5 palavras). Em CAIXA ALTA nos botões.</dd><dt>Arquivo</dt><dd>Local em assets/fonts · licença OFL</dd></dl>
+        </div>
+        <div class="tipo">
+          <p class="exemplo-texto">VT323 — texto de terminal</p>
+          <p class="exemplo-texto" style="font-size:26px">O Samuel construiu um castelo de diamante em 3 minutos!</p>
+          <dl><dt>Uso</dt><dd>Parágrafos, descrições, fichas, rodapé.</dd><dt>Tamanhos</dt><dd>22 (mínimo) · 24 (padrão) · 28–40 (destaque)</dd><dt>Regra</dt><dd>Nunca abaixo de 22px: é uma fonte pequena.</dd><dt>Arquivo</dt><dd>Local em assets/fonts · licença OFL</dd></dl>
+        </div>
+      </div>
+      <div class="tipo escala" style="margin-top:24px">
+        <p style="font-family:var(--fonte-titulo); font-size:40px">H1 · 40</p>
+        <p style="font-family:var(--fonte-titulo); font-size:24px">H2 · 24</p>
+        <p style="font-family:var(--fonte-titulo); font-size:14px">H3 · BOTÃO · 14</p>
+        <p style="font-family:var(--fonte-titulo); font-size:10px">ETIQUETA · 10</p>
+        <p style="font-size:24px">Texto padrão · VT323 24</p>
+        <p class="texto-3d" style="font-family:var(--fonte-titulo); font-size:24px; margin-top:16px">TEXTO 3D</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. PERSONAGENS -->
+  <section class="bloco-secao" id="personagens">
+    <div class="container">
+      <h2 class="texto-3d">05 · Personagens <small>versão em blocos, sem fotos</small></h2>
+      <p class="lead">Recriados das fotos de referência em pixel art (16 px de cabeça, proporção de “boneco de blocos”). <b>Nenhuma foto real vai para o site</b> — só os personagens. Para editar, mude as grades em <code>ferramentas/gerar_pixel_art.py</code> e rode o script.</p>
+      <div class="grade g2">
+        <article class="janela personagem-ficha">
+          <div class="janela__barra"><span>SAMUEL.SKIN</span><span class="janela__botoes" aria-hidden="true"><span>×</span></span></div>
+          <div class="janela__corpo">
+            <div class="fundo" style="--cor:var(--grama)"><img src="../assets/img/personagens/samuel.svg" alt="Samuel"></div>
+            <div>
+              <h3>Samuel · 7</h3>
+              <p style="font-size:22px; margin-bottom:8px">O Construtor — herói principal do site.</p>
+              <div class="swatches"><i style="--c:#2E1B10"></i><i style="--c:#F2C9A5"></i><i style="--c:#5A3416"></i><i style="--c:#8FD3F0"></i><i style="--c:#22305A"></i><i style="--c:#5F86C0"></i><i style="--c:#FF7A2E"></i></div>
+              <ul>
+                <li>Cabelo castanho-escuro arrepiado pra cima (topete em pontas)</li>
+                <li>Olhos castanhos, bochechas rosadas</li>
+                <li>Sorrisão com a <b>janelinha do dente</b></li>
+                <li>Polo azul-claro, calça azul-marinho</li>
+                <li>Tênis azul com detalhe laranja</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+        <article class="janela personagem-ficha">
+          <div class="janela__barra"><span>HELOISA.SKIN</span><span class="janela__botoes" aria-hidden="true"><span>×</span></span></div>
+          <div class="janela__corpo">
+            <div class="fundo" style="--cor:var(--neon-roxo)"><img src="../assets/img/personagens/heloisa.svg" alt="Heloísa"></div>
+            <div>
+              <h3>Heloísa · 4</h3>
+              <p style="font-size:22px; margin-bottom:8px">A Exploradora — parceira de aventura.</p>
+              <div class="swatches"><i style="--c:#5C3820"></i><i style="--c:#9B5CFF"></i><i style="--c:#FF3E9A"></i><i style="--c:#FFB3D9"></i><i style="--c:#FFE4A8"></i><i style="--c:#C9F2CF"></i><i style="--c:#BFE3FF"></i></div>
+              <ul>
+                <li>Tranças castanhas com <b>elásticos roxos</b></li>
+                <li><b>Óculos de coração</b> rosa na cabeça</li>
+                <li>Brilhinhos no rosto, sorriso aberto</li>
+                <li>Vestido degradê pastel (rosa → azul)</li>
+                <li>Sandálias rosa e menta</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="grade g4" style="margin-top:24px">
+        <div class="item"><img src="../assets/img/personagens/avatar-samuel.svg" alt="" style="width:96px;height:96px"><span>avatar-samuel</span></div>
+        <div class="item"><img src="../assets/img/personagens/avatar-heloisa.svg" alt="" style="width:96px;height:96px"><span>avatar-heloisa</span></div>
+        <div class="item" style="grid-column: span 2"><img src="../assets/img/personagens/dupla.svg" alt="" style="width:auto;height:96px"><span>dupla</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. BLOCOS & ÍCONES -->
+  <section class="bloco-secao" id="blocos">
+    <div class="container">
+      <h2 class="texto-3d">06 · Blocos e ícones <small>16×16, texturas próprias</small></h2>
+      <p class="lead">Tudo é desenhado numa grade de 16×16 e ampliado em múltiplos inteiros. Os ícones têm contorno roxo-noite de 1 pixel.</p>
+      <div class="grade g4" id="listaBlocos"></div>
+      <div class="grade g4" id="listaIcones" style="margin-top:24px"></div>
+    </div>
+  </section>
+
+  <!-- 7. COMPONENTES -->
+  <section class="bloco-secao" id="componentes">
+    <div class="container">
+      <h2 class="texto-3d">07 · Componentes <small>prontos no CSS</small></h2>
+      <p class="lead">Classes de <code>samuel.css</code>. Regra de ouro: <b>sem cantos arredondados</b>, sombras duras deslocadas (6px 6px), contorno de 4px <code>--noite</code>, tudo em múltiplos de 4px. Alvos de toque com no mínimo 56px.</p>
+
+      <h3 class="grupo-cor">Botões · .btn</h3>
+      <div class="vitrine-comp">
+        <a class="btn" href="#componentes" data-som="bloco">▶ Jogar</a>
+        <a class="btn btn--ouro" href="#componentes" data-som>Entrar</a>
+        <a class="btn btn--diamante" href="#componentes" data-som>Diamante</a>
+        <a class="btn btn--rosa" href="#componentes" data-som>Novo!</a>
+        <a class="btn btn--pedra" href="#componentes" data-som>Voltar</a>
+        <a class="btn btn--perigo btn--pequeno" href="#componentes" data-som>Sair</a>
+      </div>
+
+      <h3 class="grupo-cor">Janela 90s · .janela</h3>
+      <div class="grade g2">
+        <div class="janela">
+          <div class="janela__barra"><span><img class="icone" src="../assets/img/icones/controle.svg" alt="">JOGO.EXE</span><span class="janela__botoes"><span>_</span><span>□</span><span>×</span></span></div>
+          <div class="janela__corpo"><p style="font-size:24px">Use para agrupar conteúdo: passos, fichas, login, mensagens.</p><a class="btn btn--pequeno" href="#componentes">OK</a></div>
+          <div class="janela__status"><span>Pronto.</span><span>100%</span></div>
+        </div>
+        <div class="vitrine-comp" style="flex-direction:column; align-items:flex-start">
+          <span><span class="etiqueta">ETIQUETA</span> &nbsp; <span class="etiqueta etiqueta--novo">NOVO!</span> &nbsp; <span class="etiqueta etiqueta--breve">EM BREVE</span></span>
+          <span class="em-construcao"><span>🚧 EM CONSTRUÇÃO 🚧</span></span>
+          <span class="contador"><b>0</b><b>0</b><b>1</b><b>3</b><b>3</b><b>7</b></span>
+          <div class="xp" style="width:100%"><span class="nivel">3</span><div class="xp__barra" style="--xp:60%"><i></i></div><span>130 XP</span></div>
+        </div>
+      </div>
+
+      <h3 class="grupo-cor">Slot do inventário · .slot</h3>
+      <div class="inventario">
+        <a class="slot" href="#componentes"><span class="etiqueta etiqueta--novo">NOVO!</span><div class="slot__capa" style="--cor:#5DBB3F"><img src="../assets/img/icones/dragao.svg" alt=""></div><div class="slot__info"><h3>Nome do jogo</h3><p>Uma frase falando com a criança.</p></div><div class="slot__rodape"><span class="etiqueta">▶ Jogar</span></div></a>
+        <div class="slot slot--trancado"><span class="etiqueta etiqueta--breve">EM BREVE</span><div class="slot__capa" style="--cor:#8A4FFF"><img src="../assets/img/icones/cadeado.svg" alt=""></div><div class="slot__info"><h3>Trancado</h3><p>Estado “em breve”.</p></div><div class="slot__rodape"><span class="etiqueta">🔒 Trancado</span></div></div>
+      </div>
+
+      <h3 class="grupo-cor">Letreiro · .letreiro</h3>
+      <div class="letreiro"><div class="letreiro__trilho"><span>★ NOVO JOGO NO AR ★</span><span>♥ OBRIGADO POR JOGAR ♥</span></div></div>
+
+      <h3 class="grupo-cor">Selos 88×31 · .selo-88</h3>
+      <div class="selos" style="justify-content:flex-start">
+        <span class="selo-88" style="background:#5DBB3F;color:#140B26">FEITO<br>À MÃO</span>
+        <span class="selo-88" style="background:#140B26;color:#39FF14">100% SEM<br>ANÚNCIOS</span>
+        <span class="selo-88" style="background:#FF4FD8;color:#fff">AMIGO DAS<br>CRIANÇAS</span>
+        <span class="selo-88" style="background:#FFC93C;color:#140B26">MELHOR VISTO<br>COM PIPOCA</span>
+      </div>
+
+      <h3 class="grupo-cor">Sons 8-bit · Samuel.som.tocar()</h3>
+      <div class="vitrine-comp">
+        <button class="btn btn--pequeno" type="button" onclick="Samuel.som.tocar('clique')">clique</button>
+        <button class="btn btn--pequeno" type="button" onclick="Samuel.som.tocar('bloco')">bloco</button>
+        <button class="btn btn--pequeno btn--ouro" type="button" onclick="Samuel.som.tocar('moeda')">moeda</button>
+        <button class="btn btn--pequeno btn--diamante" type="button" onclick="Samuel.som.tocar('sucesso')">sucesso</button>
+        <button class="btn btn--pequeno btn--perigo" type="button" onclick="Samuel.som.tocar('erro')">erro</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. VOZ -->
+  <section class="bloco-secao" id="voz">
+    <div class="container">
+      <h2 class="texto-3d">08 · Voz e tom <small>como o site fala</small></h2>
+      <p class="lead">O site fala <b>com a criança</b>, como um amigo animado: frases curtas, “você”, verbos de ação e um emoji no máximo. Leitor de 7 anos — e uma de 4 que ainda está aprendendo.</p>
+      <div class="voz">
+        <div class="sim"><h3>✔ Assim</h3><ul><li>“Bora jogar!”</li><li>“Ops! Tente de novo.”</li><li>“Acertou! Abrindo o baú…”</li><li>“Cuspa fogo e derrube a muralha!”</li></ul></div>
+        <div class="nao"><h3>✘ Assim não</h3><ul><li>“Credenciais inválidas.”</li><li>“Você perdeu. Fim de jogo.” (seco demais)</li><li>“Clique aqui para acessar a plataforma.”</li><li>Textos longos, ironia, sustos, violência.</li></ul></div>
+        <div class="janela"><div class="janela__barra"><span>VOCABULARIO.TXT</span></div><div class="janela__corpo">Jogos → <b>baú</b> · Login → <b>entrar</b> · Senha → <b>blocos secretos</b> · Pontos → <b>XP</b> · Usuário → <b>herói</b> · Erro → <b>ops!</b></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. DOWNLOADS -->
+  <section class="bloco-secao" id="downloads">
+    <div class="container">
+      <h2 class="texto-3d">09 · Arquivos</h2>
+      <div class="grade g3 downloads">
+        <a href="../assets/img/marca/logo-horizontal.svg" download><img src="../assets/img/marca/logo-horizontal.svg" alt="">logo-horizontal.svg</a>
+        <a href="../assets/img/marca/logo-empilhado.svg" download><img src="../assets/img/marca/logo-empilhado.svg" alt="">logo-empilhado.svg</a>
+        <a href="../assets/img/marca/icone-512.png" download><img src="../assets/img/marca/icone.svg" alt="">icone-512.png</a>
+        <a href="../assets/img/marca/og-samuel-tech.png" download><img src="../assets/img/marca/og-samuel-tech.png" alt="">og-samuel-tech.png (1200×630)</a>
+        <a href="../assets/img/personagens/samuel.png" download><img src="../assets/img/personagens/samuel.svg" alt="">samuel.png</a>
+        <a href="../assets/img/personagens/heloisa.png" download><img src="../assets/img/personagens/heloisa.svg" alt="">heloisa.png</a>
+      </div>
+      <p class="lead" style="margin-top:24px">Versão em texto deste kit: <code>marca/MARCA.md</code>. Instruções para o Claude: <code>CLAUDE.md</code> na raiz.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape"><a href="../">← Voltar ao samuel.tech</a></footer>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/catalogo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+  const PALETA = {
+    "Blocos (base)": [
+      ["Grama", "--grama", "#5DBB3F", "Botão principal, chão, sucesso"],
+      ["Grama escura", "--grama-esc", "#3E8E2A", "Sombra da grama"],
+      ["Terra", "--terra", "#8B5A2B", "Chão, letras do logo"],
+      ["Terra escura", "--terra-esc", "#5E3A1A", "Extrusão 3D"],
+      ["Pedra", "--pedra", "#8C8C8C", "Faixas, slots"],
+      ["Diamante", "--diamante", "#4EE6E0", "Links, .TECH, destaques"],
+      ["Ouro", "--ouro", "#FFC93C", "Títulos 3D, Entrar, moedas"],
+      ["Redstone", "--redstone", "#E8333A", "Sair, erro, vida"],
+      ["Madeira", "--madeira", "#B98A4E", "Detalhes, baús"],
+    ],
+    "Neon 90s (tempero)": [
+      ["Neon rosa", "--neon-rosa", "#FF4FD8", "NOVO!, bordas do letreiro"],
+      ["Neon roxo", "--neon-roxo", "#8A4FFF", "Barra de janela, bloco neon"],
+      ["Azul janela", "--azul-janela", "#1F3A93", "Barra de título"],
+      ["Cinza janela", "--cinza-janela", "#C9C3D9", "Fundo de janelas e topo"],
+    ],
+    "Noite & céu (fundos)": [
+      ["Noite", "--noite", "#1B1036", "Fundo escuro + contorno de tudo"],
+      ["Noite 2", "--noite-2", "#2A1858", "Cartões no escuro"],
+      ["Tinta", "--tinta", "#140B26", "Texto escuro, rodapé"],
+      ["Papel", "--papel", "#FFF7E6", "Texto claro"],
+      ["Céu", "--ceu", "#7EC8F5", "Fundo do dia"],
+      ["Céu topo", "--ceu-topo", "#4FA8F0", "Topo do degradê do céu"],
+    ],
+    "Heróis": [
+      ["Azul Samuel", "--cor-samuel", "#8FD3F0", "Tudo que é do Samuel"],
+      ["Rosa Heloísa", "--cor-heloisa", "#FFB3D9", "Tudo que é da Heloísa"],
+    ],
+  };
+  document.getElementById("paleta").innerHTML = Object.entries(PALETA).map(([grupo, cores]) => `
+    <h3 class="grupo-cor">${grupo}</h3>
+    <div class="grade g4">${cores.map(([n, v, h, u]) => `
+      <div class="cor"><div class="cor__amostra" style="--c:${h}"></div>
+        <div class="cor__info"><b>${n}</b><code>${h}</code><br><code>var(${v})</code><br>${u}</div></div>`).join("")}
+    </div>`).join("");
+
+  const item = (pasta, n) => `<div class="item"><img src="../assets/img/${pasta}/${n}.svg" alt=""><span>${n}</span></div>`;
+  document.getElementById("listaBlocos").innerHTML =
+    ["grama", "terra", "pedra", "diamante", "ouro", "madeira", "folhas", "neon"].map((n) => item("blocos", n)).join("");
+  document.getElementById("listaIcones").innerHTML =
+    ["coracao", "estrela", "moeda", "controle", "trofeu", "cadeado", "chave", "casa", "dragao", "nuvem", "sol"].map((n) => item("icones", n)).join("");
+</script>
+</body>
+</html>
