@@ -172,7 +172,14 @@ async function conectar(): Promise<void> {
 function entrar() {
   if (conectado) { mostrar(null); controls.lock(); return; }
   iniciando ??= conectar()
-    .then(() => { mostrar(null); controls.lock(); escolherVaga(vaga); })
+    .then(() => {
+      escolherVaga(vaga);
+      // o navegador só prende o mouse logo depois de um clique; a conexão pode demorar mais que isso.
+      // Se não prender, a tela de pausa oferece "Continuar" (um clique novo, que prende de verdade).
+      mostrar(null);
+      controls.lock();
+      setTimeout(() => { if (!controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
+    })
     .catch(() => {
       iniciando = null;
       try { network.disconnect(); } catch { /* já caiu */ }
