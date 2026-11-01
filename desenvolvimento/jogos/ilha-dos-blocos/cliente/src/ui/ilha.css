@@ -24,7 +24,7 @@
 .grade-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; max-height: min(52vh, 460px);
   overflow: auto; padding: 4px; }
 .grade-catalogo button { border: var(--line); background: var(--cream); box-shadow: 3px 3px 0 var(--ink); padding: 6px 4px 8px;
-  display: flex; flex-direction: column; align-items: center; gap: 4px; font: 700 12px var(--sans); min-height: var(--alvo); }
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font: 700 13px var(--sans); min-height: var(--alvo); }
 .grade-catalogo button canvas { width: 44px; height: 44px; image-rendering: pixelated; }
 .grade-catalogo button:hover, .grade-catalogo button:focus-visible { background: var(--play); }
 .dica-catalogo { margin: 0 0 10px; }
@@ -103,12 +103,22 @@ body.ilha-toque .vaga img { width: 36px !important; height: 36px !important; }
   body.ilha-toque .vaga { width: 48px; height: 48px; }
   body.ilha-toque .vaga img { width: 36px !important; height: 36px !important; }
   body.ilha-toque .vaga b { display: none; }
-  body.ilha-toque .nome-bloco, body.ilha-toque #toast { top: calc(max(10px, env(safe-area-inset-top)) + 190px); }
-  #toast { font-size: 13px; padding: 6px 10px; }
+  body.ilha-toque .nome-bloco { top: calc(max(10px, env(safe-area-inset-top)) + 190px); }
+  body.ilha-toque #toast { top: calc(max(10px, env(safe-area-inset-top)) + 232px); }
+  #toast { font-size: 15px; padding: 6px 10px; }
 }
 @media (max-height: 500px) {   /* deitado: barra no alto à esquerda, livre dos botões ▦ e II */
   body.ilha-toque .barra-rapida { display: flex; left: max(12px, env(safe-area-inset-left)); transform: none; top: max(8px, env(safe-area-inset-top)); }
   body.ilha-toque .vaga { width: 44px; height: 44px; }
   body.ilha-toque .vaga img { width: 32px !important; height: 32px !important; }
-  body.ilha-toque .nome-bloco, body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 64px); }
+  body.ilha-toque .nome-bloco { top: calc(max(8px, env(safe-area-inset-top)) + 64px); }
+  body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 104px); }
+  /* catálogo deitado: grade rola e o Pronto fica à vista */
+  .grade-catalogo { max-height: calc(100vh - 190px); }
+  #tCatalogo .titulo { font-size: 24px; margin-bottom: 4px; }
+  #tCatalogo .dica-catalogo { margin-bottom: 6px; }
 }
+
+/* aviso no toque: logo abaixo da mira (nunca em cima dela), sem invadir o joystick nem os botões */
+body.ilha-toque #toast { top: calc(50% + 30px) !important; max-width: min(420px, calc(100vw - 32px)); }
+@media (max-height: 500px) { body.ilha-toque #toast { max-width: 44vw; font-size: 14px; padding: 6px 10px; } }

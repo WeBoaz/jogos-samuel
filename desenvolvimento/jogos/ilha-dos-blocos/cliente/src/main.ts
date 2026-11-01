@@ -38,8 +38,10 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const inputs = new VOXELIZE.Inputs<'jogo' | 'menu'>();
-// velocidades para criança: voo a 12 blocos/s (o motor usa 40) com força menor (sobe e desce devagar)
-const opcoesControle = { initialPosition: [0.5, 48, 0.5] as VOXELIZE.Coords3, flySpeed: 12, flyForce: 60 };
+// velocidades para criança: voo a 12 blocos/s na horizontal (o motor usa 40); subir e descer vêm do flyImpulse
+// (o motor usa 2,5 por quadro ≈ 24 blocos/s; 0,7 ≈ 7 blocos/s a 60 Hz). flyForce fica no padrão (80): abaixo disso
+// o boneco encalha ao pousar depois de um teleporte.
+const opcoesControle = { initialPosition: [0.5, 48, 0.5] as VOXELIZE.Coords3, flySpeed: 12, flyImpulse: 0.7 };
 const controls: VOXELIZE.RigidControls = MODO_TOQUE
   ? new VOXELIZE.MobileRigidControls(camera, renderer.domElement, world, opcoesControle)
   : new VOXELIZE.RigidControls(camera, renderer.domElement, world, opcoesControle);
@@ -52,6 +54,7 @@ const movel = controls as VOXELIZE.MobileRigidControls;
 let emJogo = false;   // no toque não há "mouse preso": o jogo guarda se está jogando ou num menu
 let voando = false;   // estado do voo LIDO do motor a cada quadro (gravityMultiplier === 0; ele desliga sozinho ao pousar)
 let soltarOlhar = () => {};
+let timerPausa = 0;
 const interacao = new VOXELIZE.VoxelInteract(controls.object, world, {
   highlightType: 'outline', highlightColor: new THREE.Color('#193337'), highlightOpacity: 0.7, reachDistance: ALCANCE,
   inverseDirection: true,   // o objeto dos controles aponta para +Z; a câmera olha para -Z
@@ -129,9 +132,11 @@ function voltarAoJogo() {
   mostrar(null);
   controls.lock();
   // o navegador pode recusar prender o mouse (só aceita logo depois de um clique): volta a mostrar a pausa
-  setTimeout(() => { if (conectado && !controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
+  clearTimeout(timerPausa);
+  timerPausa = window.setTimeout(() => { if (conectado && !controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
 }
 function sairDoJogo() {
+  clearTimeout(timerPausa);   // um "voltar" de menos de 600 ms atrás não pode reabrir a pausa por cima do catálogo
   if (MODO_TOQUE) { emJogo = false; toque?.soltarTudo(); soltarOlhar(); movel.resetMovements(); inputs.setNamespace('menu'); return; }
   controls.unlock();
 }
@@ -157,7 +162,7 @@ function colocar() {
   const [vx, vy, vz] = pot.voxel;
   if (dentroDoJogador(vx, vy, vz)) return aviso('Aí não: você está nesse lugar!');
   const r = usar(inv, vaga);
-  if (r.id === null) return aviso('Escolha um bloco no catálogo (E).');
+  if (r.id === null) return aviso(MODO_TOQUE ? 'Escolha um bloco no catálogo ▦.' : 'Escolha um bloco no catálogo (E).');
   inv = r.inv;
   world.updateVoxel(vx, vy, vz, r.id, { rotation: pot.rotation, yRotation: pot.yRotation });
 }
@@ -347,7 +352,13 @@ function passo() {
   if (conectado) {
     // caiu da ilha (fundo ou borda): volta para o meio, sem castigo
     const p = controls.object.position;
-    if (p.y < -8 || Math.abs(p.x) > 90 || Math.abs(p.z) > 90) { controls.teleportToTop(0.5, 0.5); aviso('Ops! De volta para o meio da ilha.'); }
+    if (p.y < -8 || Math.abs(p.x) > 90 || Math.abs(p.z) > 90) {
+      // desliga o voo e cai do alto no meio da ilha (sem dano no Criativo). Não usar teleportToTop: longe do meio o chunk
+      // de lá não está carregado, ele espera o chunk e a altura sai errada — o boneco encalhava no chão.
+      if (controls.body) controls.body.gravityMultiplier = 1;
+      controls.teleport(0, 50, 0);
+      aviso('Ops! De volta para o meio da ilha.');
+    }
     // conexão caiu no meio do jogo: avisa enquanto o motor reconecta sozinho
     if (!network.connected !== semConexao) {
       semConexao = !network.connected;

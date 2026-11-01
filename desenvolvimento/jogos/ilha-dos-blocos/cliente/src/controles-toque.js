@@ -43,7 +43,9 @@ export function criarControlesToque({ raiz, aoApertar = () => {}, aoSoltar = () 
     const x = Math.min(Math.max(e.clientX - r.left, 76), r.width - 40);
     const y = Math.min(Math.max(e.clientY - r.top, 40), r.height - 76);
     base.style.left = x + 'px'; base.style.top = y + 'px';
-    centro = { x: e.clientX, y: e.clientY };
+    // …mas a pelo menos 16 px da borda da zona: dá para andar NA DIREÇÃO da borda mesmo encostando nela, e o polegar
+    // parado ali não passa da zona morta (16 px ≈ 0,3 do raio; parado a 6 px da borda o eixo fica abaixo do limiar)
+    centro = { x: Math.min(Math.max(e.clientX, r.left + 16), r.right - 16), y: Math.min(Math.max(e.clientY, r.top + 16), r.bottom - 16) };
     zona.classList.add('ativo');
   });
   ouvir(zona, 'pointermove', (e) => {
