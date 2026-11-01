@@ -1,7 +1,8 @@
 <?php
 require dirname(__DIR__) . '/_app/inicio.php';
 require dirname(__DIR__) . '/_app/admin.php';
-$sess = exigir_familia();
+sem_cache();
+$sess = sessao() ?: [];
 $erro = '';
 $avisos = [
     'salvo' => 'Jogo salvo!', 'status' => 'Status atualizado.', 'excluido' => 'Jogo excluído.',
@@ -10,7 +11,25 @@ $avisos = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = (string) ($_POST['acao'] ?? '');
-    if ($acao === 'entrar') {
+    if ($acao === 'configurar' && !config()) {
+        // Primeiro acesso do responsável: cria a senha da área de jogos
+        $codigo = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string) ($_POST['codigo'] ?? '')));
+        $senha = (string) ($_POST['senha'] ?? '');
+        if (!hash_equals(CODIGO_CONFIG_SHA256, hash('sha256', $codigo))) {
+            usleep(400000);
+            $erro = 'Esse código de configuração não confere.';
+        } elseif (mb_strlen($senha) < 8) {
+            $erro = 'A senha precisa ter pelo menos 8 caracteres.';
+        } elseif ($senha !== (string) ($_POST['confirmar'] ?? '')) {
+            $erro = 'As duas senhas estão diferentes.';
+        } elseif (salvar_config(['senha_hash' => password_hash($senha, PASSWORD_DEFAULT), 'segredo' => bin2hex(random_bytes(32)), 'versao' => 1, 'criado_em' => date('c')])) {
+            config(true);
+            gravar_sessao(null, time() + 1800);
+            redirecionar('/admin/');
+        } else {
+            $erro = 'Não consegui salvar a configuração no servidor.';
+        }
+    } elseif ($acao === 'entrar' && config()) {
         // Confirma a senha para liberar a área do responsável por 30 minutos
         if (bloqueado()) {
             $erro = 'Muitas tentativas. Espere 15 minutos.';
@@ -62,6 +81,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $rotulos = ['rascunho' => 'Rascunho (só você vê)', 'pronto' => 'Publicado', 'em-breve' => 'Em breve', 'arquivado' => 'Arquivado'];
 cabecalho(['titulo' => 'Área do responsável — Samuel.tech', 'privado' => true]);
 
+if (!config()): ?>
+<div class="page-narrow">
+  <div class="window">
+    <div class="titlebar"><span>area_do_responsavel.exe</span><a class="close" href="/jogos/" aria-label="Fechar" style="display:grid;place-items:center;text-decoration:none">×</a></div>
+    <div class="dialog-body">
+      <span class="kicker">Só para o responsável · primeira vez</span>
+      <h1>Ativar a área de jogos</h1>
+      <p>Aqui você cadastra jogos novos. Para ninguém de fora mexer, crie uma senha só sua (as crianças não precisam dela para jogar).</p>
+<?php if ($erro): ?>      <p class="alert" role="alert"><?= e($erro) ?></p>
+<?php endif; ?>
+      <form class="form" method="post" action="/admin/">
+        <input type="hidden" name="acao" value="configurar">
+        <div class="field"><label for="codigo">Código de configuração</label><input id="codigo" name="codigo" autocomplete="off" autocapitalize="characters" spellcheck="false" required placeholder="XXXXX-XXXXX-XXXXX-XXXXX"></div>
+        <div class="field"><label for="senha">Senha do responsável</label><input id="senha" name="senha" type="password" autocomplete="new-password" minlength="8" required><small>Pelo menos 8 caracteres.</small></div>
+        <div class="field"><label for="confirmar">Repita a senha</label><input id="confirmar" name="confirmar" type="password" autocomplete="new-password" minlength="8" required></div>
+        <button class="btn full" type="submit">Ativar</button>
+      </form>
+    </div>
+  </div>
+</div>
+<?php rodape(); exit; endif;
+
 if (!modo_responsavel()): ?>
 <div class="page-narrow">
   <div class="window">
@@ -69,12 +110,12 @@ if (!modo_responsavel()): ?>
     <div class="dialog-body">
       <span class="kicker">Só para o responsável</span>
       <h1>Confirme a senha</h1>
-      <p>A área de jogos fica aberta por 30 minutos neste aparelho. Assim as crianças não mexem no catálogo sem querer.</p>
+      <p>A área de jogos fica aberta por 30 minutos neste aparelho. Assim ninguém mexe no catálogo sem querer.</p>
 <?php if ($erro): ?>      <p class="alert" role="alert"><?= e($erro) ?></p>
 <?php endif; ?>
       <form class="form" method="post" action="/admin/">
         <input type="hidden" name="acao" value="entrar">
-        <div class="field"><label for="senha">Senha da família</label><input id="senha" name="senha" type="password" autocomplete="current-password" required autofocus></div>
+        <div class="field"><label for="senha">Senha do responsável</label><input id="senha" name="senha" type="password" autocomplete="current-password" required autofocus></div>
         <button class="btn full" type="submit">Abrir a área do responsável</button>
       </form>
     </div>

@@ -9,6 +9,13 @@ $lista = jogos();
     <span class="kicker">Meu cantinho / biblioteca</span>
     <h1 style="font-size:clamp(34px,5vw,58px)">Olá, <?= e($p['nome']) ?>!</h1>
     <p>Escolha um mundo. A imaginação faz o resto.</p>
+    <form class="quem-joga" method="post" action="/exploradores/" aria-label="Quem está jogando">
+      <input type="hidden" name="voltar" value="/jogos/">
+      <span class="kicker">Quem está jogando?</span>
+<?php foreach (perfis() as $pp): ?>
+      <button class="profile mini-perfil" type="submit" name="perfil" value="<?= e($pp['id']) ?>" style="background:<?= $pp['cor'] ?>" aria-pressed="<?= $pp['id'] === $p['id'] ? 'true' : 'false' ?>"><?= $pp['svg'] ?><?= e($pp['nome']) ?></button>
+<?php endforeach; ?>
+    </form>
     <div class="library-bar">
       <div class="filters" aria-label="Filtrar jogos"><button class="filter" type="button" data-filter="all" aria-pressed="true">Todos os mundos</button><button class="filter" type="button" data-filter="favorite" aria-pressed="false">★ Favoritos</button></div>
       <input id="search" class="search" type="search" aria-label="Buscar jogos" placeholder="Buscar um mundo…">

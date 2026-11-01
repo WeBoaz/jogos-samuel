@@ -1,9 +1,8 @@
 <?php
 require __DIR__ . '/_app/inicio.php';
-$s = sessao();
-$logado = (bool) $s;
-$cta = $logado ? (!empty($s['p']) ? '/jogos/' : '/exploradores/') : '/entrar/';
-$ctaTexto = $logado ? 'Meus mundos' : 'Entrar para jogar';
+$logado = true;   // acesso livre: todo mundo vai direto para os jogos
+$cta = '/jogos/';
+$ctaTexto = 'Jogar agora';
 cabecalho(['home' => true]);
 ?>
 <section class="wrap hero">
@@ -32,7 +31,7 @@ cabecalho(['home' => true]);
 <section class="wrap section" id="mundos">
   <div class="section-head">
     <div><span class="kicker">Seleção de mundos / prévia</span><h2>Qual vai ser a<br>aventura de hoje?</h2></div>
-    <p>Uma espiadinha no que este universo guarda. Entre para jogar.</p>
+    <p>Uma espiadinha no que este universo guarda. Escolha e jogue!</p>
   </div>
   <div class="game-grid">
 <?php
@@ -65,7 +64,7 @@ foreach ($lista as $g) {
   <span class="kicker">Manual do pequeno explorador</span>
   <h2>Pronto? É só dar o play.</h2>
   <div class="steps">
-    <div class="step"><span class="num">01</span><h3>Entre no seu universo</h3><p>Abra o portal com a senha da família e escolha seu explorador.</p></div>
+    <div class="step"><span class="num">01</span><h3>Entre no seu universo</h3><p>Abra o portal e escolha seu explorador: Samuel ou Player 2.</p></div>
     <div class="step"><span class="num">02</span><h3>Escolha um mundo</h3><p>Encontre uma aventura que combine com a sua curiosidade.</p></div>
     <div class="step"><span class="num">03</span><h3>Brinque do seu jeito</h3><p>Descubra, invente e divirta-se. A graça é explorar!</p></div>
   </div>

@@ -12,13 +12,12 @@ Idioma: **português do Brasil**, sempre. O briefing visual original está em `k
 ## Estrutura
 ```
 index.php                Home pública (fiel ao kit)
-entrar/                  Primeiro acesso (cria a senha) + login da família
-exploradores/            Escolha do perfil (Samuel / Player 2)
-jogos/                   Biblioteca: busca, filtro, favoritos por perfil   [privado]
-jogar/?jogo=<slug>       Player: iframe + voltar, recomeçar, tela cheia    [privado]
-jogo.php                 “Porteiro”: /jogo/<slug>/<arquivo> → entrega arquivos de _privado/jogos/ só com sessão
-conta/                   Trocar a senha da família                        [privado]
-admin/                   Área do responsável: catálogo, status, excluir   [senha de novo, 30 min]
+entrar/  conta/          Rotas antigas (redirecionam para /jogos/ e /admin/)
+exploradores/            Escolha do explorador (Samuel / Player 2) — cookie simples
+jogos/                   Biblioteca: busca, filtro, favoritos por explorador   [livre]
+jogar/?jogo=<slug>       Player: iframe + voltar, recomeçar, tela cheia        [livre]
+jogo.php                 “Porteiro”: /jogo/<slug>/<arquivo> → entrega arquivos de _privado/jogos/ (rascunho só p/ responsável)
+admin/                   Área do responsável: ativar (código+senha), catálogo, status   [senha, 30 min]
 admin/jogo/              Cadastrar/editar jogo: .zip + capa + instruções + status
 capa.php                 Capas dos jogos do responsável (públicas só se o jogo estiver visível)
 sair/  404.php  robots.txt  .htaccess
@@ -39,19 +38,19 @@ kit/                     Kit original: PNGs, brand kit, tokens, docs (NÃO publi
 ferramentas/             empacotar.sh, roteador-local.php, novo_codigo.py (NÃO publicado)
 ```
 
-## Login e segurança (não enfraquecer)
-- Senha da família: hash bcrypt em `samuel-config.php` **fora da pasta pública**
-  (`/home/u401945237/domains/samuel.tech/samuel-config.php`), criado no primeiro acesso em `/entrar/`
-  com o **código de configuração** (só o SHA-256 dele está no repo; o código foi entregue ao responsável).
-- Sessão: cookie `samuel_sessao` HttpOnly + SameSite=Lax + Secure, assinado com HMAC-SHA256 (180 dias).
-  Trocar a senha (`/conta/`) incrementa `versao` e derruba todos os outros aparelhos.
-- Esqueceu a senha? Apagar `samuel-config.php` pelo Gerenciador de Arquivos da Hostinger e refazer o primeiro acesso.
-  Novo código: `python3 ferramentas/novo_codigo.py` (grava só o hash).
-- 8 senhas erradas por IP em 15 min → bloqueio temporário.
-- Páginas privadas chamam `exigir_familia()` / `exigir_perfil()`. Arquivos de jogo só saem por `jogo.php`
-  (lista branca de extensões, nunca `.php`, sem `..`, `realpath` dentro da pasta do jogo).
+## Acesso (decisão do responsável: jogos abertos, sem senha)
+- **Jogar é livre:** home → “Jogar” → `/jogos/` direto. Sem código, sem senha da família.
+  `/entrar/` só redireciona para `/jogos/`; `/conta/` vai para `/admin/`.
+- Explorador (Samuel / Player 2): cookie simples `samuel_perfil` (só separa favoritos; não é proteção).
+  Troca na própria biblioteca ou em `/exploradores/`.
+- Os arquivos dos jogos continuam fora do acesso direto (`_privado/` bloqueado), mas `jogo.php` entrega
+  jogos `pronto` para qualquer visitante. Rascunho/arquivado só no modo responsável.
+- **A área do responsável (`/admin`) continua protegida** (ela aceita upload de arquivos):
+  - Primeira vez: `/admin` pede o **código de configuração** + cria a senha do responsável
+    (hash bcrypt em `/home/u401945237/domains/samuel.tech/samuel-config.php`, fora da pasta pública).
+  - Depois: senha → `adm` no cookie assinado (HMAC) por 30 min; formulários com CSRF; 8 erros/15 min bloqueiam.
+  - Esqueceu? Apagar `samuel-config.php` no Gerenciador de Arquivos e ativar de novo. Novo código: `python3 ferramentas/novo_codigo.py`.
 - **Nunca** colocar senha, segredo ou o código de configuração em arquivo do repositório (ele é público).
-- **Nunca** proteger nada só com JavaScript/localStorage. Favoritos no localStorage são só conveniência.
 
 ## Catálogo: dois lugares
 - **Jogos do site** (vêm do repositório): `_app/jogos.json` + arquivos em `_privado/jogos/<slug>/`.
@@ -61,7 +60,7 @@ ferramentas/             empacotar.sh, roteador-local.php, novo_codigo.py (NÃO 
 - Status: `pronto` (família joga) · `em-breve` (selo, sem jogar) · `rascunho` (só no modo responsável) · `arquivado` (escondido).
 - Import do .zip: rejeita `..`/caminho absoluto, ignora ocultos e `__MACOSX`, só extensões de `EXTENSOES_JOGO`
   (nunca `.php`/`.htaccess`), máx. 3000 arquivos/300 MB, achata pasta única no topo, troca de versão atômica.
-- Área do responsável: família logada + senha de novo → `adm` no cookie por 30 min; formulários com token CSRF.
+- Área do responsável: senha do responsável → `adm` no cookie por 30 min; formulários com token CSRF.
 
 ## Regras do kit (resumo — ver `kit/brand/brand-kit.html` e `kit/brand/tokens.json`)
 - Retrô anos 90 + mundo voxel. Papel `#F5F2E8`, tinta `#193337`, verde play `#B9ED80`, laranja `#FF9D52`, lilás `#CEB7EF`.
@@ -82,7 +81,7 @@ O jogo deve usar caminhos relativos e sair com `<a href="/jogos/" target="_top">
 2. Links de saída do jogo: `<a href="/jogos/" target="_top">← Voltar aos jogos</a>`.
 3. Adicionar no `_app/jogos.json`: `slug, title, category, description, cover, entry, instructions[], input[], status:"pronto", novo, version`.
 4. Capa 1200×675 em `assets/img/<slug>.webp` (original em `kit/originais/` se vier do kit).
-5. Testar: home → entrar → perfil → biblioteca → jogo → recomeçar → voltar. Conferir sem sessão: `/jogo/<slug>/index.html` = 403.
+5. Testar: home → Jogar → biblioteca → jogo → recomeçar → voltar. Conferir: `/_privado/jogos/<slug>/index.html` = 403.
 6. Publicar (abaixo).
 
 ## Publicação (Hostinger)

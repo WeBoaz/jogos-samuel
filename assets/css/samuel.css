@@ -74,3 +74,9 @@ textarea.campo-texto{resize:vertical;min-height:110px}
 .so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Player em telas pequenas ou deitadas: o jogo ocupa a tela toda */
 @media(max-width:760px),(max-height:560px){.player-frame iframe{height:calc(100dvh - 44px)}}
+/* Biblioteca: troca rápida de explorador */
+.quem-joga{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.quem-joga .kicker{margin:0 6px 0 0}
+.mini-perfil{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;min-height:48px;font-size:15px;opacity:.65}
+.mini-perfil svg{width:34px;height:34px;margin:0;display:inline-block}
+.mini-perfil[aria-pressed=true]{opacity:1;outline:3px solid var(--ink);outline-offset:2px}

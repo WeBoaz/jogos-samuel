@@ -171,26 +171,41 @@ function encerrar_sessao(): void
     unset($_COOKIE[COOKIE_SESSAO]);
 }
 
-/** Página privada: exige a família logada. */
+/* ---------- Acesso da família: livre (sem senha) ------------------------
+   Os jogos abrem direto. A senha só existe para a área do responsável (/admin).
+   O explorador (Samuel / Player 2) fica num cookie simples: serve só para
+   separar os favoritos, não é proteção de nada. */
+const COOKIE_PERFIL = 'samuel_perfil';
+
+function perfil_escolhido(): ?array
+{
+    return perfil((string) ($_COOKIE[COOKIE_PERFIL] ?? ''));
+}
+
+function perfil_atual(): array
+{
+    return perfil_escolhido() ?: perfis()[0];
+}
+
+function escolher_perfil(string $id): void
+{
+    setcookie(COOKIE_PERFIL, $id, [
+        'expires' => time() + 365 * 86400, 'path' => '/', 'secure' => https(), 'httponly' => true, 'samesite' => 'Lax',
+    ]);
+    $_COOKIE[COOKIE_PERFIL] = $id;
+}
+
+/** Antes exigia a senha da família; agora o acesso aos jogos é livre. */
 function exigir_familia(): array
 {
     sem_cache();
-    $s = sessao();
-    if (!$s) {
-        redirecionar('/entrar/?voltar=' . rawurlencode($_SERVER['REQUEST_URI'] ?? '/jogos/'));
-    }
-    return $s;
+    return sessao() ?: [];
 }
 
-/** Página privada que também precisa de um explorador escolhido. */
 function exigir_perfil(): array
 {
-    $s = exigir_familia();
-    $p = perfil((string) ($s['p'] ?? ''));
-    if (!$p) {
-        redirecionar('/exploradores/?voltar=' . rawurlencode($_SERVER['REQUEST_URI'] ?? '/jogos/'));
-    }
-    return $p;
+    sem_cache();
+    return perfil_atual();
 }
 
 /* ---------- Proteção contra tentativa e erro de senha -------------------- */

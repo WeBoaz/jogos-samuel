@@ -13,13 +13,10 @@ function negar(int $codigo, string $texto): void
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
     echo '<!doctype html><meta charset="utf-8"><body style="font:18px Arial,sans-serif;padding:32px;background:#f5f2e8;color:#193337">'
-       . $texto . ' <a href="/entrar/" target="_top" style="color:#326344">Entrar para jogar</a></body>';
+       . $texto . ' <a href="/jogos/" target="_top" style="color:#326344">Voltar aos jogos</a></body>';
     exit;
 }
 
-if (!sessao()) {
-    negar(403, 'Este mundo é só para a família.');
-}
 
 $partes = explode('/', $caminho);
 $slug = array_shift($partes);
