@@ -12,7 +12,7 @@
 | `/exploradores/` | livre | Trocar de explorador |
 | `/admin/` | responsável (senha) | Cadastrar jogo por .zip, capa, status, testar, excluir |
 
-Jogos: **Turbo dos Blocos** (corrida 3D), **Dragões & Blocos** e **Caça às estrelas** (jogáveis); **A turma dos pets** e **Ilha dos blocos** (em breve).
+Jogos: **Reino dos Blocos** (plataforma, 3 fases), **Caça às Estrelas** (voo 3D, 6 constelações), **Turbo dos Blocos** (corrida 3D) e **Dragões & Blocos** (jogáveis); **A turma dos pets** e **Ilha dos blocos** (em breve).
 
 ## Adicionar um jogo (sem código)
 1. Abra **samuel.tech/admin/** → na primeira vez, ative com o código de configuração e crie a sua senha.

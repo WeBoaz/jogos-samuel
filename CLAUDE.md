@@ -31,6 +31,11 @@ _app/                    Núcleo PHP (bloqueado na web)
 _privado/jogos/<slug>/   Arquivos dos jogos (bloqueado na web; só via jogo.php)
   turbo-dos-blocos/      Corrida 3D (Three.js 0.170 local, licença MIT em three-LICENSE.txt; import map relativo).
                          `window.__turbo` expõe o estado só para os testes automáticos.
+  caca-as-estrelas/      “Missão Constelação”: voo 3D com bloom (Three.js + EffectComposer/UnrealBloomPass em lib/).
+                         6 constelações → Mapa do Céu (localStorage `estrelas3d:*`). `window.__estrelas` p/ testes.
+  reino-dos-blocos/      Plataforma 2D em canvas (pixel art gerada em código, 3 fases montadas por funções em FASES).
+                         Física: coiote 0,1 s, pulo guardado 0,13 s, corte 0,45, queda mais forte, correção de quina.
+                         `window.__reino` p/ testes (robô de teste: anda e pula obstáculos).
 assets/css/samuel.css    Bloco 1 = CSS original do kit; bloco 2 = páginas novas
 assets/js/site.js        Favoritos, busca, filtro, diálogos, player
 assets/img/              Artes do kit otimizadas (.webp) + capas

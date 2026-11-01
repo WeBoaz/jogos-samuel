@@ -2,182 +2,828 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Caça às estrelas</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Caça às Estrelas — Missão Constelação</title>
 <style>
   :root{--ink:#193337;--paper:#f5f2e8;--green:#b9ed80;--orange:#ff9d52;--purple:#ceb7ef;--gold:#ffd56b;--mono:'Courier New',monospace}
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
-  body{background:#1b1440 url('/assets/img/caca-as-estrelas.webp') center/cover no-repeat}
-  body::before{content:'';position:fixed;inset:0;background:linear-gradient(#0d0a2a99,#1b144066 40%,#0d0a2acc)}
-  .hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;z-index:3}
-  .pill{background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:8px 14px;font:bold 16px var(--mono)}
-  .pill button{all:unset;cursor:pointer}
-  .som{width:44px;height:44px;display:grid;place-items:center;font-size:20px;padding:0}
-  #ceu{position:fixed;inset:0;z-index:2}
-  .estrela{position:absolute;width:var(--t,76px);height:var(--t,76px);margin:calc(var(--t,76px)/-2) 0 0 calc(var(--t,76px)/-2);
-    border:0;background:none;padding:0;cursor:pointer;font-size:calc(var(--t,76px)*.82);line-height:1;color:var(--gold);
-    text-shadow:0 0 12px #ffe9a0,0 0 26px #ffb13b,3px 3px 0 #b86a00;animation:brilha 1.6s ease-in-out infinite;animation-delay:var(--d,0s)}
-  .estrela:focus-visible{outline:3px dashed #fff;outline-offset:6px;border-radius:50%}
-  .estrela.pega{animation:pega .45s ease-out forwards;pointer-events:none}
-  @keyframes brilha{0%,100%{transform:scale(1) rotate(-6deg)}50%{transform:scale(1.12) rotate(6deg)}}
-  @keyframes pega{to{transform:scale(2.2) rotate(40deg);opacity:0}}
-  .faisca{position:absolute;width:10px;height:10px;background:#fff6c2;box-shadow:0 0 8px #ffd56b;pointer-events:none;animation:faisca .6s ease-out forwards}
-  @keyframes faisca{to{transform:translate(var(--x),var(--y)) scale(.2);opacity:0}}
-  .tela{position:fixed;inset:0;display:grid;place-items:center;padding:20px;z-index:4}
-  .tela[hidden]{display:none}
-  .cartao{background:var(--paper);border:2px solid var(--ink);box-shadow:7px 7px 0 var(--ink);max-width:420px;width:100%;text-align:center}
-  .barra{background:#e8e7db;border-bottom:2px solid var(--ink);padding:9px 13px;font:12px var(--mono);text-align:left}
-  .corpo{padding:26px 24px}
-  h1,h2{font-family:var(--mono);font-weight:900;letter-spacing:-2px;margin:0 0 10px;line-height:1.05}
-  h1{font-size:36px}h2{font-size:32px}
-  p{margin:0 0 18px;color:#526568;line-height:1.5}
-  .grande{font-size:56px;line-height:1;margin-bottom:12px}
-  .btn{border:2px solid var(--ink);background:var(--green);box-shadow:4px 4px 0 var(--ink);padding:13px 22px;font:800 17px Arial,sans-serif;cursor:pointer;min-height:52px;color:var(--ink)}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b0830;font-family:Arial,Helvetica,sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:none}
+  canvas#cena{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .tela{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding:16px;z-index:10;overflow:auto}
+  .tela>.cartao{margin:auto 0}
+  [hidden]{display:none!important}
+  .cartao{background:var(--paper);border:2px solid var(--ink);box-shadow:7px 7px 0 var(--ink);width:min(680px,100%)}
+  .barra{background:#e8e7db;border-bottom:2px solid var(--ink);padding:8px 12px;font:12px var(--mono);display:flex;justify-content:space-between}
+  .corpo{padding:20px 22px 22px;text-align:center}
+  .logo{font:900 clamp(30px,7vw,56px)/.95 var(--mono);letter-spacing:-3px;margin:4px 0 8px;text-shadow:3px 3px 0 var(--gold),6px 6px 0 var(--ink)}
+  .logo small{display:block;font-size:.4em;letter-spacing:2px;color:#6a3cc4;text-shadow:none;margin-top:6px}
+  h2{font:900 30px var(--mono);letter-spacing:-2px;margin:0 0 6px}
+  p{margin:0 0 14px;color:#526568;line-height:1.5}
+  .kicker{font:11px var(--mono);letter-spacing:1.6px;text-transform:uppercase;display:block;margin-bottom:8px}
+  .btn{border:2px solid var(--ink);background:var(--green);box-shadow:4px 4px 0 var(--ink);padding:12px 20px;font:800 17px Arial,sans-serif;cursor:pointer;min-height:50px;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
   .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
-  .btn.sec{background:var(--paper);margin-top:12px}
-  .acoes{display:flex;flex-direction:column;align-items:center;gap:4px}
-  @media (prefers-reduced-motion:reduce){.estrela{animation:none}.estrela.pega{animation:none;opacity:0}.faisca{display:none}}
+  .btn:focus-visible,.missao:focus-visible,.opcao:focus-visible{outline:3px solid #9956e0;outline-offset:4px}
+  .btn.sec{background:var(--paper)}
+  .btn.grande{font-size:21px;padding:14px 30px;min-height:60px}
+  .acoes{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .missoes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 16px}
+  .missao{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);background:#1b1440;color:#fff;padding:8px 6px 10px;cursor:pointer;font:800 14px Arial,sans-serif;position:relative}
+  .missao canvas{width:100%;aspect-ratio:1;display:block;margin-bottom:6px}
+  .missao .med{display:block;font:700 13px var(--mono);color:var(--gold);min-height:16px}
+  .missao[disabled]{cursor:not-allowed;filter:grayscale(.8) brightness(.7)}
+  .missao.atual{outline:3px solid var(--gold);outline-offset:2px}
+  .opcoes{display:flex;gap:10px;justify-content:center;margin:4px 0 14px}
+  .opcao{border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:#fffdf7;padding:8px 16px;cursor:pointer;font:800 15px Arial,sans-serif;color:var(--ink);min-height:46px}
+  .opcao[aria-pressed=true]{background:var(--green)}
+  .dica{font:12px var(--mono);color:#526568;margin-top:10px}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5;font-family:var(--mono)}
+  .painel{position:absolute;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:6px 12px;font-weight:900}
+  #hMissao{top:12px;left:12px;display:flex;gap:10px;align-items:center;padding:6px}
+  #hMissao canvas{width:76px;height:76px;background:#1b1440;border:2px solid var(--ink)}
+  #hMissao b{display:block;font-size:13px}#hMissao span{font-size:22px}
+  .progresso{height:12px;border:2px solid var(--ink);background:#fff;margin-top:4px;width:150px;position:relative}
+  .progresso i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,var(--gold) 0 8px,#fff2b8 8px 12px);transition:width .2s}
+  #hCombo{top:12px;left:50%;transform:translateX(-50%);font-size:26px;background:var(--gold);display:none}
+  #hCombo.on{display:block}
+  #hPoderes{position:absolute;top:110px;left:12px;display:flex;gap:8px}
+  #hPoderes span{background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:4px 8px;font:900 15px var(--mono)}
+  #aviso{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);font:900 clamp(30px,7vw,64px) var(--mono);color:var(--paper);text-shadow:3px 3px 0 var(--ink),-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink);letter-spacing:-2px;white-space:nowrap;text-align:center}
+  .pop{animation:pop .45s ease-out}
+  @keyframes pop{from{transform:translate(-50%,-50%) scale(1.7);opacity:0}}
+  .flutua{position:fixed;z-index:6;pointer-events:none;font:900 22px var(--mono);color:var(--gold);text-shadow:2px 2px 0 var(--ink);transform:translate(-50%,-50%);animation:flutua .8s ease-out forwards}
+  @keyframes flutua{to{transform:translate(-50%,-150%);opacity:0}}
+  .topo-btns{position:fixed;top:12px;right:12px;z-index:6;display:flex;gap:8px}
+  .mini{width:44px;height:44px;padding:0;font-size:19px;min-height:44px;background:var(--paper);box-shadow:3px 3px 0 var(--ink)}
+  #flash{position:fixed;inset:0;background:#ff3b5c;opacity:0;pointer-events:none;z-index:4;transition:opacity .25s}
+  #dicaToque{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:5;font:700 14px var(--mono);color:#fff;background:#193337cc;padding:8px 14px;border:2px solid #fff}
+  .resultado-med{font-size:44px;letter-spacing:6px;margin:4px 0 10px}
+  .ceu{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 14px}
+  .ceu figure{margin:0;background:#1b1440;border:2px solid var(--ink);padding:6px;color:#fff;font:800 13px Arial,sans-serif}
+  .ceu canvas{width:100%;aspect-ratio:1;display:block}
+  @media (max-width:560px){.missoes,.ceu{grid-template-columns:repeat(2,1fr)}#hMissao canvas{width:56px;height:56px}.progresso{width:110px}#hPoderes{top:92px}}
+  @media (max-height:520px){.corpo{padding:12px 16px}.logo{font-size:30px}.logo small,.corpo>p{display:none}.missoes{grid-template-columns:repeat(6,1fr);gap:8px}.missao{font-size:11px;padding:4px}}
+  @media (prefers-reduced-motion:reduce){.pop,.flutua{animation:none}}
 </style>
 </head>
 <body>
-  <div class="hud" aria-live="polite">
-    <span class="pill" id="missao">Missão 1</span>
-    <span class="pill" id="placar">★ 0 / 6</span>
-    <span class="pill som"><button id="btnSom" aria-label="Desligar som">🔊</button></span>
-  </div>
-  <div id="ceu" aria-label="Céu com estrelas"></div>
+<canvas id="cena" aria-label="Espaço com estrelas para pegar"></canvas>
+<div id="flash"></div>
 
-  <div class="tela" id="inicio">
-    <div class="cartao"><div class="barra">caca_as_estrelas.exe</div><div class="corpo">
-      <div class="grande" aria-hidden="true">⭐</div>
-      <h1>Caça às estrelas</h1>
-      <p>As estrelas se espalharam pelo espaço! Toque em todas para levar de volta para a nave.</p>
-      <button class="btn" id="btnComecar">▶ Começar</button>
-    </div></div>
-  </div>
+<div id="hud" hidden>
+  <div class="painel" id="hMissao"><canvas id="miniConst" width="152" height="152"></canvas><div><b id="hNome">Doguinho</b><span id="hEstrelas">0/30</span> ⭐<div class="progresso"><i id="hBarra"></i></div></div></div>
+  <div class="painel" id="hCombo">x2</div>
+  <div id="hPoderes"></div>
+  <div id="aviso"></div>
+</div>
+<div id="dicaToque" hidden>☝️ arraste o dedo para pilotar</div>
+<div class="topo-btns" id="topoBtns" hidden>
+  <button class="btn mini" id="btnSom" aria-label="Som">🔊</button>
+  <button class="btn mini" id="btnMusica" aria-label="Música">🎵</button>
+  <button class="btn mini" id="btnPausa" aria-label="Pausar" style="font:900 17px var(--mono)">II</button>
+</div>
 
-  <div class="tela" id="fim" hidden>
-    <div class="cartao"><div class="barra">missao_cumprida.exe</div><div class="corpo">
-      <div class="grande" aria-hidden="true">🚀</div>
-      <h2 id="fimTitulo">Missão cumprida!</h2>
-      <p id="fimTexto">Você brilhou!</p>
+<section class="tela" id="telaInicio">
+  <div class="cartao">
+    <div class="barra"><span>missao_constelacao.exe</span><span>✦ ✦ ✦</span></div>
+    <div class="corpo">
+      <span class="kicker">Samuel.tech apresenta</span>
+      <div class="logo">CAÇA ÀS<br>ESTRELAS<small>MISSÃO CONSTELAÇÃO</small></div>
+      <p>Pilote o foguete, pegue as estrelas e desenhe constelações no céu! Desvie dos asteroides e passe pelos anéis de turbo.</p>
+      <div class="opcoes" id="selModo">
+        <button class="opcao" data-modo="facil" aria-pressed="false">🐢 Fácil</button>
+        <button class="opcao" data-modo="normal" aria-pressed="true">🚀 Normal</button>
+      </div>
+      <div class="missoes" id="listaMissoes"></div>
+      <div class="acoes">
+        <button class="btn grande" id="btnJogar">▶ DECOLAR!</button>
+        <button class="btn sec" id="btnMapa">🌌 Mapa do Céu</button>
+      </div>
+      <p class="dica">Arraste o dedo ou o mouse · setas/WASD · P pausa</p>
+      <a class="dica" href="/jogos/" target="_top">← Voltar aos jogos</a>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="telaMapa" hidden>
+  <div class="cartao">
+    <div class="barra"><span>mapa_do_ceu.exe</span><span>🌌</span></div>
+    <div class="corpo">
+      <h2>Mapa do Céu</h2>
+      <p>Todas as constelações que você já desenhou.</p>
+      <div class="ceu" id="ceuLista"></div>
+      <button class="btn" id="btnFecharMapa">← Voltar</button>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="telaPausa" hidden>
+  <div class="cartao" style="width:min(420px,100%)">
+    <div class="barra"><span>pausa.exe</span><span>II</span></div>
+    <div class="corpo">
+      <h2>Pausado</h2>
+      <div class="acoes" style="flex-direction:column;align-items:center">
+        <button class="btn grande" id="btnContinuar">▶ Continuar</button>
+        <button class="btn sec" id="btnRecomecar">↻ Recomeçar missão</button>
+        <button class="btn sec" id="btnMenu">☰ Escolher missão</button>
+        <a class="btn sec" href="/jogos/" target="_top">← Voltar aos jogos</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="telaFim" hidden>
+  <div class="cartao" style="width:min(460px,100%)">
+    <div class="barra"><span>constelacao_completa.exe</span><span>✦</span></div>
+    <div class="corpo">
+      <span class="kicker">Missão cumprida!</span>
+      <h2 id="fimTitulo">Constelação do Doguinho</h2>
+      <div class="resultado-med" id="fimMed">⭐⭐⭐</div>
+      <p id="fimInfo"></p>
       <div class="acoes">
         <button class="btn" id="btnProxima">Próxima missão ▶</button>
-        <button class="btn sec" id="btnDeNovo">↻ Começar do início</button>
+        <button class="btn sec" id="btnDeNovo">↻ Jogar de novo</button>
+        <button class="btn sec" id="btnMapa2">🌌 Mapa do Céu</button>
       </div>
-    </div></div>
+    </div>
   </div>
+</section>
 
-<script>
-'use strict';
-(() => {
-  const $ = (id) => document.getElementById(id);
-  const ceu = $('ceu');
-  const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let missao = 1, total = 6, pegas = 0, inicioT = 0;
+<script type="importmap">{"imports":{"three":"./lib/three.module.min.js","three/addons/":"./lib/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-  // ---------- Som (só depois de um toque) ----------
-  let audio = null;
-  let som = (() => { try { return localStorage.getItem('estrelas-som') !== '0'; } catch { return true; } })();
-  function bip(freq, dur = 0.12) {
-    if (!som) return;
+/* =====================================================================
+   CAÇA ÀS ESTRELAS — MISSÃO CONSTELAÇÃO (jogo original do Samuel.tech)
+   Um foguete de blocos voa pelo espaço; cada missão junta estrelas para
+   desenhar uma constelação no céu. Tudo é gerado por código.
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const guardar = {
+  ler(k, f) { try { const v = localStorage.getItem('estrelas3d:' + k); return v === null ? f : JSON.parse(v); } catch { return f; } },
+  gravar(k, v) { try { localStorage.setItem('estrelas3d:' + k, JSON.stringify(v)); } catch {} },
+};
+
+/* ---------------- Constelações (forma em coordenadas -1..1) ---------------- */
+const CONSTELACOES = [
+  { id: 'doguinho', nome: 'Doguinho', cores: [0x1b1460, 0x4b2a9a, 0xff7ab8],
+    pts: [[0.95,-0.05],[0.55,0.2],[0.25,0.55],[-0.05,0.95],[-0.3,0.45],[-0.6,0.15],[-0.55,-0.45],[0.0,-0.55],[0.45,-0.35],[0.18,0.25]],
+    linhas: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,0],[2,9]] },
+  { id: 'gatinho', nome: 'Gatinho', cores: [0x0e2a4a, 0x1f6aa5, 0xffc93c],
+    pts: [[-0.65,0.95],[-0.3,0.45],[0.3,0.45],[0.65,0.95],[0.75,0.0],[0.4,-0.5],[-0.4,-0.5],[-0.75,0.0],[-0.25,0.1],[0.25,0.1]],
+    linhas: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],[8,9]] },
+  { id: 'foguete', nome: 'Foguete', cores: [0x2a0c3a, 0x8a2a6a, 0x4ee6e0],
+    pts: [[0,1],[0.32,0.45],[0.32,-0.45],[0.7,-0.95],[0,-0.6],[-0.7,-0.95],[-0.32,-0.45],[-0.32,0.45],[0,0.15]],
+    linhas: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],[1,8],[8,7]] },
+  { id: 'coracao', nome: 'Coração', cores: [0x3a0a2a, 0xa52a6a, 0xffb3d9],
+    pts: [[0,-0.9],[0.6,-0.25],[0.9,0.3],[0.65,0.8],[0.25,0.75],[0,0.4],[-0.25,0.75],[-0.65,0.8],[-0.9,0.3],[-0.6,-0.25]],
+    linhas: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,0]] },
+  { id: 'dragao', nome: 'Dragão', cores: [0x0a2a1a, 0x2a7a4a, 0xb9ed80],
+    pts: [[0.95,0.45],[0.6,0.7],[0.35,0.35],[0.05,0.6],[0.1,1.0],[-0.25,0.3],[-0.55,0.55],[-0.85,0.2],[-0.95,-0.3],[-0.4,-0.2],[0.2,-0.45]],
+    linhas: [[0,1],[1,2],[2,3],[3,4],[4,5],[3,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,2]] },
+  { id: 'coroa', nome: 'Coroa', cores: [0x2a1a0a, 0x9a6a1a, 0xffd56b],
+    pts: [[-0.85,-0.6],[0.85,-0.6],[0.9,0.55],[0.45,0.05],[0,0.85],[-0.45,0.05],[-0.9,0.55],[0,0.25]],
+    linhas: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[3,7],[7,5]] },
+];
+
+/* ---------------- Render + bloom ---------------- */
+const canvas = $('cena');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+let pr = Math.min(devicePixelRatio || 1, 1.6);
+renderer.setPixelRatio(pr);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0b0830, 0.0045);
+const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 2000);
+camera.position.set(0, 1.6, 9.5);
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.7, 0.35, 0.72);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+let usarBloom = true;
+function redimensionar() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); composer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.fov = 64 + (w < h ? 14 : 0);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', redimensionar); redimensionar();
+
+/* Céu: nebulosa animada (shader) */
+const ceuMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: { c1: { value: new THREE.Color(0x1b1460) }, c2: { value: new THREE.Color(0x4b2a9a) }, c3: { value: new THREE.Color(0xff7ab8) }, t: { value: 0 } },
+  vertexShader: 'varying vec3 vD; void main(){ vD = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+  fragmentShader: `varying vec3 vD; uniform vec3 c1; uniform vec3 c2; uniform vec3 c3; uniform float t;
+    float h(vec3 p){ p = fract(p*0.3183099+.1); p *= 17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
+    float n(vec3 x){ vec3 i=floor(x), f=fract(x); f=f*f*(3.0-2.0*f);
+      return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),
+                 mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z); }
+    float fbm(vec3 p){ float a=.5,s=0.; for(int i=0;i<5;i++){ s+=a*n(p); p*=2.03; a*=.5; } return s; }
+    void main(){ vec3 d = normalize(vD); float a = fbm(d*2.6 + vec3(0.,t*.015,0.)); float b = fbm(d*5.5 + a*2.2);
+      vec3 col = mix(c1, c2, smoothstep(.3,.75,a)); col = mix(col, c3, smoothstep(.58,.92,b)*.6);
+      col *= .45 + .7*smoothstep(.2,.8,a); gl_FragColor = vec4(col, 1.); }`,
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(900, 48, 24), ceuMat));
+
+/* Estrelas distantes */
+{
+  const n = 2500, pos = new Float32Array(n * 3), cor = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = 700, s = Math.sqrt(1 - u * u);
+    pos.set([Math.cos(a) * s * r, u * r, Math.sin(a) * s * r], i * 3);
+    const c = new THREE.Color().setHSL(rnd(0.55, 0.75), 0.5, rnd(0.7, 1)); cor.set([c.r, c.g, c.b], i * 3);
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(cor, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true, fog: false })));
+}
+/* Planeta de blocos com anel */
+const planeta = new THREE.Group();
+{
+  const p = new THREE.Mesh(new THREE.IcosahedronGeometry(70, 1), new THREE.MeshStandardMaterial({ color: 0x4ee6e0, flatShading: true, roughness: 0.8, emissive: 0x0d2a4a, fog: false }));
+  const anel = new THREE.Mesh(new THREE.RingGeometry(95, 135, 6, 1), new THREE.MeshBasicMaterial({ color: 0xceb7ef, side: THREE.DoubleSide, transparent: true, opacity: 0.55, fog: false }));
+  anel.rotation.x = Math.PI / 2.3; planeta.add(p, anel);
+  planeta.position.set(-430, 210, -720); scene.add(planeta);
+}
+/* Luzes */
+scene.add(new THREE.HemisphereLight(0xbfb8ff, 0x2a1d4f, 0.85));
+const sol = new THREE.DirectionalLight(0xfff1d6, 1.5); sol.position.set(5, 10, 6); scene.add(sol);
+
+/* Riscos de velocidade (estrelas passando) */
+const NR = 260;
+const riscosPos = new Float32Array(NR * 6), riscosCor = new Float32Array(NR * 6), riscosDados = [];
+for (let i = 0; i < NR; i++) {
+  const a = Math.random() * Math.PI * 2, r = rnd(9, 60);
+  riscosDados.push({ x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z: rnd(-400, 10) });
+  riscosCor.set([1, 1, 1, 0.1, 0.1, 0.25], i * 6);
+}
+const riscosGeo = new THREE.BufferGeometry();
+riscosGeo.setAttribute('position', new THREE.BufferAttribute(riscosPos, 3));
+riscosGeo.setAttribute('color', new THREE.BufferAttribute(riscosCor, 3));
+scene.add(new THREE.LineSegments(riscosGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.8, fog: false })));
+
+/* ---------------- Foguete (blocos) ---------------- */
+const MAT = (c, e = 0, ei = 1) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.55, metalness: 0.1, emissive: e, emissiveIntensity: ei, flatShading: true });
+function bloco(w, h, d, m, x, y, z) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); return b; }
+const foguete = new THREE.Group(), naveCorpo = new THREE.Group(); foguete.add(naveCorpo);
+{
+  const branco = MAT(0xd9d4c8), laranja = MAT(0xff7a2e), escuro = MAT(0x34374f), vidro = MAT(0x4ee6e0, 0x4ee6e0, 0.9);
+  naveCorpo.add(bloco(1.0, 1.0, 2.4, branco, 0, 0, 0), bloco(0.75, 0.75, 0.8, laranja, 0, 0, -1.55), bloco(0.4, 0.4, 0.5, laranja, 0, 0, -2.15));
+  naveCorpo.add(bloco(0.62, 0.42, 0.95, vidro, 0, 0.5, -0.45));
+  naveCorpo.add(bloco(0.12, 0.6, 0.9, laranja, 0.55, 0, 0.6), bloco(0.12, 0.6, 0.9, laranja, -0.55, 0, 0.6));
+  naveCorpo.add(bloco(1.2, 0.16, 0.8, laranja, 0.85, -0.25, 0.85), bloco(1.2, 0.16, 0.8, laranja, -0.85, -0.25, 0.85), bloco(0.16, 0.9, 0.8, laranja, 0, 0.8, 0.9));
+  naveCorpo.add(bloco(0.85, 0.85, 0.4, escuro, 0, 0, 1.35));
+  naveCorpo.add(bloco(0.55, 0.55, 0.3, MAT(0xffb13b, 0xff8a1a, 1.1), 0, 0, 1.58));
+}
+const escudoVisual = new THREE.Mesh(new THREE.IcosahedronGeometry(1.9, 1), new THREE.MeshBasicMaterial({ color: 0x4ee6e0, wireframe: true, transparent: true, opacity: 0.6 }));
+escudoVisual.visible = false; foguete.add(escudoVisual);
+const luzMotor = new THREE.PointLight(0xff8a2a, 6, 10, 2); luzMotor.position.set(0, 0, 2); foguete.add(luzMotor);
+foguete.scale.setScalar(0.85);
+scene.add(foguete);
+
+/* ---------------- Objetos do caminho ---------------- */
+const formaEstrela = new THREE.Shape();
+for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 0.42 : 1; formaEstrela[k ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+const geoEstrela = new THREE.ExtrudeGeometry(formaEstrela, { depth: 0.3, bevelEnabled: true, bevelSize: 0.07, bevelThickness: 0.07, bevelSegments: 1 }); geoEstrela.center();
+const matEstrela = new THREE.MeshStandardMaterial({ color: 0xffd56b, emissive: 0xffa31a, emissiveIntensity: 0.85, roughness: 0.3 });
+const matArcoIris = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff4fd8, emissiveIntensity: 2.2 });
+const matPedra = [0x6a5f8a, 0x5a4f7a, 0x7d72a0, 0x4a4066].map((c) => MAT(c));
+const matCristal = MAT(0xceb7ef, 0x8a4fff, 1.4);
+const objetos = [];
+
+function criarEstrela(x, y, z, especial = false) {
+  const m = new THREE.Mesh(geoEstrela, especial ? matArcoIris : matEstrela);
+  m.scale.setScalar(especial ? 0.95 : 0.7);
+  return adicionar({ tipo: especial ? 'cadente' : 'estrela', mesh: m, x, y, z, r: 0.9, giro: rnd(2, 4), vx: especial ? rnd(-3, 3) : 0 });
+}
+function criarAsteroide(x, y, z, tam = 1) {
+  const g = new THREE.Group();
+  const n = 5 + Math.floor(Math.random() * 5);
+  for (let i = 0; i < n; i++) {
+    const s = rnd(0.6, 1.1) * tam;
+    const b = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), matPedra[i % 4]);
+    b.position.set(rnd(-0.6, 0.6) * tam, rnd(-0.6, 0.6) * tam, rnd(-0.6, 0.6) * tam);
+    b.rotation.set(rnd(0, 3), rnd(0, 3), rnd(0, 3)); g.add(b);
+  }
+  if (Math.random() < 0.5) { const c = new THREE.Mesh(new THREE.BoxGeometry(0.4 * tam, 0.7 * tam, 0.4 * tam), matCristal); c.position.set(0, 0.7 * tam, 0); g.add(c); }
+  return adicionar({ tipo: 'asteroide', mesh: g, x, y, z, r: 1.15 * tam, giro: rnd(-1, 1), rot: new THREE.Vector3(rnd(-1, 1), rnd(-1, 1), 0) });
+}
+const geoAnel = new THREE.TorusGeometry(2.3, 0.2, 8, 24);
+const matAnel = new THREE.MeshStandardMaterial({ color: 0x4ee6e0, emissive: 0x4ee6e0, emissiveIntensity: 1.5 });
+function criarAnel(x, y, z) {
+  const g = new THREE.Group(); g.add(new THREE.Mesh(geoAnel, matAnel));
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; const c = bloco(0.35, 0.35, 0.35, matEstrela, Math.cos(a) * 2.3, Math.sin(a) * 2.3, 0); g.add(c); }
+  return adicionar({ tipo: 'anel', mesh: g, x, y, z, r: 2.1, giro: 1.2 });
+}
+function criarPoder(tipo, x, y, z) {
+  const g = new THREE.Group();
+  if (tipo === 'ima') {
+    const v = MAT(0xff3b5c, 0xff3b5c, 1.2), c = MAT(0xd9d9d9, 0xffffff, 0.8);
+    g.add(bloco(0.35, 1.0, 0.35, v, -0.45, 0.1, 0), bloco(0.35, 1.0, 0.35, v, 0.45, 0.1, 0), bloco(1.25, 0.35, 0.35, v, 0, -0.55, 0), bloco(0.35, 0.3, 0.36, c, -0.45, 0.7, 0), bloco(0.35, 0.3, 0.36, c, 0.45, 0.7, 0));
+  } else {
+    g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.85, 0), MAT(0x4ee6e0, 0x4ee6e0, 1.6)));
+  }
+  const aura = new THREE.Mesh(new THREE.IcosahedronGeometry(1.25, 1), new THREE.MeshBasicMaterial({ color: tipo === 'ima' ? 0xff9ad0 : 0x9ad8ff, wireframe: true, transparent: true, opacity: 0.5 }));
+  g.add(aura);
+  return adicionar({ tipo, mesh: g, x, y, z, r: 1.3, giro: 2 });
+}
+function adicionar(o) { o.vivo = true; o.mesh.position.set(o.x, o.y, o.z); scene.add(o.mesh); objetos.push(o); return o; }
+function remover(o) { o.vivo = false; scene.remove(o.mesh); }
+
+/* ---------------- Partículas ---------------- */
+const MAXP = 500;
+const parts = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff }), MAXP);
+parts.frustumCulled = false; scene.add(parts);
+const pd = Array.from({ length: MAXP }, () => ({ v: 0, max: 1, p: new THREE.Vector3(), vel: new THREE.Vector3(), t: 0.2, c: new THREE.Color() }));
+let pi = 0;
+function emitir(x, y, z, vx, vy, vz, cor, t, vida) { const p = pd[pi]; pi = (pi + 1) % MAXP; p.p.set(x, y, z); p.vel.set(vx, vy, vz); p.c.set(cor); p.t = t; p.v = p.max = vida; }
+function explosao(x, y, z, cor, n = 18, forca = 8) {
+  if (reduzido) n = Math.ceil(n / 3);
+  for (let i = 0; i < n; i++) emitir(x, y, z, rnd(-1, 1) * forca, rnd(-1, 1) * forca, rnd(-1, 1) * forca, cor, rnd(0.07, 0.18), rnd(0.35, 0.7));
+}
+const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3();
+function atualizarParticulas(dt) {
+  for (let i = 0; i < MAXP; i++) {
+    const p = pd[i];
+    if (p.v > 0) { p.v -= dt; p.p.addScaledVector(p.vel, dt); p.p.z += velMundo * dt * 0.6; p.vel.multiplyScalar(1 - dt * 1.5); const s = Math.max(0, p.v / p.max) * p.t; _m.compose(p.p, _q, _s.set(s, s, s)); }
+    else _m.compose(p.p, _q, _s.set(0, 0, 0));
+    parts.setMatrixAt(i, _m); parts.setColorAt(i, p.c);
+  }
+  parts.instanceMatrix.needsUpdate = true; if (parts.instanceColor) parts.instanceColor.needsUpdate = true;
+}
+
+/* ---------------- Áudio sintetizado ---------------- */
+const Som = {
+  ctx: null, saida: null, sfx: null, mus: null, ligado: guardar.ler('som', true), musica: guardar.ler('musica', true),
+  iniciar() {
+    if (this.ctx) { this.ctx.resume(); return; }
     try {
-      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      const t = audio.currentTime, o = audio.createOscillator(), g = audio.createGain();
-      o.type = 'triangle'; o.frequency.setValueAtTime(freq, t);
-      g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur);
-    } catch {}
-  }
-  const NOTAS = [523, 587, 659, 698, 784, 880, 988, 1047];
-  function atualizarSom() { $('btnSom').textContent = som ? '🔊' : '🔇'; $('btnSom').setAttribute('aria-label', som ? 'Desligar som' : 'Ligar som'); }
-  $('btnSom').onclick = () => { som = !som; try { localStorage.setItem('estrelas-som', som ? '1' : '0'); } catch {} atualizarSom(); };
-  atualizarSom();
-
-  // ---------- Estrelas ----------
-  function posicoes(n) {
-    const W = innerWidth, H = innerHeight, tam = Math.max(56, Math.min(92, Math.min(W, H) / 7));
-    const pts = [], margem = tam * 0.7, topo = 80 + tam / 2;
-    let tentativas = 0;
-    while (pts.length < n && tentativas < 3000) {
-      tentativas++;
-      const x = margem + Math.random() * (W - 2 * margem);
-      const y = topo + Math.random() * (H - topo - margem);
-      const minDist = tentativas < 2000 ? tam * 1.25 : tam * 0.9;
-      if (pts.every((p) => Math.hypot(p.x - x, p.y - y) > minDist)) pts.push({ x, y });
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const comp = this.ctx.createDynamicsCompressor(); comp.connect(this.ctx.destination);
+      this.saida = this.ctx.createGain(); this.saida.gain.value = this.ligado ? 0.9 : 0; this.saida.connect(comp);
+      this.sfx = this.ctx.createGain(); this.sfx.gain.value = 0.8; this.sfx.connect(this.saida);
+      this.mus = this.ctx.createGain(); this.mus.gain.value = this.musica ? 0.3 : 0; this.mus.connect(this.saida);
+      // eco leve para dar "espaço"
+      const eco = this.ctx.createDelay(); eco.delayTime.value = 0.28; const fb = this.ctx.createGain(); fb.gain.value = 0.32;
+      this.ecoEntrada = this.ctx.createGain(); this.ecoEntrada.gain.value = 0.35;
+      this.ecoEntrada.connect(eco); eco.connect(fb).connect(eco); eco.connect(this.saida);
+    } catch { this.ctx = null; }
+  },
+  nota(f, d, tipo = 'sine', v = 0.15, q = 0, dest, eco = false) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + q, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = tipo; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(dest || this.sfx); if (eco) g.connect(this.ecoEntrada);
+    o.start(t); o.stop(t + d + 0.05);
+  },
+  ruido(d, v, f, q = 0) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + q, n = Math.floor(this.ctx.sampleRate * d), b = this.ctx.createBuffer(1, n, this.ctx.sampleRate), c = b.getChannelData(0);
+    for (let i = 0; i < n; i++) c[i] = Math.random() * 2 - 1;
+    const s = this.ctx.createBufferSource(); s.buffer = b; const fl = this.ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(f, t); fl.frequency.exponentialRampToValueAtTime(80, t + d);
+    const g = this.ctx.createGain(); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(fl).connect(g).connect(this.sfx); s.start(t);
+  },
+  ESCALA: [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5, 1568, 1760],
+  estrela(combo) { const f = this.ESCALA[Math.min(combo, this.ESCALA.length - 1)]; this.nota(f, 0.35, 'triangle', 0.16, 0, null, true); this.nota(f * 2, 0.2, 'sine', 0.05); },
+  batida() { this.ruido(0.5, 0.6, 900); this.nota(70, 0.4, 'sawtooth', 0.15); },
+  anel() { this.ruido(0.7, 0.25, 4000); [440, 660, 880].forEach((f, i) => this.nota(f, 0.25, 'square', 0.05, i * 0.05)); },
+  poder() { [523, 784, 1046, 1568].forEach((f, i) => this.nota(f, 0.3, 'triangle', 0.12, i * 0.07, null, true)); },
+  escudoQuebra() { this.ruido(0.4, 0.4, 3000); this.nota(330, 0.3, 'square', 0.08); },
+  revela(i) { this.nota(this.ESCALA[i % this.ESCALA.length] * 0.5, 1.2, 'sine', 0.12, 0, null, true); this.nota(this.ESCALA[(i + 2) % this.ESCALA.length], 0.6, 'triangle', 0.05, 0.05, null, true); },
+  vitoria() { [523, 659, 784, 1046, 1318, 1568].forEach((f, i) => this.nota(f, 0.5, 'triangle', 0.13, i * 0.12, null, true)); },
+  alternar() { this.ligado = !this.ligado; guardar.gravar('som', this.ligado); if (this.saida) this.saida.gain.value = this.ligado ? 0.9 : 0; },
+  alternarMusica() { this.musica = !this.musica; guardar.gravar('musica', this.musica); if (this.mus) this.mus.gain.value = this.musica ? 0.3 : 0; },
+};
+/* Música espacial original: pad + arpejo */
+const Musica = {
+  on: false, passo: 0, prox: 0, timer: null,
+  acordes: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]],
+  f: (n) => 440 * Math.pow(2, (n - 69) / 12),
+  iniciar() { if (!Som.ctx || this.on) return; this.on = true; this.prox = Som.ctx.currentTime + 0.1; this.timer = setInterval(() => this.agendar(), 50); },
+  agendar() {
+    const d = 60 / 112 / 4;
+    while (this.prox < Som.ctx.currentTime + 0.2) {
+      const c = Math.floor(this.passo / 32) % 4, p = this.passo % 32, q = this.prox - Som.ctx.currentTime, ac = this.acordes[c];
+      if (p === 0) ac.forEach((n) => Som.nota(this.f(n), d * 30, 'sine', 0.05, q, Som.mus));
+      if (p % 2 === 0) { const n = ac[(p / 2) % 3] + 12 + (p % 8 === 6 ? 12 : 0); Som.nota(this.f(n), d * 3, 'triangle', 0.045, q, Som.mus, true); }
+      if (p % 8 === 0) Som.nota(this.f(ac[0] - 12), d * 7, 'sine', 0.14, q, Som.mus);
+      if (p % 4 === 2) Som.ruido(0.04, 0.03, 6000, q);
+      this.prox += d; this.passo++;
     }
-    return { pts, tam };
-  }
+  },
+};
 
-  function montar() {
-    pegas = 0; ceu.innerHTML = '';
-    total = Math.min(6 + (missao - 1) * 2, 16);
-    $('missao').textContent = 'Missão ' + missao;
-    placar();
-    const { pts, tam } = posicoes(total);
-    pts.forEach((p, i) => {
-      const b = document.createElement('button');
-      b.className = 'estrela'; b.textContent = '★';
-      b.setAttribute('aria-label', 'Pegar estrela ' + (i + 1));
-      b.style.left = p.x + 'px'; b.style.top = p.y + 'px';
-      b.style.setProperty('--t', tam + 'px');
-      b.style.setProperty('--d', (Math.random() * 1.6).toFixed(2) + 's');
-      ceu.appendChild(b);
-    });
-    inicioT = performance.now();
-    const primeira = ceu.querySelector('.estrela');
-    if (primeira) primeira.focus({ preventScroll: true });
-  }
+/* ---------------- Estado ---------------- */
+const estado = {
+  fase: 'menu', modo: guardar.ler('modo', 'normal'), missao: 0,
+  coletadas: 0, meta: 30, combo: 0, comboTempo: 0, batidas: 0, tempo: 0, distancia: 0, proxPadrao: 0,
+  ima: 0, escudo: false, invencivel: 0, turbo: 0, trauma: 0, hitStop: 0, maiorCombo: 0,
+};
+const progresso = guardar.ler('progresso', {});   // { id: medalhas }
+let velMundo = 0, velAlvo = 0;
+const nave = { x: 0, y: 0, vx: 0, vy: 0, alvoX: 0, alvoY: 0 };
+const LIM_X = 6.2, LIM_Y = 3.4;
 
-  function placar() { $('placar').textContent = '★ ' + pegas + ' / ' + total; }
-
-  function faiscas(x, y) {
-    if (reduzido) return;
-    for (let i = 0; i < 8; i++) {
-      const f = document.createElement('i');
-      f.className = 'faisca';
-      const a = (Math.PI * 2 * i) / 8, d = 40 + Math.random() * 30;
-      f.style.left = x + 'px'; f.style.top = y + 'px';
-      f.style.setProperty('--x', Math.cos(a) * d + 'px'); f.style.setProperty('--y', Math.sin(a) * d + 'px');
-      ceu.appendChild(f);
-      setTimeout(() => f.remove(), 650);
+/* ---------------- Padrões de objetos ---------------- */
+function dificuldade() { return (estado.modo === 'facil' ? 0.45 : 1) * (0.75 + estado.missao * 0.12); }
+function gerarPadrao(z0 = -240, forcar = null) {
+  const d = dificuldade();
+  const opcoes = [['linha', 3], ['seno', 3], ['espiral', 2], ['asteroides', 2.2 * d], ['muralha', 1.2 * d], ['anel', 1.6], ['poder', 0.45], ['cadente', 0.5]];
+  let total = opcoes.reduce((s, o) => s + o[1], 0), r = Math.random() * total, tipo = 'linha';
+  for (const [t, w] of opcoes) { if ((r -= w) <= 0) { tipo = t; break; } }
+  if (forcar) tipo = forcar;
+  let comp = 40;
+  if (tipo === 'linha') { const x = rnd(-LIM_X, LIM_X) * 0.8, y = rnd(-LIM_Y, LIM_Y) * 0.8; for (let i = 0; i < 6; i++) criarEstrela(x, y, z0 - i * 5); comp = 34; }
+  else if (tipo === 'seno') { const y = rnd(-2, 2), f = rnd(0.35, 0.6), a = rnd(3, 5); for (let i = 0; i < 9; i++) criarEstrela(Math.sin(i * f) * a, y + Math.cos(i * f * 0.7), z0 - i * 5); comp = 48; }
+  else if (tipo === 'espiral') { for (let i = 0; i < 10; i++) { const a = i * 0.65; criarEstrela(Math.cos(a) * 2.6, Math.sin(a) * 2.2, z0 - i * 4.5); } comp = 50; }
+  else if (tipo === 'asteroides') {
+    const n = Math.round(3 + 4 * d);
+    for (let i = 0; i < n; i++) criarAsteroide(rnd(-LIM_X, LIM_X), rnd(-LIM_Y, LIM_Y), z0 - rnd(0, 40), rnd(0.8, 1.5));
+    for (let i = 0; i < 4; i++) criarEstrela(rnd(-4, 4), rnd(-2.5, 2.5), z0 - 10 - i * 8);
+    comp = 55;
+  } else if (tipo === 'muralha') {
+    const bx = Math.round(rnd(-2, 2)) * 2.4, by = Math.round(rnd(-1, 1)) * 2.2;
+    for (let gx = -3; gx <= 3; gx++) for (let gy = -2; gy <= 2; gy++) {
+      const x = gx * 2.4, y = gy * 2.2;
+      if (Math.abs(x - bx) < 2.5 && Math.abs(y - by) < 2.3) continue;
+      if (Math.random() < 0.72) criarAsteroide(x, y, z0 + rnd(-1, 1), 1.0);
     }
+    criarAnel(bx, by, z0 - 2); for (let i = 0; i < 4; i++) criarEstrela(bx, by, z0 + 12 - i * 5);
+    comp = 50;
+  } else if (tipo === 'anel') { const x = rnd(-4, 4), y = rnd(-2, 2); criarAnel(x, y, z0); for (let i = 1; i <= 3; i++) criarEstrela(x, y, z0 - i * 5); comp = 34; }
+  else if (tipo === 'poder') { criarPoder(Math.random() < 0.5 ? 'ima' : 'escudo', rnd(-4, 4), rnd(-2, 2), z0); comp = 24; }
+  else if (tipo === 'cadente') { criarEstrela(rnd(-5, 5), rnd(-2.5, 2.5), z0, true); comp = 24; }
+  estado.proxPadrao = estado.distancia + comp;
+}
+
+/* ---------------- HUD e constelações em 2D ---------------- */
+function desenharConstelacao(cv, c, acesas, opcoes = {}) {
+  const g = cv.getContext('2d'), W = cv.width, H = cv.height, m = W * 0.14;
+  g.clearRect(0, 0, W, H);
+  const fundo = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.7);
+  fundo.addColorStop(0, '#' + new THREE.Color(c.cores[1]).getHexString()); fundo.addColorStop(1, '#0b0830');
+  g.fillStyle = fundo; g.fillRect(0, 0, W, H);
+  const P = c.pts.map(([x, y]) => [m + (x + 1) / 2 * (W - 2 * m), m + (1 - (y + 1) / 2) * (H - 2 * m)]);
+  g.lineWidth = Math.max(1.5, W / 60);
+  for (const [a, b] of c.linhas) {
+    const ok = a < acesas && b < acesas;
+    g.strokeStyle = ok ? '#9ad8ff' : 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(...P[a]); g.lineTo(...P[b]); g.stroke();
   }
-
-  ceu.addEventListener('click', (e) => {
-    const b = e.target.closest('.estrela');
-    if (!b || b.classList.contains('pega')) return;
-    b.classList.add('pega');
-    const r = b.getBoundingClientRect();
-    faiscas(r.left + r.width / 2, r.top + r.height / 2);
-    bip(NOTAS[pegas % NOTAS.length]);
-    pegas++; placar();
-    const proxima = ceu.querySelector('.estrela:not(.pega)');
-    if (proxima) proxima.focus({ preventScroll: true });
-    if (pegas === total) setTimeout(terminar, 500);
+  P.forEach(([x, y], i) => {
+    const on = i < acesas, r = on ? W / 22 : W / 40;
+    g.fillStyle = on ? '#ffd56b' : 'rgba(255,255,255,.3)';
+    if (on) { g.shadowColor = '#ffb13b'; g.shadowBlur = W / 10; }
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
   });
+  if (opcoes.bloqueado) { g.fillStyle = 'rgba(11,8,48,.6)'; g.fillRect(0, 0, W, H); g.fillStyle = '#fff'; g.font = `900 ${W / 3}px Courier New`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', W / 2, H / 2); }
+}
+function atualizarHUD() {
+  const c = CONSTELACOES[estado.missao];
+  $('hEstrelas').textContent = estado.coletadas + '/' + estado.meta;
+  $('hBarra').style.width = Math.min(100, estado.coletadas / estado.meta * 100) + '%';
+  desenharConstelacao($('miniConst'), c, Math.floor(Math.min(1, estado.coletadas / estado.meta) * c.pts.length));
+  const comboEl = $('hCombo');
+  comboEl.classList.toggle('on', estado.combo >= 3);
+  comboEl.textContent = 'COMBO x' + multiplicador();
+  const pod = [];
+  if (estado.ima > 0) pod.push('🧲 ' + Math.ceil(estado.ima));
+  if (estado.escudo) pod.push('🛡️');
+  if (estado.turbo > 0) pod.push('💨 TURBO');
+  $('hPoderes').innerHTML = pod.map((t) => `<span>${t}</span>`).join('');
+}
+const multiplicador = () => estado.combo >= 15 ? 4 : estado.combo >= 8 ? 3 : estado.combo >= 3 ? 2 : 1;
+let avisoT = 0;
+function aviso(txt, d = 1) { const a = $('aviso'); a.innerHTML = txt; a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); avisoT = d; }
+const _v = new THREE.Vector3();
+function textoFlutuante(x, y, z, txt, cor) {
+  _v.set(x, y, z).project(camera);
+  const el = document.createElement('div'); el.className = 'flutua'; el.textContent = txt; if (cor) el.style.color = cor;
+  el.style.left = ((_v.x + 1) / 2 * innerWidth) + 'px'; el.style.top = ((1 - _v.y) / 2 * innerHeight) + 'px';
+  document.body.appendChild(el); setTimeout(() => el.remove(), 850);
+}
 
-  function terminar() {
-    const seg = Math.round((performance.now() - inicioT) / 1000);
-    [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => bip(f, 0.16), i * 120));
-    $('fimTitulo').textContent = 'Missão ' + missao + ' cumprida!';
-    $('fimTexto').textContent = 'Você pegou ' + total + ' estrelas em ' + seg + ' segundos. Você brilhou!';
-    $('fim').hidden = false;
-    $('btnProxima').focus();
+/* ---------------- Fluxo ---------------- */
+function mostrar(id) { for (const t of ['telaInicio', 'telaMapa', 'telaPausa', 'telaFim']) $(t).hidden = t !== id; }
+function liberada(i) { return i === 0 || !!progresso[CONSTELACOES[i - 1].id]; }
+function montarMissoes() {
+  $('listaMissoes').innerHTML = '';
+  CONSTELACOES.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'missao' + (i === estado.missao ? ' atual' : '');
+    const ok = liberada(i); b.disabled = !ok;
+    const cv = document.createElement('canvas'); cv.width = cv.height = 160;
+    desenharConstelacao(cv, c, progresso[c.id] ? c.pts.length : 0, { bloqueado: !ok });
+    const med = progresso[c.id] ? '★'.repeat(progresso[c.id]) + '☆'.repeat(3 - progresso[c.id]) : (ok ? 'nova!' : '🔒');
+    b.append(cv, document.createTextNode((i + 1) + '. ' + c.nome)); const s = document.createElement('span'); s.className = 'med'; s.textContent = med; b.append(s);
+    b.addEventListener('click', () => { estado.missao = i; Som.iniciar(); Som.nota(660, 0.1, 'square', 0.08); montarMissoes(); aplicarTema(); });
+    $('listaMissoes').append(b);
+  });
+}
+function montarMapa() {
+  $('ceuLista').innerHTML = '';
+  CONSTELACOES.forEach((c) => {
+    const f = document.createElement('figure'); const cv = document.createElement('canvas'); cv.width = cv.height = 220;
+    const tem = !!progresso[c.id];
+    desenharConstelacao(cv, c, tem ? c.pts.length : 0, { bloqueado: !tem });
+    f.append(cv, document.createTextNode(tem ? c.nome + ' ' + '★'.repeat(progresso[c.id]) : '???')); $('ceuLista').append(f);
+  });
+}
+function aplicarTema() {
+  const c = CONSTELACOES[estado.missao];
+  ceuMat.uniforms.c1.value.set(c.cores[0]); ceuMat.uniforms.c2.value.set(c.cores[1]); ceuMat.uniforms.c3.value.set(c.cores[2]);
+  scene.fog.color.set(c.cores[0]).multiplyScalar(0.5);
+}
+function marcarModo() { document.querySelectorAll('#selModo [data-modo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.modo === estado.modo))); }
+$('selModo').addEventListener('click', (e) => { const b = e.target.closest('[data-modo]'); if (!b) return; estado.modo = b.dataset.modo; guardar.gravar('modo', estado.modo); marcarModo(); Som.iniciar(); Som.nota(660, 0.1, 'square', 0.08); });
+
+function limparObjetos() { for (const o of objetos) if (o.vivo) remover(o); objetos.length = 0; limparConstelacao3D(); }
+function irMenu() {
+  estado.fase = 'menu'; limparObjetos(); mostrar('telaInicio'); $('hud').hidden = true; $('topoBtns').hidden = true; $('dicaToque').hidden = true;
+  // escolhe a próxima missão ainda não feita
+  if (progresso[CONSTELACOES[estado.missao].id]) { const p = CONSTELACOES.findIndex((c, i) => liberada(i) && !progresso[c.id]); if (p >= 0) estado.missao = p; }
+  marcarModo(); montarMissoes(); aplicarTema(); velAlvo = 14; $('btnJogar').focus();
+}
+function iniciarMissao() {
+  Som.iniciar(); Musica.iniciar();
+  limparObjetos(); aplicarTema();
+  Object.assign(estado, { fase: 'jogando', coletadas: 0, combo: 0, comboTempo: 0, batidas: 0, tempo: 0, distancia: 0, proxPadrao: 20, ima: 0, escudo: false, invencivel: 0, turbo: 0, maiorCombo: 0 });
+  estado.meta = estado.modo === 'facil' ? 20 : 30;
+  nave.x = nave.y = nave.vx = nave.vy = nave.alvoX = nave.alvoY = 0;
+  // as primeiras estrelas já aparecem perto, sem espera
+  gerarPadrao(-70, 'linha'); gerarPadrao(-130, 'seno'); estado.proxPadrao = 70;
+  mostrar(null); $('hud').hidden = false; $('topoBtns').hidden = false;
+  if (toque) { $('dicaToque').hidden = false; setTimeout(() => ($('dicaToque').hidden = true), 3500); }
+  aviso('MISSÃO ' + (estado.missao + 1) + '<br><span style="font-size:.5em">' + CONSTELACOES[estado.missao].nome + '</span>', 2);
+  atualizarHUD();
+}
+$('btnJogar').addEventListener('click', iniciarMissao);
+$('btnDeNovo').addEventListener('click', iniciarMissao);
+$('btnRecomecar').addEventListener('click', iniciarMissao);
+$('btnProxima').addEventListener('click', () => { estado.missao = Math.min(CONSTELACOES.length - 1, estado.missao + 1); iniciarMissao(); });
+$('btnMenu').addEventListener('click', irMenu);
+$('btnMapa').addEventListener('click', () => { montarMapa(); mostrar('telaMapa'); });
+$('btnMapa2').addEventListener('click', () => { montarMapa(); mostrar('telaMapa'); estado.voltarDoMapa = 'telaFim'; });
+$('btnFecharMapa').addEventListener('click', () => { if (estado.voltarDoMapa === 'telaFim') { estado.voltarDoMapa = null; irMenu(); } else mostrar('telaInicio'); });
+$('btnContinuar').addEventListener('click', () => pausar(false));
+$('btnPausa').addEventListener('click', () => pausar(true));
+function pausar(sim) {
+  if (sim && estado.fase === 'jogando') { estado.fase = 'pausa'; mostrar('telaPausa'); $('btnContinuar').focus(); }
+  else if (!sim && estado.fase === 'pausa') { estado.fase = 'jogando'; mostrar(null); }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) pausar(true); });
+function botoesSom() { $('btnSom').textContent = Som.ligado ? '🔊' : '🔇'; $('btnMusica').style.opacity = Som.musica ? 1 : 0.4; }
+$('btnSom').addEventListener('click', () => { Som.alternar(); botoesSom(); });
+$('btnMusica').addEventListener('click', () => { Som.alternarMusica(); botoesSom(); });
+botoesSom();
+
+/* ---------------- Constelação final (cinemática) ---------------- */
+let const3D = null, cineT = 0;
+function limparConstelacao3D() { if (const3D) { scene.remove(const3D.grupo); const3D = null; } }
+function iniciarCinematica() {
+  estado.fase = 'cinematica'; cineT = 0; velAlvo = 0;
+  for (const o of objetos) if (o.vivo) { explosao(o.mesh.position.x, o.mesh.position.y, o.mesh.position.z, o.tipo === 'asteroide' ? 0xceb7ef : 0xffd56b, 8, 6); remover(o); }
+  const c = CONSTELACOES[estado.missao];
+  const grupo = new THREE.Group(); grupo.position.set(0, 5.5, -22); scene.add(grupo);
+  const estrelas = c.pts.map(([x, y]) => {
+    const m = new THREE.Mesh(geoEstrela, matEstrela); m.position.set(x * 12, y * 7.5, 0); m.scale.setScalar(0.001); grupo.add(m);
+    const brilho = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffe9a0 })); brilho.scale.setScalar(0.001); m.add(brilho);
+    return m;
+  });
+  // linhas = feixes de luz (caixas finas que brilham com o bloom)
+  const linhas = c.linhas.map(([a, b]) => {
+    const A = estrelas[a].position, B = estrelas[b].position, comp = A.distanceTo(B);
+    const l = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, comp), new THREE.MeshBasicMaterial({ color: 0x9ad8ff, transparent: true, opacity: 0 }));
+    l.position.copy(A).add(B).multiplyScalar(0.5); l.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), B.clone().sub(A).normalize()); grupo.add(l); return l;
+  });
+  const3D = { grupo, estrelas, linhas, c };
+  $('hud').hidden = true; $('topoBtns').hidden = true;
+  aviso('MISSÃO CUMPRIDA!', 2);
+}
+function atualizarCinematica(dt) {
+  cineT += dt;
+  const { estrelas, linhas, c } = const3D;
+  estrelas.forEach((m, i) => {
+    const t0 = 1.2 + i * 0.28;
+    if (cineT > t0 && !m.userData.on) { m.userData.on = true; Som.revela(i); explosao(m.position.x, m.position.y + 5.5, m.position.z - 22, 0xffd56b, 12, 5); }
+    const k = clamp((cineT - t0) / 0.35, 0, 1), s = k < 1 ? k * 1.4 : 1.4 - Math.min(0.4, (cineT - t0 - 0.35) * 2);
+    m.scale.setScalar(Math.max(0.001, s * 1.25)); m.rotation.z += dt * 1.5;
+  });
+  const tl = 1.2 + estrelas.length * 0.28 + 0.2;
+  linhas.forEach((l, i) => { l.material.opacity = clamp((cineT - tl - i * 0.12) / 0.4, 0, 1); });
+  if (cineT > tl && !const3D.nomeMostrado) { const3D.nomeMostrado = true; aviso('✦ ' + c.nome.toUpperCase() + ' ✦', 3); }
+  if (cineT > tl + linhas.length * 0.12 + 1.6 && estado.fase === 'cinematica') concluirMissao();
+}
+function concluirMissao() {
+  estado.fase = 'resultado';
+  const c = CONSTELACOES[estado.missao];
+  const med = estado.batidas === 0 ? 3 : estado.batidas <= 2 ? 2 : 1;
+  const antes = progresso[c.id] || 0; progresso[c.id] = Math.max(antes, med); guardar.gravar('progresso', progresso);
+  Som.vitoria();
+  $('fimTitulo').textContent = 'Constelação ' + (c.nome === 'Coração' || c.nome === 'Coroa' ? 'da ' : 'do ') + c.nome;
+  $('fimMed').textContent = '★'.repeat(med) + '☆'.repeat(3 - med);
+  const sMin = Math.floor(estado.tempo / 60), sSeg = Math.round(estado.tempo % 60);
+  $('fimInfo').textContent = `${estado.coletadas} estrelas em ${sMin}:${String(sSeg).padStart(2, '0')} · maior combo ${estado.maiorCombo} · ${estado.batidas === 0 ? 'nenhuma batida! 🚀' : estado.batidas + (estado.batidas === 1 ? ' batida' : ' batidas')}`;
+  const ultima = estado.missao >= CONSTELACOES.length - 1;
+  $('btnProxima').hidden = ultima;
+  if (ultima) $('fimInfo').textContent += ' · Você completou o céu inteiro! 🌌';
+  mostrar('telaFim'); (ultima ? $('btnMapa2') : $('btnProxima')).focus();
+}
+
+/* ---------------- Entrada ---------------- */
+const teclas = {};
+addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase(); teclas[k] = true;
+  if (k.startsWith('arrow') && estado.fase === 'jogando') e.preventDefault();
+  if (k === 'p' || k === 'escape') pausar(estado.fase !== 'pausa');
+});
+addEventListener('keyup', (e) => { teclas[e.key.toLowerCase()] = false; });
+addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; });
+const toque = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+const ray = new THREE.Raycaster(), plano = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), _p = new THREE.Vector3(), _ndc = new THREE.Vector2();
+let ponteiroAtivo = false, ultimoPonteiro = 0;
+function ponteiro(e) {
+  if (estado.fase !== 'jogando') return;
+  _ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(_ndc, camera);
+  if (ray.ray.intersectPlane(plano, _p)) {
+    nave.alvoX = clamp(_p.x, -LIM_X, LIM_X);
+    nave.alvoY = clamp(_p.y + (e.pointerType === 'touch' ? 1.6 : 0), -LIM_Y, LIM_Y);   // no toque, o foguete fica acima do dedo
+    ultimoPonteiro = performance.now();
   }
+}
+canvas.addEventListener('pointerdown', (e) => { ponteiroAtivo = true; Som.iniciar(); ponteiro(e); });
+addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' || ponteiroAtivo) ponteiro(e); });
+addEventListener('pointerup', () => { ponteiroAtivo = false; });
+function lerTeclado(dt) {
+  let dx = 0, dy = 0;
+  if (teclas['arrowleft'] || teclas['a']) dx -= 1; if (teclas['arrowright'] || teclas['d']) dx += 1;
+  if (teclas['arrowup'] || teclas['w']) dy += 1; if (teclas['arrowdown'] || teclas['s']) dy -= 1;
+  const gp = navigator.getGamepads ? [...navigator.getGamepads()].find((g) => g) : null;
+  if (gp) { if (Math.abs(gp.axes[0]) > 0.2) dx += gp.axes[0]; if (Math.abs(gp.axes[1]) > 0.2) dy -= gp.axes[1]; if (gp.buttons[9]?.pressed && !estado.gpPausa) { estado.gpPausa = true; pausar(estado.fase !== 'pausa'); } if (!gp.buttons[9]?.pressed) estado.gpPausa = false; }
+  if (dx || dy) { nave.alvoX = clamp(nave.alvoX + dx * 9 * dt, -LIM_X, LIM_X); nave.alvoY = clamp(nave.alvoY + dy * 7 * dt, -LIM_Y, LIM_Y); }
+}
 
-  $('btnComecar').onclick = () => { $('inicio').hidden = true; bip(660); montar(); };
-  $('btnProxima').onclick = () => { $('fim').hidden = true; missao++; montar(); };
-  $('btnDeNovo').onclick = () => { $('fim').hidden = true; missao = 1; montar(); };
-  addEventListener('resize', () => {
-    // reposiciona as estrelas que faltam quando a tela gira
-    if (!$('inicio').hidden || !$('fim').hidden) return;
-    const restantes = [...ceu.querySelectorAll('.estrela:not(.pega)')];
-    const { pts, tam } = posicoes(restantes.length);
-    restantes.forEach((b, i) => { if (pts[i]) { b.style.left = pts[i].x + 'px'; b.style.top = pts[i].y + 'px'; b.style.setProperty('--t', tam + 'px'); } });
-  });
-})();
+/* ---------------- Jogo ---------------- */
+function coletarEstrela(o) {
+  estado.combo = estado.comboTempo > 0 ? estado.combo + 1 : 1; estado.comboTempo = 1.4;
+  estado.maiorCombo = Math.max(estado.maiorCombo, estado.combo);
+  const mult = multiplicador(), valor = (o.tipo === 'cadente' ? 3 : 1) * mult;
+  estado.coletadas += valor;
+  Som.estrela(Math.min(estado.combo - 1, 9));
+  if (o.tipo === 'cadente') { Som.poder(); aviso('ESTRELA CADENTE!', 1); }
+  explosao(o.mesh.position.x, o.mesh.position.y, o.mesh.position.z, o.tipo === 'cadente' ? 0xff9ad0 : 0xffd56b, 14, 7);
+  textoFlutuante(o.mesh.position.x, o.mesh.position.y, o.mesh.position.z, '+' + valor + (mult > 1 ? ' x' + mult : ''));
+  if (estado.combo === 3 || estado.combo === 8 || estado.combo === 15) aviso('COMBO x' + mult + '!', 0.8);
+  remover(o);
+  if (estado.coletadas >= estado.meta) iniciarCinematica();
+}
+function bater(o) {
+  explosao(o.mesh.position.x, o.mesh.position.y, o.mesh.position.z, 0xceb7ef, 22, 9); remover(o);
+  if (estado.escudo) { estado.escudo = false; estado.invencivel = 1; Som.escudoQuebra(); aviso('ESCUDO!', 0.7); estado.trauma = Math.min(1, estado.trauma + 0.35); return; }
+  if (estado.invencivel > 0) return;
+  estado.batidas++; estado.combo = 0; estado.invencivel = 1.6;
+  const perde = Math.min(estado.coletadas, estado.modo === 'facil' ? 1 : 3);
+  estado.coletadas -= perde;
+  if (perde) textoFlutuante(nave.x, nave.y + 1, 0, '-' + perde, '#ff8a8a');
+  estado.trauma = Math.min(1, estado.trauma + 0.7); estado.hitStop = 0.08;
+  Som.batida(); const f = $('flash'); f.style.opacity = 0.35; setTimeout(() => (f.style.opacity = 0), 120);
+  if (navigator.vibrate) try { navigator.vibrate(60); } catch {}
+}
+function passarAnel(o) {
+  o.passou = true; estado.turbo = 2.2; Som.anel(); aviso('TURBO!', 0.7);
+  estado.coletadas += 2; textoFlutuante(o.mesh.position.x, o.mesh.position.y + 2.5, o.mesh.position.z, '+2');
+  for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; emitir(o.mesh.position.x + Math.cos(a) * 2.3, o.mesh.position.y + Math.sin(a) * 2.3, o.mesh.position.z, Math.cos(a) * 6, Math.sin(a) * 6, 4, 0x4ee6e0, 0.25, 0.6); }
+  if (estado.coletadas >= estado.meta) iniciarCinematica();
+}
+function pegarPoder(o) {
+  Som.poder(); explosao(o.mesh.position.x, o.mesh.position.y, o.mesh.position.z, o.tipo === 'ima' ? 0xff9ad0 : 0x9ad8ff, 20, 7);
+  if (o.tipo === 'ima') { estado.ima = 8; aviso('🧲 ÍMÃ DE ESTRELAS!', 1.2); } else { estado.escudo = true; aviso('🛡️ ESCUDO!', 1.2); }
+  remover(o);
+}
+
+function atualizarJogo(dt) {
+  estado.tempo += dt; lerTeclado(dt);
+  const facil = estado.modo === 'facil';
+  velAlvo = (facil ? 26 : 34) + estado.missao * 1.5 + (estado.turbo > 0 ? 22 : 0);
+  estado.turbo = Math.max(0, estado.turbo - dt); estado.ima = Math.max(0, estado.ima - dt); estado.invencivel = Math.max(0, estado.invencivel - dt);
+  estado.comboTempo -= dt; if (estado.comboTempo <= 0 && estado.combo) estado.combo = 0;
+  // nave: mola suave em direção ao alvo
+  const k = 26, amort = 9;
+  nave.vx += ((nave.alvoX - nave.x) * k - nave.vx * amort) * dt; nave.vy += ((nave.alvoY - nave.y) * k - nave.vy * amort) * dt;
+  nave.x = clamp(nave.x + nave.vx * dt, -LIM_X, LIM_X); nave.y = clamp(nave.y + nave.vy * dt, -LIM_Y, LIM_Y);
+  // gera objetos
+  estado.distancia += velMundo * dt;
+  if (estado.distancia >= estado.proxPadrao && estado.fase === 'jogando') gerarPadrao();
+  // objetos
+  const raioNave = facil ? 1.5 : 1.1, raioEstrela = facil ? 1.9 : 1.4;
+  for (const o of objetos) {
+    if (!o.vivo) continue;
+    o.z += velMundo * dt; o.x += (o.vx || 0) * dt;
+    const m = o.mesh; m.position.set(o.x, o.y, o.z);
+    if (o.tipo === 'estrela' || o.tipo === 'cadente') {
+      m.rotation.y += o.giro * dt;
+      if (o.tipo === 'cadente') { matArcoIris.emissive.setHSL((estado.tempo * 0.6) % 1, 1, 0.5); if (Math.random() < 0.6) emitir(o.x, o.y, o.z + 0.5, 0, 0, 2, new THREE.Color().setHSL(Math.random(), 1, 0.6), 0.2, 0.5); }
+      if (estado.ima > 0 && o.z > -40 && o.z < 3) { o.x = lerp(o.x, nave.x, dt * 5); o.y = lerp(o.y, nave.y, dt * 5); }
+    } else if (o.tipo === 'asteroide') { m.rotation.x += o.rot.x * dt; m.rotation.y += o.rot.y * dt; }
+    else if (o.tipo === 'anel') m.rotation.z += o.giro * dt;
+    else { m.rotation.y += 2 * dt; m.rotation.x += dt; }
+    // colisão perto do plano da nave
+    if (Math.abs(o.z) < 1.4) {
+      const d = Math.hypot(o.x - nave.x, o.y - nave.y);
+      if ((o.tipo === 'estrela' || o.tipo === 'cadente') && d < raioEstrela) coletarEstrela(o);
+      else if (o.tipo === 'asteroide' && d < o.r + raioNave * 0.7) bater(o);
+      else if (o.tipo === 'anel' && !o.passou && d < o.r) passarAnel(o);
+      else if ((o.tipo === 'ima' || o.tipo === 'escudo') && d < o.r + raioNave) pegarPoder(o);
+    }
+    if (o.vivo && o.z > 14) remover(o);
+  }
+  for (let i = objetos.length - 1; i >= 0; i--) if (!objetos[i].vivo) objetos.splice(i, 1);
+  atualizarHUD();
+}
+
+function atualizarNaveVisual(dt, t) {
+  foguete.position.set(nave.x, nave.y + Math.sin(t * 2.2) * 0.08, 0);
+  naveCorpo.rotation.z = lerp(naveCorpo.rotation.z, -nave.vx * 0.06, 0.15);
+  naveCorpo.rotation.x = lerp(naveCorpo.rotation.x, nave.vy * 0.04, 0.15);
+  foguete.visible = !(estado.invencivel > 0 && Math.floor(t * 14) % 2 === 0 && !estado.escudo);
+  escudoVisual.visible = estado.escudo; escudoVisual.rotation.y += dt; escudoVisual.rotation.x += dt * 0.7;
+  luzMotor.intensity = 3 + Math.random() * 2 + (estado.turbo > 0 ? 4 : 0);
+  // chama do motor
+  const n = estado.turbo > 0 ? 4 : 2;
+  for (let i = 0; i < n; i++) emitir(foguete.position.x + rnd(-0.2, 0.2), foguete.position.y + rnd(-0.2, 0.2), 1.6, rnd(-0.5, 0.5), rnd(-0.5, 0.5), rnd(6, 10), Math.random() < 0.5 ? 0xffd56b : 0xff6a2a, rnd(0.12, 0.24), rnd(0.12, 0.26));
+}
+function atualizarRiscos(dt) {
+  const len = 0.3 + velMundo * 0.09;
+  for (let i = 0; i < NR; i++) {
+    const r = riscosDados[i]; r.z += velMundo * dt * 1.6;
+    if (r.z > 12) { r.z = rnd(-400, -300); const a = Math.random() * Math.PI * 2, rr = rnd(9, 60); r.x = Math.cos(a) * rr; r.y = Math.sin(a) * rr * 0.7; }
+    riscosPos.set([r.x, r.y, r.z, r.x, r.y, r.z - len], i * 6);
+  }
+  riscosGeo.attributes.position.needsUpdate = true;
+}
+const camAlvo = new THREE.Vector3();
+function atualizarCamera(dt, t) {
+  let cx = nave.x * 0.55, cy = 1.6 + nave.y * 0.45, cz = 9.5, lx = nave.x * 0.35, ly = nave.y * 0.3, lz = -20;
+  if (estado.fase === 'menu') { cx = Math.sin(t * 0.3) * 3; cy = 2 + Math.sin(t * 0.21); lx = 0; ly = 0; }
+  if (estado.fase === 'cinematica' || estado.fase === 'resultado') { cx = 0; cy = 1.5; cz = 11; lx = 0; ly = 4.5; lz = -22; }
+  const s = 1 - Math.exp(-dt * (estado.fase === 'cinematica' ? 1.5 : 5));
+  camera.position.x = lerp(camera.position.x, cx, s); camera.position.y = lerp(camera.position.y, cy, s); camera.position.z = lerp(camera.position.z, cz, s);
+  camAlvo.lerp(_v.set(lx, ly, lz), s);
+  const tr = estado.trauma * estado.trauma;
+  if (tr > 0 && !reduzido) { camera.position.x += (Math.random() - 0.5) * tr * 0.8; camera.position.y += (Math.random() - 0.5) * tr * 0.8; }
+  estado.trauma = Math.max(0, estado.trauma - dt * 1.6);
+  camera.lookAt(camAlvo);
+  const fovBase = 64 + (innerWidth < innerHeight ? 14 : 0);
+  camera.fov = lerp(camera.fov, fovBase + (estado.turbo > 0 ? 14 : 0) + velMundo * 0.08, 1 - Math.exp(-dt * 3)); camera.updateProjectionMatrix();
+}
+
+/* ---------------- Laço ---------------- */
+const relogio = new THREE.Clock();
+let mediaQ = 16, tAjuste = 0;
+function quadro() {
+  requestAnimationFrame(quadro);
+  let dt = Math.min(relogio.getDelta(), 0.05);
+  const t = relogio.elapsedTime;
+  mediaQ = lerp(mediaQ, dt * 1000, 0.05); tAjuste += dt;
+  if (tAjuste > 4 && mediaQ > 30) {           // aparelho sofrendo: baixa a qualidade
+    tAjuste = 0;
+    if (pr > 1) { pr = 1; renderer.setPixelRatio(1); redimensionar(); }
+    else if (usarBloom) usarBloom = false;
+  }
+  if (estado.hitStop > 0) { estado.hitStop -= dt; dt *= 0.1; }
+  if (estado.fase === 'cinematica' || estado.fase === 'resultado') {
+    nave.vx += ((0 - nave.x) * 6 - nave.vx * 4) * dt; nave.vy += ((-4.2 - nave.y) * 6 - nave.vy * 4) * dt;
+    nave.x += nave.vx * dt; nave.y += nave.vy * dt;
+  }
+  const pausado = estado.fase === 'pausa';
+  if (!pausado) {
+    velMundo = lerp(velMundo, velAlvo, 1 - Math.exp(-dt * 2));
+    ceuMat.uniforms.t.value = t; planeta.rotation.y += dt * 0.02;
+    if (estado.fase === 'jogando') atualizarJogo(dt);
+    else if (estado.fase === 'cinematica') { atualizarCinematica(dt); for (const o of objetos) if (o.vivo) { o.z += velMundo * dt; o.mesh.position.z = o.z; if (o.z > 14) remover(o); } }
+    else if (estado.fase === 'resultado' && const3D) { const3D.grupo.rotation.z = Math.sin(t * 0.3) * 0.03; for (const m of const3D.estrelas) m.rotation.z += dt; }
+    if (estado.fase === 'menu') { nave.x = Math.sin(t * 0.7) * 2.5; nave.y = Math.sin(t * 1.1) * 1.2; nave.vx = Math.cos(t * 0.7) * 1.7; nave.vy = 0; }
+    atualizarNaveVisual(dt, t); atualizarRiscos(dt); atualizarParticulas(dt);
+  }
+  atualizarCamera(pausado ? 0 : dt, t);
+  if (avisoT > 0) { avisoT -= dt; if (avisoT <= 0) $('aviso').innerHTML = ''; }
+  if (usarBloom) composer.render(); else renderer.render(scene, camera);
+}
+irMenu();
+quadro();
+window.__estrelas = { estado, nave, objetos, CONSTELACOES };   // usado só nos testes automáticos
 </script>
 </body>
 </html>

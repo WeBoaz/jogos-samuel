@@ -3,6 +3,50 @@
   "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e só abrem com a família logada. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
   "games": [
     {
+      "slug": "reino-dos-blocos",
+      "title": "Reino dos Blocos",
+      "category": "Plataforma",
+      "description": "Corra, pule e pise nas geleias! 3 fases com o Doguinho de ajudante e o Gatinho esperando no portal.",
+      "cover": "reino-dos-blocos.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Celular ou tablet: ◀ ▶ para andar e ⤒ para pular (segure para pular mais alto).",
+        "Computador: setas para andar; ESPAÇO, ↑ ou Z para pular; P pausa. Funciona com controle de videogame.",
+        "Pule em cima das geleias e abelhas: elas viram corações! Bata a cabeça nos blocos roxos.",
+        "Ache o TÊNIS DE MOLA para o pulo duplo e os 3 cristais secretos 💎 de cada fase."
+      ],
+      "input": [
+        "touch",
+        "keyboard",
+        "gamepad"
+      ],
+      "status": "pronto",
+      "novo": true,
+      "version": "1.0"
+    },
+    {
+      "slug": "caca-as-estrelas",
+      "title": "Caça às Estrelas",
+      "category": "Espaço",
+      "description": "Pilote o foguete pelo espaço 3D, pegue as estrelas e desenhe constelações no céu!",
+      "cover": "caca-as-estrelas.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Arraste o dedo (ou o mouse) para pilotar o foguete. No teclado: setas ou WASD.",
+        "Pegue estrelas em sequência para fazer COMBO. Passe pelos anéis azuis para ganhar turbo.",
+        "Desvie dos asteroides! O ímã 🧲 puxa estrelas e o escudo 🛡️ protege de uma batida.",
+        "Cada missão desenha uma constelação nova no Mapa do Céu."
+      ],
+      "input": [
+        "touch",
+        "mouse",
+        "keyboard"
+      ],
+      "status": "pronto",
+      "version": "2.0",
+      "novo": true
+    },
+    {
       "slug": "turbo-dos-blocos",
       "title": "Turbo dos Blocos",
       "category": "Corrida",
@@ -20,7 +64,7 @@
         "keyboard"
       ],
       "status": "pronto",
-      "novo": true,
+      "novo": false,
       "version": "1.0"
     },
     {
@@ -42,26 +86,6 @@
       ],
       "status": "pronto",
       "novo": false,
-      "version": "1.0"
-    },
-    {
-      "slug": "caca-as-estrelas",
-      "title": "Caça às estrelas",
-      "category": "Descobertas",
-      "description": "Uma pequena missão com muito brilho pelo caminho.",
-      "cover": "caca-as-estrelas.webp",
-      "entry": "index.html",
-      "instructions": [
-        "Toque ou clique nas estrelas que aparecem no espaço.",
-        "No teclado: Tab para escolher a estrela e Enter para pegar.",
-        "Pegue todas para cumprir a missão. Cada missão tem mais estrelas!"
-      ],
-      "input": [
-        "touch",
-        "mouse",
-        "keyboard"
-      ],
-      "status": "pronto",
       "version": "1.0"
     },
     {
