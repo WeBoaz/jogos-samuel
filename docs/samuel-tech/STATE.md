@@ -3,6 +3,22 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (EXP-01 Minigolfe dos Pets)
+
+- **Pedido do Boaz:** executar o Minigolfe dos Pets (documento "12 jogos 2D/3D") no automático, com várias
+  rodadas de QA, e publicar.
+- **Commits:** `1235b79` (MVP), `8b3e383` (correções de QA + capa), `040829f` (manifesto). PR
+  https://github.com/WeBoaz/jogos-samuel/pull/1 (fork AndaimeOS — a conta não tem escrita no WeBoaz).
+- **Deploy:** **em produção** desde 2026-11-01 12:47 (-03:00), upload TUS + `deploy-static-site-archive` pela API
+  da Hostinger. Registro: https://app.notion.com/p/40b0a726d05581d69440cf9fa623464f. Sinal
+  `SAMUEL_TECH_DEPLOY_READY` no PR #1.
+- **Testes:** vitest 43/43; 4 QAs independentes com P0/P1 corrigidos (`desenvolvimento/jogos/minigolfe-dos-pets/qa/`);
+  circuito completo por robô local e em produção; layout em 3 tamanhos; produção = bytes do Git; 4 jogos antigos idênticos.
+- **Não executado:** aparelho real/FPS no celular, Safari, playtest com o Samuel.
+- **Pendência de processo:** branch `publicacao` desatualizada até o merge do PR #1.
+- **NEXT:** ler o parecer de EXP-01-F; corrigir P0/P1 se houver. Estado detalhado em `docs/jogos/minigolfe-dos-pets/ESTADO.md`.
+  (Fila do plano principal continua em HO-010.)
+
 ## 2026-11-01 — Claude (ST-030)
 
 - **Tarefa atual:** ST-030 — Definir interface e identidade dos dois jogos. **Concluída.**
