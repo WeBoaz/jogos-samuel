@@ -28,7 +28,6 @@
 .grade-catalogo button canvas { width: 44px; height: 44px; image-rendering: pixelated; }
 .grade-catalogo button:hover, .grade-catalogo button:focus-visible { background: var(--play); }
 .dica-catalogo { margin: 0 0 10px; }
-.aviso-toque { font: 700 14px var(--sans); background: var(--gold); border: var(--line); padding: 8px 10px; margin: 14px 0 0; }
 
 #toast { position: fixed; top: max(12px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 7; }
 
@@ -49,3 +48,52 @@
 .msg-codigo:empty { display: none; }
 .trocar-codigo { margin: 10px 0 0; }
 button.link { background: none; border: 0; padding: 6px; font: 700 13px var(--sans); color: var(--forest); text-decoration: underline; min-height: 44px; }
+
+/* ---------- modo toque (celular e tablet) ---------- */
+body.ilha-toque .toque { display: block; z-index: 4; }   /* abaixo da barra, da mira e dos botões do topo (z 5–7) */
+body:not(.ilha-toque) .toque { display: none !important; }
+#hud[hidden] ~ .toque { display: none !important; }
+.olhar-zona { position: absolute; right: 0; top: 0; width: 50%; height: 100%; pointer-events: auto; touch-action: none; }
+.toque .joy-zona { width: 46%; height: 60%; }
+.toque .acoes-toque { grid-template-columns: auto auto; gap: 12px; }
+.toque .acoes-toque .acao[data-acao="quebrar"] { grid-column: 1; grid-row: 1; }
+.toque .acoes-toque .acao.principal { grid-column: 2; grid-row: 1 / span 2; }
+.toque .acoes-toque .acao[data-acao="colocar"] { grid-column: 1; grid-row: 2; }
+.acoes-voo { position: absolute; right: max(16px, env(safe-area-inset-right)); display: flex; gap: 10px; pointer-events: auto;
+  bottom: calc(max(16px, env(safe-area-inset-bottom)) + 200px); }
+.acao.mini-acao { width: 64px; height: 64px; font-size: 28px; }
+.acoes-voo .descer { display: none; }
+.toque.voando .acoes-voo .descer { display: grid; }
+.toque.voando [data-acao="voar"] { background: var(--imagination); }
+.acao { color: var(--ink); }
+
+/* no toque a barra vai para o alto (embaixo ficam o joystick e os botões) */
+body.ilha-toque .barra-rapida { bottom: auto; top: calc(max(10px, env(safe-area-inset-top)) + 70px); }
+body.ilha-toque .nome-bloco { bottom: auto; top: calc(max(10px, env(safe-area-inset-top)) + 140px); }
+body.ilha-toque .ilha-topo { display: flex; gap: 10px; }
+body.ilha-toque #toast { top: calc(max(10px, env(safe-area-inset-top)) + 150px); }
+body.ilha-toque .mira { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+body.ilha-toque .mira::before { left: 12px; height: 26px; }
+body.ilha-toque .mira::after { top: 12px; width: 26px; }
+
+/* celular deitado: pouca altura — barra no alto à esquerda dos botões de cima, ações menores */
+@media (max-height: 500px) {
+  body.ilha-toque .barra-rapida { top: max(8px, env(safe-area-inset-top)); left: 50%; }
+  body.ilha-toque .nome-bloco { top: calc(max(8px, env(safe-area-inset-top)) + 54px); }
+  body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 54px); }
+  body.ilha-toque .vaga { width: 40px; height: 40px; }
+  body.ilha-toque .vaga canvas, body.ilha-toque .vaga img { width: 30px !important; height: 30px !important; }
+  body.ilha-toque .vaga b { display: none; }
+  .toque .acao { width: 64px; height: 64px; font-size: 26px; }
+  .toque .acao.principal { width: 84px; height: 84px; font-size: 34px; }
+  .acoes-voo { bottom: auto; top: calc(max(8px, env(safe-area-inset-top)) + 84px); }
+  .acao.mini-acao { width: 56px; height: 56px; font-size: 24px; }
+  .toque .joy-zona { height: 70%; }
+}
+/* celular em pé estreito */
+@media (max-width: 430px) {
+  body.ilha-toque .vaga { width: 34px; height: 34px; }
+  body.ilha-toque .vaga img { width: 26px !important; height: 26px !important; }
+  body.ilha-toque .barra-rapida { gap: 2px; padding: 4px; }
+  .acoes-voo { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 184px); }
+}

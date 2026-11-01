@@ -13,10 +13,25 @@
 <!-- HUD do jogo -->
 <div id="hud" hidden>
   <div class="mira" aria-hidden="true"></div>
-  <div class="topo-btns ilha-topo"><button class="mini" id="bPausa" aria-label="Pausar">II</button></div>
+  <div class="topo-btns ilha-topo"><button class="mini so-toque" id="bCatalogoToque" aria-label="Catálogo de blocos">▦</button><button class="mini" id="bPausa" aria-label="Pausar">II</button></div>
   <div class="nome-bloco" id="nomeBloco" aria-live="polite"></div>
   <div class="barra-rapida" id="barra" role="toolbar" aria-label="Barra de blocos"></div>
   <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<!-- Controles de toque (celular e tablet): joystick à esquerda, olhar arrastando à direita, botões -->
+<div class="toque" id="toque" aria-hidden="true">
+  <div class="olhar-zona" id="olharZona"></div>
+  <div class="joy-zona"><div class="joy-base"><div class="joy-pino"></div></div></div>
+  <div class="acoes-toque">
+    <button class="acao" data-acao="quebrar" aria-label="Quebrar bloco">⛏</button>
+    <button class="acao principal" data-acao="pular" aria-label="Pular / subir">⤒</button>
+    <button class="acao" data-acao="colocar" aria-label="Colocar bloco">🧱</button>
+  </div>
+  <div class="acoes-voo">
+    <button class="acao mini-acao" data-acao="voar" aria-label="Voar">🪽</button>
+    <button class="acao mini-acao descer" data-acao="descer" aria-label="Descer">⤓</button>
+  </div>
 </div>
 
 <!-- Começo -->
@@ -25,7 +40,8 @@
     <div class="barra"><span>ilha_dos_blocos.exe</span><span><i></i><i></i><i></i></span></div>
     <div class="corpo">
       <div class="logo">ILHA<br>DOS BLOCOS<small>modo criativo · prévia</small></div>
-      <div class="dica-icones"><span>🖱️ olhar</span><span>WASD andar</span><span>espaço pular</span><span>clique quebra · botão direito põe</span><span>1–9 / rodinha troca</span><span>E catálogo</span></div>
+      <div class="dica-icones so-teclado"><span>🖱️ olhar</span><span>WASD andar</span><span>espaço pular</span><span>clique quebra · botão direito põe</span><span>1–9 / rodinha troca</span><span>E catálogo</span></div>
+      <div class="dica-icones so-toque"><span>🕹️ esquerda anda</span><span>👆 arraste à direita para olhar</span><span>⛏ quebra · 🧱 põe</span><span>⤒ pula · 🪽 voa</span><span>▦ catálogo</span></div>
       <div class="caixa-codigo" id="caixaCodigo" hidden>
         <label for="campoCodigo">Código da ilha</label>
         <input id="campoCodigo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="peça para um adulto">
@@ -34,10 +50,6 @@
       </div>
       <div class="acoes"><button class="btn grande" id="bEntrar">▶ ENTRAR NA ILHA</button></div>
       <p class="trocar-codigo"><button class="link" id="bTrocarCodigo" hidden>trocar o código da ilha</button></p>
-      <div id="avisoToque" hidden>
-        <p class="aviso-toque">Por enquanto a ilha é no computador, com teclado e mouse. No tablet e no celular ela chega logo! 🏝️</p>
-        <div class="acoes"><a class="btn sec" href="/jogos/" target="_top">← Escolher outro jogo</a></div>
-      </div>
     </div>
   </div>
 </div>

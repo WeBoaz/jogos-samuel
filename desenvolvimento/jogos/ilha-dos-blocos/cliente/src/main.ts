@@ -7,6 +7,7 @@ import * as VOXELIZE from '@voxelize/core';
 import { AGUA, BARRA_INICIAL, BLOCOS, porId, type BlocoArte } from './catalogo';
 import { desenhar, icone } from './texturas';
 import { BARRA, criar, escolherNoCatalogo, usar, type Inventario } from './regras/inventario';
+import { criarControlesToque } from './controles-toque.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.has('debug');
@@ -20,9 +21,9 @@ const guardarCodigo = (c: string) => { try { if (c) localStorage.setItem(CHAVE_C
 let codigo = (import.meta.env.DEV && params.get('codigo')) || lerCodigo() || (import.meta.env.DEV ? 'ilha-local' : '');
 const MUNDO = 'ilha';
 const ALCANCE = 5;
-const TOQUE = matchMedia('(pointer: coarse)').matches;
-// tela de toque sem mouse: os controles de toque chegam na BLK-040; não deixar a criança presa num mundo sem controle
-const SO_TOQUE = TOQUE && !matchMedia('(any-pointer: fine)').matches;
+// Celular e tablet (ponteiro principal grosso): joystick, olhar arrastando e botões na tela. Computador: mouse e teclado.
+const MODO_TOQUE = matchMedia('(pointer: coarse)').matches;
+const OLHAR_PX = 0.5;  // arrasto → câmera: o motor gira 0,012 rad por unidade (sensibilidade 100), então ~0,006 rad por pixel
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const telas = ['tInicio', 'tConexao', 'tPausa', 'tCatalogo'] as const;
@@ -37,8 +38,15 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const inputs = new VOXELIZE.Inputs<'jogo' | 'menu'>();
-const controls = new VOXELIZE.RigidControls(camera, renderer.domElement, world, { initialPosition: [0.5, 48, 0.5], flyForce: 300 });
-controls.connect(inputs, 'jogo');
+const opcoesControle = { initialPosition: [0.5, 48, 0.5] as VOXELIZE.Coords3, flyForce: 300 };
+const controls: VOXELIZE.RigidControls = MODO_TOQUE
+  ? new VOXELIZE.MobileRigidControls(camera, renderer.domElement, world, opcoesControle)
+  : new VOXELIZE.RigidControls(camera, renderer.domElement, world, opcoesControle);
+if (MODO_TOQUE) controls.options.alwaysSprint = false;   // o modo de celular do motor corre sempre; criança anda
+else controls.connect(inputs, 'jogo');
+const movel = controls as VOXELIZE.MobileRigidControls;
+let emJogo = false;   // no toque não há "mouse preso": o jogo guarda se está jogando ou num menu
+let voando = false;   // espelho do voo do motor (lá é gravityMultiplier === 0, que muda 100 ms depois)
 const interacao = new VOXELIZE.VoxelInteract(controls.object, world, {
   highlightType: 'outline', highlightColor: new THREE.Color('#193337'), highlightOpacity: 0.7, reachDistance: ALCANCE,
   inverseDirection: true,   // o objeto dos controles aponta para +Z; a câmera olha para -Z
@@ -107,8 +115,20 @@ function montarCatalogo() {
     return bt;
   }));
 }
-function abrirCatalogo() { if (!conectado) return; montarCatalogo(); controls.unlock(); mostrar('tCatalogo'); }
-function fecharCatalogo() { mostrar(null); controls.lock(); escolherVaga(vaga); }
+function abrirCatalogo() { if (!conectado) return; montarCatalogo(); sairDoJogo(); mostrar('tCatalogo'); }
+function fecharCatalogo() { voltarAoJogo(); escolherVaga(vaga); }
+
+// ---------------- jogar / pausar (mouse preso no computador; estado no toque) ----------------
+function voltarAoJogo() {
+  if (MODO_TOQUE) { emJogo = true; inputs.setNamespace('jogo'); mostrar(null); return; }
+  mostrar(null);
+  controls.lock();
+}
+function sairDoJogo() {
+  if (MODO_TOQUE) { emJogo = false; toque?.soltarTudo(); movel.resetMovements(); inputs.setNamespace('menu'); return; }
+  controls.unlock();
+}
+function pausar() { sairDoJogo(); mostrar('tPausa'); }
 inputs.bind('KeyE', abrirCatalogo, 'jogo');
 
 // ---------------- quebrar e colocar ----------------
@@ -136,7 +156,7 @@ function colocar() {
 }
 inputs.click('left', quebrar, 'jogo');
 inputs.click('right', colocar, 'jogo');
-inputs.bind('KeyF', controls.toggleFly, 'jogo');
+inputs.bind('KeyF', () => { controls.toggleFly(); voando = !voando; }, 'jogo');
 
 let avisoTimer = 0;
 let semConexao = false;
@@ -172,11 +192,11 @@ function telaConexao(titulo: string, texto: string, falhou: boolean) {
   mostrar('tConexao');
 }
 function telaInicio(msg = '') {
-  $('caixaCodigo').hidden = !!codigo || SO_TOQUE;
-  $('bTrocarCodigo').hidden = !codigo || SO_TOQUE;
+  $('caixaCodigo').hidden = !!codigo;
+  $('bTrocarCodigo').hidden = !codigo;
   $('msgCodigo').textContent = msg;
   mostrar('tInicio');
-  if (!codigo && !SO_TOQUE) setTimeout(() => $('campoCodigo').focus(), 50);
+  if (!codigo && !MODO_TOQUE) setTimeout(() => $('campoCodigo').focus(), 50);
 }
 /** Testa o código antes de entrar: 'ok', 'recusado' (servidor no ar, código errado) ou 'fora' (servidor fora). */
 function testarCodigo(c: string): Promise<'ok' | 'recusado' | 'fora'> {
@@ -211,8 +231,7 @@ async function conectar(): Promise<void> {
   conectado = true;
 }
 function entrar() {
-  if (SO_TOQUE) return;
-  if (conectado) { mostrar(null); controls.lock(); return; }
+  if (conectado) { voltarAoJogo(); return; }
   let novo = false;
   if (!codigo) {
     const digitado = $<HTMLInputElement>('campoCodigo').value.trim().toLowerCase();
@@ -225,9 +244,8 @@ function entrar() {
       escolherVaga(vaga);
       // o navegador só prende o mouse logo depois de um clique; a conexão pode demorar mais que isso.
       // Se não prender, a tela de pausa oferece "Continuar" (um clique novo, que prende de verdade).
-      mostrar(null);
-      controls.lock();
-      setTimeout(() => { if (!controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
+      voltarAoJogo();
+      if (!MODO_TOQUE) setTimeout(() => { if (!controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
     })
     .catch((erro) => {
       iniciando = null;
@@ -247,20 +265,50 @@ function entrar() {
 
 // ---------------- pausa ----------------
 controls.on('unlock', () => {
-  if (!conectado) return;
+  if (!conectado || MODO_TOQUE) return;
   inputs.setNamespace('menu');
   if ($('tCatalogo').hidden) mostrar('tPausa');
 });
-controls.on('lock', () => { inputs.setNamespace('jogo'); mostrar(null); });
+controls.on('lock', () => { if (MODO_TOQUE) return; inputs.setNamespace('jogo'); mostrar(null); });
 $('bEntrar').addEventListener('click', entrar);
 $('campoCodigo').addEventListener('keydown', (e) => { if (e.key === 'Enter') entrar(); });
 $('bTrocarCodigo').addEventListener('click', () => { codigo = ''; guardarCodigo(''); telaInicio(); });
 $('bTentar').addEventListener('click', entrar);
-$('bContinuar').addEventListener('click', () => controls.lock());
-$('bPausa').addEventListener('click', (e) => { e.stopPropagation(); controls.unlock(); mostrar('tPausa'); });
+$('bContinuar').addEventListener('click', voltarAoJogo);
+$('bPausa').addEventListener('click', (e) => { e.stopPropagation(); pausar(); });
+$('bCatalogoToque').addEventListener('click', (e) => { e.stopPropagation(); abrirCatalogo(); });
 $('bCatalogoPausa').addEventListener('click', abrirCatalogo);
 $('bFecharCatalogo').addEventListener('click', fecharCatalogo);
-if (SO_TOQUE) { $('avisoToque').hidden = false; $('bEntrar').hidden = true; $('caixaCodigo').hidden = true; $('bTrocarCodigo').hidden = true; }
+// ---------------- controles de toque ----------------
+const toque = MODO_TOQUE ? (() => {
+  document.body.classList.add('ilha-toque');
+  const c = criarControlesToque({
+    raiz: $('toque'),
+    aoApertar: (nome: string) => {
+      if (!emJogo) return;
+      if (nome === 'quebrar') quebrar();
+      else if (nome === 'colocar') colocar();
+      else if (nome === 'voar') { controls.toggleFly(); voando = !voando; $('toque').classList.toggle('voando', voando); }
+    },
+  });
+  // olhar: arrastar um dedo na metade direita (fora dos botões) vira a câmera
+  const zona = $('olharZona');
+  let dedo: number | null = null, ultimo = { x: 0, y: 0 };
+  zona.addEventListener('pointerdown', (e) => {
+    if (dedo !== null) return;
+    e.preventDefault(); dedo = e.pointerId; ultimo = { x: e.clientX, y: e.clientY };
+    try { zona.setPointerCapture(e.pointerId); } catch { /* sem captura */ }
+  });
+  zona.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== dedo || !emJogo) return;
+    movel.setLookDirection((e.clientX - ultimo.x) * OLHAR_PX, (e.clientY - ultimo.y) * OLHAR_PX);
+    ultimo = { x: e.clientX, y: e.clientY };
+  });
+  for (const tipo of ['pointerup', 'pointercancel', 'lostpointercapture']) zona.addEventListener(tipo, (e) => { if ((e as PointerEvent).pointerId === dedo) dedo = null; });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && emJogo) pausar(); });
+  return c;
+})() : null;
+document.querySelectorAll<HTMLElement>(MODO_TOQUE ? '.so-teclado' : '.so-toque').forEach((el) => { el.hidden = true; });
 
 // ---------------- laço ----------------
 function redimensionar() {
@@ -273,6 +321,14 @@ redimensionar();
 const direcao = new THREE.Vector3();
 function passo() {
   if (!world.isInitialized) return;
+  if (toque) {
+    const { eixo, botoes } = toque.estado;
+    if (emJogo) {
+      movel.setMovementVector(eixo.x, -eixo.y);
+      movel.setJumping(botoes.has('pular'));
+      controls.movements.down = voando && botoes.has('descer');
+    } else movel.resetMovements();
+  }
   interacao.update();
   controls.update();
   if (conectado) {
@@ -297,7 +353,7 @@ telaInicio();
 if (DEBUG) (window as unknown as { __ilha: object }).__ilha = {
   world, controls, network, interacao, VOXELIZE, THREE,
   get inv() { return inv; }, get vaga() { return vaga; }, get conectado() { return conectado; },
-  entrar, escolherVaga, quebrar, colocar,
+  entrar, escolherVaga, quebrar, colocar, MODO_TOQUE, get emJogo() { return emJogo; }, get toque() { return toque; },
   /** Roda n quadros na mão (o painel oculto para o requestAnimationFrame). */
   avancar: async (n = 30) => { for (let i = 0; i < n; i++) { passo(); await new Promise((r) => setTimeout(r, 16)); } },
 };

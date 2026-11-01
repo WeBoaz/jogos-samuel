@@ -122,22 +122,23 @@
       "slug": "ilha-dos-blocos",
       "title": "Ilha dos Blocos",
       "category": "Construção",
-      "description": "Prévia do modo criativo: explore a ilha e construa com 32 blocos. O que você constrói fica guardado na ilha da família. Por enquanto no computador, com teclado e mouse.",
+      "description": "Prévia do modo criativo: explore a ilha e construa com 32 blocos. O que você constrói fica guardado na ilha da família. Joga no computador, no tablet e no celular.",
       "cover": "ilha-dos-blocos.webp",
       "status": "pronto",
       "entry": "index.html",
       "instructions": [
-        "Clique em Entrar na ilha. O mouse vira a câmera; aperte Esc para pausar.",
-        "W A S D andam, espaço pula, F liga o voo.",
-        "Clique quebra o bloco; botão direito coloca o bloco da barra.",
-        "Teclas 1 a 9 ou a rodinha trocam o bloco; E abre o catálogo com os 32 blocos."
+        "Na primeira vez, um adulto digita o código da ilha. Depois é só tocar em Entrar na ilha.",
+        "Celular e tablet: o polegar esquerdo anda (joystick), arraste o lado direito para olhar; ⛏ quebra, 🧱 põe, ⤒ pula e 🪽 voa.",
+        "Computador: o mouse vira a câmera, W A S D andam, espaço pula, F voa; clique quebra e botão direito põe; Esc pausa.",
+        "Escolha o bloco na barra (toque, teclas 1 a 9 ou rodinha); o catálogo ▦ (ou E) tem os 32 blocos."
       ],
       "input": [
+        "touch",
         "mouse",
         "keyboard"
       ],
       "novo": true,
-      "version": "0.1.1"
+      "version": "0.2"
     }
   ]
 }

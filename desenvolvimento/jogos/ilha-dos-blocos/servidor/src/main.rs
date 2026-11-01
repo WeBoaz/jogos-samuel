@@ -11,6 +11,7 @@ fn var(nome: &str, padrao: &str) -> String {
 }
 
 const SEGREDO_LOCAL: &str = "ilha-local";
+const MANHA: f32 = 9000.0; // de 24000 (dia inteiro)
 
 /// Em produção (ou escutando fora do 127.0.0.1) o código da ilha precisa existir, não ser o de teste e ter 12+ caracteres.
 fn conferir_segredo(segredo: &str, producao: bool, endereco: &str) -> Result<(), String> {
@@ -30,12 +31,15 @@ fn mundo_ilha(dados: &str, seed: u32) -> World {
         .max_height(96)
         .water_level(terreno::NIVEL_MAR as usize)
         .time_per_day(24000)
-        .default_time(9000.0)
+        .default_time(MANHA)
+        .does_tick_time(false) // Criativo: sempre de dia (dia e noite chegam com a Sobrevivência)
         .saving(true)
         .save_dir(&format!("{dados}/mundos/ilha"))
         .build();
     let mut mundo = World::new("ilha", &config);
     mundo.pipeline_mut().add_stage(terreno::EstagioIlha);
+    // o mundo salvo guarda a hora em stats.json; com o relógio parado, começa sempre de manhã
+    mundo.stats_mut().set_time(MANHA);
     mundo
 }
 
