@@ -1,4 +1,4 @@
-# Roteiro de 5 minutos no celular — Minigolfe dos Pets 1.0.1
+# Roteiro de 5 minutos no celular — Minigolfe dos Pets 1.0.1 (candidata c0b67d9)
 
 Para o Boaz, no celular de referência (o que o Samuel usa). Serve para fechar o que só um aparelho real prova:
 toque de verdade e a meta de 30 FPS. Nada é enviado para lugar nenhum: o resultado aparece na tela e você copia.
@@ -7,6 +7,8 @@ toque de verdade e a meta de 30 FPS. Nada é enviado para lugar nenhum: o result
 
 - Celular com bateria acima de 30% e fora do modo economia de energia (se estiver, anote).
 - Feche os outros apps. Wi-Fi normal de casa.
+- Durante os 5 minutos, **não abra a Central de Controle nem as notificações** (puxar do topo): isso pode congelar a
+  tela sem o jogo saber e contar como travada. Se abrir sem querer, anote.
 
 ## Passo a passo
 
@@ -23,7 +25,9 @@ toque de verdade e a meta de 30 FPS. Nada é enviado para lugar nenhum: o result
 3. Continue jogando até completar **5 minutos com a tela acesa** (o contador só anda com o jogo visível).
    Gire o celular deitado por um tempo também.
 4. Quando a faixa disser **"RESUMO PRONTO: toque em II"**, toque em **II** (pausa): abre o painel
-   **"teste de quadros"**. Toque em **Copiar** (ou tire um print) e me mande o texto.
+   **"teste de quadros"**. Toque em **Copiar** (ou tire um print do painel) e me mande o texto. Vale o painel, não a
+   faixa do rodapé (ela continua contando depois que o resultado congela). Depois toque em **Fechar** para liberar os
+   botões da pausa.
    A meta é: **média ≥ 30 FPS e p95 ≤ 40 ms**. O próprio painel diz "CUMPRIDA" ou "NÃO cumprida".
 5. Se terminar o circuito, toque em **↻ Jogar de novo** e confira que volta a jogar.
 
