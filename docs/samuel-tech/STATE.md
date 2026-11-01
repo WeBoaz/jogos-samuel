@@ -3,6 +3,19 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (BLK-020 — decisão da base)
+
+- **Decisão:** DEC-012 / `docs/blocos/ADR-001-base.md` — Voxelize `7ae1c20` aceito **com condições** (servidor na VPS
+  com `wss://` no iframe; celular real com toque e 30 FPS). Critérios: Recursos, Save, Gameplay e Sustentação aprovados;
+  Navegador móvel e Hostinger/infra **inconclusivos por falta de ambiente**.
+- **Novos documentos:** `docs/blocos/RECURSOS.md` (licenças; assets do Voxelize não entram), `TESTES.md` (automáticos,
+  sessões, orçamento: JS ≤ 450 KB gzip, 30 FPS, ≤ 5 s até jogar, 4 jogadores na VPS), `MATRIZ-FIDELIDADE.md`.
+- **Bloqueio real para a condição 1:** acesso SSH/TLS na VPS ainda não configurado (cartão de sessão "Infra da VPS e
+  Rust" proposto; Rust já instalado nesta máquina).
+- **NEXT:** BLK-030 — esqueleto `desenvolvimento/jogos/ilha-dos-blocos/{cliente,servidor}`, catálogo de 32 blocos com
+  texturas próprias, regras de inventário em TS, primeiro trecho jogável local (seed, árvores, quebrar madeira, colocar,
+  barra, salvar/reabrir).
+
 ## 2026-11-01 — Claude (BLK-010 — provas da base de blocos)
 
 - **Resultado:** Voxelize `7ae1c20` **aprovado como base** (com ressalvas); zardoy **reprovado** para publicação

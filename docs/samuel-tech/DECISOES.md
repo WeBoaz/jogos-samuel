@@ -85,3 +85,14 @@ Não apagar decisões antigas: acrescentar uma nova com alternativa, motivo e ef
   `/jogo/<slug>/release.json`; o roteador local deixou de bloquear `.json` dentro de `/jogo/`.
 - Hash do zip, hora do deploy e link do Notion ficam fora do pacote (Notion + comentário
   `SAMUEL_TECH_DEPLOY_READY` no PR), nunca o hash do próprio zip dentro dele.
+
+## DEC-012 — Base da Ilha dos Blocos: Voxelize (BLK-020, 2026-11-01)
+
+- **Decisão:** Voxelize `7ae1c202c4ed33e6f18ea2e947c5c6f9a373b605` (MIT): cliente `@voxelize/core` estático em
+  `/jogo/ilha-dos-blocos/` + servidor Rust autoritativo na VPS por `wss://`. Regras de inventário/crafting/modos em TS
+  puro testado; modpacks JSON próprios com o manifesto da seção 7. Detalhes: `docs/blocos/ADR-001-base.md`.
+- **Aceita com condições:** servidor na VPS com TLS conectando do iframe do player, e sessão em celular real com
+  toque e ≥ 30 FPS. Se uma reprovar, prova mínima de noa antes de seguir.
+- **Descartados:** zardoy (recursos extraídos do Minecraft via `mc-assets`), noa (reserva, não testado), Luanti (lab).
+- **Efeito:** a Ilha é o primeiro jogo do portal que depende de servidor; precisa de tela "servidor fora do ar",
+  backup diário e proteção infantil (sem chat livre, mundos por código opaco). Matriz: `docs/blocos/MATRIZ-FIDELIDADE.md`.
