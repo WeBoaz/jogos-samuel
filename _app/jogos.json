@@ -22,7 +22,7 @@
       ],
       "status": "pronto",
       "novo": true,
-      "version": "1.0"
+      "version": "1.0.1"
     },
     {
       "slug": "reino-dos-blocos",
@@ -120,11 +120,24 @@
     },
     {
       "slug": "ilha-dos-blocos",
-      "title": "Ilha dos blocos",
-      "category": "Exploração",
-      "description": "Um mundo de ilhas e caminhos para soltar a imaginação.",
+      "title": "Ilha dos Blocos",
+      "category": "Construção",
+      "description": "Prévia do modo criativo: explore a ilha e construa com 32 blocos. O que você constrói fica guardado na ilha da família. Por enquanto no computador, com teclado e mouse.",
       "cover": "ilha-dos-blocos.webp",
-      "status": "em-breve"
+      "status": "pronto",
+      "entry": "index.html",
+      "instructions": [
+        "Clique em Entrar na ilha. O mouse vira a câmera; aperte Esc para pausar.",
+        "W A S D andam, espaço pula, F liga o voo.",
+        "Clique quebra o bloco; botão direito coloca o bloco da barra.",
+        "Teclas 1 a 9 ou a rodinha trocam o bloco; E abre o catálogo com os 32 blocos."
+      ],
+      "input": [
+        "mouse",
+        "keyboard"
+      ],
+      "novo": true,
+      "version": "0.1"
     }
   ]
 }

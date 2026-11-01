@@ -193,7 +193,8 @@ $('bContinuar').addEventListener('click', () => controls.lock());
 $('bPausa').addEventListener('click', (e) => { e.stopPropagation(); controls.unlock(); mostrar('tPausa'); });
 $('bCatalogoPausa').addEventListener('click', abrirCatalogo);
 $('bFecharCatalogo').addEventListener('click', fecharCatalogo);
-if (TOQUE) $('avisoToque').hidden = false;
+// tela de toque sem mouse: os controles de toque chegam na BLK-040; não deixar a criança presa num mundo sem controle
+if (TOQUE && !matchMedia('(any-pointer: fine)').matches) { $('avisoToque').hidden = false; $('bEntrar').hidden = true; }
 
 // ---------------- laço ----------------
 function redimensionar() {

@@ -1,0 +1,25 @@
+# /etc/systemd/system/ilha-dos-blocos.service — servidor da Ilha dos Blocos (usuário sem privilégios).
+[Unit]
+Description=Ilha dos Blocos (samuel.tech) - servidor Voxelize
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ilha
+Group=ilha
+WorkingDirectory=/opt/ilha
+EnvironmentFile=-/opt/ilha/ilha.env
+Environment=ILHA_PORTA=4100 ILHA_ENDERECO=127.0.0.1 ILHA_DADOS=/opt/ilha/dados RUST_LOG=warn
+ExecStart=/opt/ilha/bin/ilha-dos-blocos-servidor
+Restart=on-failure
+RestartSec=3
+# endurecimento
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/ilha/dados
+MemoryMax=1500M
+
+[Install]
+WantedBy=multi-user.target

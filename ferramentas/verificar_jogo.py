@@ -26,11 +26,11 @@ EXTERNO = re.compile(
 # Caminho absoluto do site: quebra quando o jogo é servido em /jogo/<slug>/.
 ABSOLUTO = re.compile(
     r"""(?:\b(?:src|href)\s*=\s*["']/(?!/|jogos/))"""
-    r"""|(?:\bfrom\s*["']/(?!/))|(?:\bimport\(\s*["']/(?!/))|(?:url\(\s*["']?/(?!/))""",
+    r"""|(?:\bfrom\s*["']/(?!/))|(?:\bimport\(\s*["']/(?!/))|(?:(?-i:url)\(\s*["']?/(?!/))""",   # url() do CSS; new URL("/x", base) do JS não
     re.I)
 RASTREADOR = re.compile(
     r"googletagmanager|google-analytics|\bgtag\s*\(|\bdataLayer\b|connect\.facebook|fbq\(|hotjar|"
-    r"plausible\.io|clarity\.ms|mixpanel|segment\.io|amplitude|posthog|sentry\.io|doubleclick|adsbygoogle",
+    r"plausible\.io|clarity\.ms|mixpanel|segment\.io|amplitude\.com|@amplitude/|amplitude\.getInstance|posthog|sentry\.io|doubleclick|adsbygoogle",
     re.I)
 
 
