@@ -10,17 +10,19 @@ import { BARRA, criar, escolherNoCatalogo, usar, type Inventario } from './regra
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.has('debug');
-// Endereço do servidor: fixo no build (VITE_ILHA_SERVIDOR); ?servidor= só vale com ?debug.
-const SERVIDOR = (DEBUG && params.get('servidor')) || import.meta.env.VITE_ILHA_SERVIDOR || 'http://localhost:4100/';
+// Endereço do servidor: fixo no build (VITE_ILHA_SERVIDOR); ?servidor= e ?codigo= só no dev (nunca no build publicado).
+const SERVIDOR = (import.meta.env.DEV && params.get('servidor')) || import.meta.env.VITE_ILHA_SERVIDOR || 'http://localhost:4100/';
 // Código da ilha da família: é a chave do servidor e NÃO vai no código público. Um adulto digita uma vez por
 // aparelho; fica no localStorage deste aparelho. No dev local o servidor usa 'ilha-local'.
 const CHAVE_CODIGO = 'samuel:ilha-dos-blocos:codigo';
 const lerCodigo = () => { try { return localStorage.getItem(CHAVE_CODIGO) ?? ''; } catch { return ''; } };
 const guardarCodigo = (c: string) => { try { if (c) localStorage.setItem(CHAVE_CODIGO, c); else localStorage.removeItem(CHAVE_CODIGO); } catch { /* vale só nesta visita */ } };
-let codigo = (DEBUG && params.get('codigo')) || lerCodigo() || (import.meta.env.DEV ? 'ilha-local' : '');
+let codigo = (import.meta.env.DEV && params.get('codigo')) || lerCodigo() || (import.meta.env.DEV ? 'ilha-local' : '');
 const MUNDO = 'ilha';
 const ALCANCE = 5;
 const TOQUE = matchMedia('(pointer: coarse)').matches;
+// tela de toque sem mouse: os controles de toque chegam na BLK-040; não deixar a criança presa num mundo sem controle
+const SO_TOQUE = TOQUE && !matchMedia('(any-pointer: fine)').matches;
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const telas = ['tInicio', 'tConexao', 'tPausa', 'tCatalogo'] as const;
@@ -137,7 +139,9 @@ inputs.click('right', colocar, 'jogo');
 inputs.bind('KeyF', controls.toggleFly, 'jogo');
 
 let avisoTimer = 0;
+let semConexao = false;
 function aviso(txt: string) {
+  if (semConexao) return;   // o aviso de conexão caída fica na tela até voltar
   const t = $('toast'); t.textContent = txt; t.hidden = false;
   clearTimeout(avisoTimer); avisoTimer = window.setTimeout(() => { t.hidden = true; }, 1800);
 }
@@ -168,11 +172,11 @@ function telaConexao(titulo: string, texto: string, falhou: boolean) {
   mostrar('tConexao');
 }
 function telaInicio(msg = '') {
-  $('caixaCodigo').hidden = !!codigo;
-  $('bTrocarCodigo').hidden = !codigo;
+  $('caixaCodigo').hidden = !!codigo || SO_TOQUE;
+  $('bTrocarCodigo').hidden = !codigo || SO_TOQUE;
   $('msgCodigo').textContent = msg;
   mostrar('tInicio');
-  if (!codigo) setTimeout(() => $('campoCodigo').focus(), 50);
+  if (!codigo && !SO_TOQUE) setTimeout(() => $('campoCodigo').focus(), 50);
 }
 /** Testa o código antes de entrar: 'ok', 'recusado' (servidor no ar, código errado) ou 'fora' (servidor fora). */
 function testarCodigo(c: string): Promise<'ok' | 'recusado' | 'fora'> {
@@ -207,11 +211,13 @@ async function conectar(): Promise<void> {
   conectado = true;
 }
 function entrar() {
+  if (SO_TOQUE) return;
   if (conectado) { mostrar(null); controls.lock(); return; }
+  let novo = false;
   if (!codigo) {
     const digitado = $<HTMLInputElement>('campoCodigo').value.trim().toLowerCase();
     if (!digitado) { telaInicio('Digite o código da ilha.'); return; }
-    codigo = digitado;
+    codigo = digitado; novo = true;
   }
   iniciando ??= conectar()
     .then(() => {
@@ -226,10 +232,13 @@ function entrar() {
     .catch((erro) => {
       iniciando = null;
       try { network.disconnect(); } catch { /* já caiu */ }
-      if (erro instanceof CodigoRecusado) {
-        codigo = ''; guardarCodigo('');
+      if (erro instanceof CodigoRecusado && novo) {
+        codigo = '';
         $<HTMLInputElement>('campoCodigo').value = '';
         telaInicio('Esse código não abriu a ilha. Confira e tente de novo.');
+      } else if (erro instanceof CodigoRecusado) {
+        // código guardado foi recusado: pode ser excesso de tentativas (espera um pouco) ou código trocado na ilha
+        telaConexao('A ilha não abriu agora', 'Espere um minutinho e tente de novo. Se o código da ilha mudou, use "trocar o código" na tela inicial.', true);
       } else {
         telaConexao('A ilha está dormindo 😴', 'Não deu para chegar na ilha agora. Tente de novo daqui a pouco.', true);
       }
@@ -251,8 +260,7 @@ $('bContinuar').addEventListener('click', () => controls.lock());
 $('bPausa').addEventListener('click', (e) => { e.stopPropagation(); controls.unlock(); mostrar('tPausa'); });
 $('bCatalogoPausa').addEventListener('click', abrirCatalogo);
 $('bFecharCatalogo').addEventListener('click', fecharCatalogo);
-// tela de toque sem mouse: os controles de toque chegam na BLK-040; não deixar a criança presa num mundo sem controle
-if (TOQUE && !matchMedia('(any-pointer: fine)').matches) { $('avisoToque').hidden = false; $('bEntrar').hidden = true; }
+if (SO_TOQUE) { $('avisoToque').hidden = false; $('bEntrar').hidden = true; $('caixaCodigo').hidden = true; $('bTrocarCodigo').hidden = true; }
 
 // ---------------- laço ----------------
 function redimensionar() {
@@ -263,7 +271,6 @@ function redimensionar() {
 addEventListener('resize', redimensionar);
 redimensionar();
 const direcao = new THREE.Vector3();
-let semConexao = false;
 function passo() {
   if (!world.isInitialized) return;
   interacao.update();
@@ -275,7 +282,8 @@ function passo() {
     // conexão caiu no meio do jogo: avisa enquanto o motor reconecta sozinho
     if (!network.connected !== semConexao) {
       semConexao = !network.connected;
-      const t = $('toast'); t.textContent = 'Reconectando à ilha…'; t.hidden = !semConexao;
+      clearTimeout(avisoTimer);
+      const t = $('toast'); t.textContent = 'A conexão com a ilha caiu. Voltando… (o que você construiu está guardado)'; t.hidden = !semConexao;
     }
   }
   world.update(controls.object.position, camera.getWorldDirection(direcao));

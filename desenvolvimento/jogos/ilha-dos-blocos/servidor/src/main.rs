@@ -1,6 +1,6 @@
 // Servidor da Ilha dos Blocos. Uso local:  ILHA_SEGREDO=... cargo run --release
-// Variáveis: ILHA_PORTA (4100), ILHA_ENDERECO (127.0.0.1 — atrás do proxy na VPS), ILHA_SEGREDO (obrigatória fora
-// do modo local), ILHA_DADOS (pasta dos mundos, ./dados), ILHA_SEED (2026).
+// Variáveis: ILHA_PORTA (4100), ILHA_ENDERECO (127.0.0.1 — atrás do proxy na VPS), ILHA_SEGREDO (código da ilha;
+// obrigatório em produção), ILHA_PRODUCAO (definida na VPS), ILHA_DADOS (pasta dos mundos, ./dados), ILHA_SEED (2026).
 mod catalogo;
 mod terreno;
 
@@ -8,6 +8,16 @@ use voxelize::{Server, Voxelize, World, WorldConfig};
 
 fn var(nome: &str, padrao: &str) -> String {
     std::env::var(nome).unwrap_or_else(|_| padrao.to_owned())
+}
+
+const SEGREDO_LOCAL: &str = "ilha-local";
+
+/// Em produção (ou escutando fora do 127.0.0.1) o código da ilha precisa existir, não ser o de teste e ter 12+ caracteres.
+fn conferir_segredo(segredo: &str, producao: bool, endereco: &str) -> Result<(), String> {
+    if (producao || endereco != "127.0.0.1") && (segredo.trim().len() < 12 || segredo == SEGREDO_LOCAL) {
+        return Err("defina ILHA_SEGREDO (código da ilha, 12+ caracteres) para rodar em produção".to_owned());
+    }
+    Ok(())
 }
 
 fn mundo_ilha(dados: &str, seed: u32) -> World {
@@ -33,15 +43,31 @@ fn mundo_ilha(dados: &str, seed: u32) -> World {
 async fn main() -> std::io::Result<()> {
     let porta: u16 = var("ILHA_PORTA", "4100").parse().expect("ILHA_PORTA inválida");
     let endereco = var("ILHA_ENDERECO", "127.0.0.1");
-    let segredo = var("ILHA_SEGREDO", "ilha-local");
+    let segredo = var("ILHA_SEGREDO", SEGREDO_LOCAL);
     let dados = var("ILHA_DADOS", "./dados");
     let seed: u32 = var("ILHA_SEED", "2026").parse().expect("ILHA_SEED inválida");
-    if endereco != "127.0.0.1" && segredo == "ilha-local" {
-        panic!("defina ILHA_SEGREDO para escutar fora do 127.0.0.1");
+    if let Err(erro) = conferir_segredo(&segredo, std::env::var("ILHA_PRODUCAO").is_ok(), &endereco) {
+        eprintln!("{erro}");
+        std::process::exit(2);
     }
 
     let registro = catalogo::registro();
     let mut servidor = Server::new().port(porta).addr(&endereco).secret(&segredo).registry(&registro).build();
     servidor.add_world(mundo_ilha(&dados, seed)).expect("não deu para criar o mundo da ilha");
     Voxelize::run(servidor).await
+}
+
+#[cfg(test)]
+mod testes {
+    use super::*;
+
+    #[test]
+    fn producao_exige_codigo_de_verdade() {
+        assert!(conferir_segredo("ilha-local", false, "127.0.0.1").is_ok()); // dev local
+        for ruim in ["", "   ", "ilha-local", "curto-123"] {
+            assert!(conferir_segredo(ruim, true, "127.0.0.1").is_err(), "aceitou {ruim:?} em produção");
+            assert!(conferir_segredo(ruim, false, "0.0.0.0").is_err(), "aceitou {ruim:?} escutando fora");
+        }
+        assert!(conferir_segredo("pato-coco-sapo-1234", true, "127.0.0.1").is_ok());
+    }
 }
