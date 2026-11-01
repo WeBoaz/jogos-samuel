@@ -8,8 +8,10 @@ Wants=network-online.target
 User=ilha
 Group=ilha
 WorkingDirectory=/opt/ilha
-EnvironmentFile=-/opt/ilha/ilha.env
-Environment=ILHA_PORTA=4100 ILHA_ENDERECO=127.0.0.1 ILHA_DADOS=/opt/ilha/dados RUST_LOG=warn
+# /opt/ilha/ilha.env (root, 600, fora do Git): só ILHA_SEGREDO = código da ilha da família
+EnvironmentFile=/opt/ilha/ilha.env
+Environment=ILHA_ENDERECO=127.0.0.1
+Environment=ILHA_PORTA=4100 ILHA_DADOS=/opt/ilha/dados RUST_LOG=error
 ExecStart=/opt/ilha/bin/ilha-dos-blocos-servidor
 Restart=on-failure
 RestartSec=3

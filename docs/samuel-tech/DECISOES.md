@@ -96,3 +96,19 @@ Não apagar decisões antigas: acrescentar uma nova com alternativa, motivo e ef
 - **Descartados:** zardoy (recursos extraídos do Minecraft via `mc-assets`), noa (reserva, não testado), Luanti (lab).
 - **Efeito:** a Ilha é o primeiro jogo do portal que depende de servidor; precisa de tela "servidor fora do ar",
   backup diário e proteção infantil (sem chat livre, mundos por código opaco). Matriz: `docs/blocos/MATRIZ-FIDELIDADE.md`.
+
+## DEC-013 — Ilha dos Blocos no ar como prévia, com código da ilha (2026-11-01)
+
+- **Pedido do Boaz:** publicar a Ilha. Vai como **prévia do Criativo (0.1), só computador** (teclado e mouse; no
+  tablet aparece um aviso e um botão de voltar, sem prender a criança num mundo sem controle).
+- **Servidor:** VPS `srv2114451.hstgr.cloud`, serviço `ilha-dos-blocos` (usuário `ilha`, sem privilégio, só
+  `127.0.0.1:4100`), nginx em **:8443** com o certificado Let's Encrypt que já existia (porta própria porque o cliente
+  do Voxelize usa `/ws/` na raiz, que é do painel de jogos). Só passam `/ws/` (Origin samuel.tech, limite por IP),
+  `/registry/` e `/saude`. Backup de hora em hora (3 dias) na VPS. Arquivos em `desenvolvimento/infra/vps/`.
+- **Código da ilha (achado P1 do REV-01):** a chave do servidor é um código da família que **não está no Git nem no
+  JS publicado** — fica só em `/opt/ilha/ilha.env` (root, 600) e numa cópia local do Boaz. Um adulto digita uma vez por
+  computador; fica no `localStorage` daquele aparelho. Código errado → mensagem; servidor fora → "a ilha está dormindo".
+  Não é login nem conta: não há nome, e-mail ou dado pessoal. Trocar o código = editar o `.env` e reiniciar o serviço.
+- **Limites conhecidos (P2, fila):** sem limite de edições por segundo no servidor (só a família tem o código);
+  mensagens grandes aceitas pelo motor; JS total com workers ≈ 591 KB gzip (orçamento de 450 KB vale para o bundle
+  principal: 425 KB); sem cópia do backup fora da VPS.

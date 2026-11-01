@@ -3,6 +3,16 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (Ilha dos Blocos 0.1 — prévia publicada)
+
+- **Pedido do Boaz:** "Publicar não apareceu no site" → publicar a Ilha. DEC-013.
+- **VPS:** chave SSH dedicada (`~/.ssh/samuel_tech_vps`) cadastrada pela API; servidor da Ilha compilado na VPS,
+  systemd com usuário `ilha`, nginx :8443 (certificado existente; painel de jogos intacto), backup de hora em hora.
+- **REV-01 rodada 1:** reprovado (P1 mundo aberto; P1 avisos de licença) → código da ilha fora do Git/JS + Origin +
+  limites no nginx; avisos gerados do bundle real. Mais P2: logs sem IP, `/info` fechado, volta do vazio, aviso de
+  reconexão, fallback do pointer lock, backup robusto.
+- **NEXT:** revisão da candidata corrigida → publicar → conferir em samuel.tech.
+
 ## 2026-11-01 — Claude (BLK-030 — Ilha dos Blocos, incremento 1)
 
 - **Feito (local):** servidor Rust da Ilha (32 blocos + água, ilha por seed 2026, save, 127.0.0.1, sem chat) e

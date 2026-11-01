@@ -26,7 +26,14 @@
     <div class="corpo">
       <div class="logo">ILHA<br>DOS BLOCOS<small>modo criativo · prévia</small></div>
       <div class="dica-icones"><span>🖱️ olhar</span><span>WASD andar</span><span>espaço pular</span><span>clique quebra · botão direito põe</span><span>1–9 / rodinha troca</span><span>E catálogo</span></div>
+      <div class="caixa-codigo" id="caixaCodigo" hidden>
+        <label for="campoCodigo">Código da ilha</label>
+        <input id="campoCodigo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="peça para um adulto">
+        <p class="msg-codigo" id="msgCodigo" role="alert"></p>
+        <small>O código fica guardado só neste aparelho.</small>
+      </div>
       <div class="acoes"><button class="btn grande" id="bEntrar">▶ ENTRAR NA ILHA</button></div>
+      <p class="trocar-codigo"><button class="link" id="bTrocarCodigo" hidden>trocar o código da ilha</button></p>
       <div id="avisoToque" hidden>
         <p class="aviso-toque">Por enquanto a ilha é no computador, com teclado e mouse. No tablet e no celular ela chega logo! 🏝️</p>
         <div class="acoes"><a class="btn sec" href="/jogos/" target="_top">← Escolher outro jogo</a></div>

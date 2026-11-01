@@ -38,3 +38,14 @@
   .vaga b { display: none; }
   .nome-bloco { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 58px); }
 }
+
+.caixa-codigo { text-align: left; margin: 4px auto 6px; max-width: 360px; }
+.caixa-codigo label { display: block; font: 700 13px var(--mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.caixa-codigo input { width: 100%; min-height: 52px; border: var(--line); box-shadow: var(--shadow); background: var(--cream);
+  font: 700 20px var(--mono); padding: 8px 12px; user-select: text; -webkit-user-select: text; }
+.caixa-codigo input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.caixa-codigo small { display: block; margin-top: 8px; color: var(--muted); font: 13px var(--sans); }
+.msg-codigo { min-height: 1em; margin: 8px 0 0; color: var(--heart); font: 700 14px var(--sans); }
+.msg-codigo:empty { display: none; }
+.trocar-codigo { margin: 10px 0 0; }
+button.link { background: none; border: 0; padding: 6px; font: 700 13px var(--sans); color: var(--forest); text-decoration: underline; min-height: 44px; }

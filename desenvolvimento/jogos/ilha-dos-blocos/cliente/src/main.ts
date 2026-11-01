@@ -12,7 +12,12 @@ const params = new URLSearchParams(location.search);
 const DEBUG = params.has('debug');
 // Endereço do servidor: fixo no build (VITE_ILHA_SERVIDOR); ?servidor= só vale com ?debug.
 const SERVIDOR = (DEBUG && params.get('servidor')) || import.meta.env.VITE_ILHA_SERVIDOR || 'http://localhost:4100/';
-const SEGREDO = import.meta.env.VITE_ILHA_SEGREDO || 'ilha-local';
+// Código da ilha da família: é a chave do servidor e NÃO vai no código público. Um adulto digita uma vez por
+// aparelho; fica no localStorage deste aparelho. No dev local o servidor usa 'ilha-local'.
+const CHAVE_CODIGO = 'samuel:ilha-dos-blocos:codigo';
+const lerCodigo = () => { try { return localStorage.getItem(CHAVE_CODIGO) ?? ''; } catch { return ''; } };
+const guardarCodigo = (c: string) => { try { if (c) localStorage.setItem(CHAVE_CODIGO, c); else localStorage.removeItem(CHAVE_CODIGO); } catch { /* vale só nesta visita */ } };
+let codigo = (DEBUG && params.get('codigo')) || lerCodigo() || (import.meta.env.DEV ? 'ilha-local' : '');
 const MUNDO = 'ilha';
 const ALCANCE = 5;
 const TOQUE = matchMedia('(pointer: coarse)').matches;
@@ -114,6 +119,7 @@ function dentroDoJogador(vx: number, vy: number, vz: number) {
 function quebrar() {
   if (!interacao.target) return;
   const [vx, vy, vz] = interacao.target;
+  if (vy <= 1) return aviso('Esse é o fundo da ilha: não dá para quebrar.');
   world.updateVoxel(vx, vy, vz, 0, {});
 }
 function colocar() {
@@ -156,14 +162,45 @@ function aplicarTexturas() {
 }
 
 // ---------------- conexão ----------------
+class CodigoRecusado extends Error {}
 function telaConexao(titulo: string, texto: string, falhou: boolean) {
   $('conexaoTitulo').textContent = titulo; $('conexaoTexto').textContent = texto; $('conexaoAcoes').hidden = !falhou;
   mostrar('tConexao');
 }
+function telaInicio(msg = '') {
+  $('caixaCodigo').hidden = !!codigo;
+  $('bTrocarCodigo').hidden = !codigo;
+  $('msgCodigo').textContent = msg;
+  mostrar('tInicio');
+  if (!codigo) setTimeout(() => $('campoCodigo').focus(), 50);
+}
+/** Testa o código antes de entrar: 'ok', 'recusado' (servidor no ar, código errado) ou 'fora' (servidor fora). */
+function testarCodigo(c: string): Promise<'ok' | 'recusado' | 'fora'> {
+  return new Promise((resolver) => {
+    let feito = false;
+    let ws: WebSocket | null = null;
+    const fim = (r: 'ok' | 'recusado' | 'fora') => {
+      if (feito) return; feito = true; clearTimeout(limite);
+      if (ws) { ws.onopen = ws.onerror = ws.onclose = null; try { ws.close(); } catch { /* já fechou */ } }
+      resolver(r);
+    };
+    const limite = setTimeout(() => fim('fora'), 8000);
+    const u = new URL('ws/', SERVIDOR);
+    u.protocol = u.protocol.replace('http', 'ws');
+    u.searchParams.set('secret', c);
+    try { ws = new WebSocket(u.toString()); } catch { fim('fora'); return; }
+    ws.onopen = () => fim('ok');
+    // recusou: o servidor está de pé (a rota de saúde responde com CORS) ou caiu?
+    ws.onerror = ws.onclose = () => { fetch(new URL('saude', SERVIDOR), { mode: 'cors', cache: 'no-store' }).then(() => fim('recusado'), () => fim('fora')); };
+  });
+}
 async function conectar(): Promise<void> {
   telaConexao('Chegando na ilha…', 'Preparando os blocos.', false);
-  const tempo = new Promise<never>((_, rej) => setTimeout(() => rej(new Error('demorou')), 12000));
-  await Promise.race([network.connect(SERVIDOR, { secret: SEGREDO }), tempo]);
+  const teste = await testarCodigo(codigo);
+  if (teste === 'recusado') throw new CodigoRecusado();
+  if (teste === 'fora') throw new Error('servidor fora');
+  const tempo = new Promise<never>((_, rej) => setTimeout(() => rej(new Error('demorou')), 15000));
+  await Promise.race([network.connect(SERVIDOR, { secret: codigo }), tempo]);
   await Promise.race([network.join(MUNDO), tempo]);
   await world.initialize();
   aplicarTexturas();
@@ -171,8 +208,14 @@ async function conectar(): Promise<void> {
 }
 function entrar() {
   if (conectado) { mostrar(null); controls.lock(); return; }
+  if (!codigo) {
+    const digitado = $<HTMLInputElement>('campoCodigo').value.trim().toLowerCase();
+    if (!digitado) { telaInicio('Digite o código da ilha.'); return; }
+    codigo = digitado;
+  }
   iniciando ??= conectar()
     .then(() => {
+      guardarCodigo(codigo);
       escolherVaga(vaga);
       // o navegador só prende o mouse logo depois de um clique; a conexão pode demorar mais que isso.
       // Se não prender, a tela de pausa oferece "Continuar" (um clique novo, que prende de verdade).
@@ -180,10 +223,16 @@ function entrar() {
       controls.lock();
       setTimeout(() => { if (!controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
     })
-    .catch(() => {
+    .catch((erro) => {
       iniciando = null;
       try { network.disconnect(); } catch { /* já caiu */ }
-      telaConexao('A ilha está dormindo 😴', 'Não deu para chegar na ilha agora. Tente de novo daqui a pouco.', true);
+      if (erro instanceof CodigoRecusado) {
+        codigo = ''; guardarCodigo('');
+        $<HTMLInputElement>('campoCodigo').value = '';
+        telaInicio('Esse código não abriu a ilha. Confira e tente de novo.');
+      } else {
+        telaConexao('A ilha está dormindo 😴', 'Não deu para chegar na ilha agora. Tente de novo daqui a pouco.', true);
+      }
     });
 }
 
@@ -195,6 +244,8 @@ controls.on('unlock', () => {
 });
 controls.on('lock', () => { inputs.setNamespace('jogo'); mostrar(null); });
 $('bEntrar').addEventListener('click', entrar);
+$('campoCodigo').addEventListener('keydown', (e) => { if (e.key === 'Enter') entrar(); });
+$('bTrocarCodigo').addEventListener('click', () => { codigo = ''; guardarCodigo(''); telaInicio(); });
 $('bTentar').addEventListener('click', entrar);
 $('bContinuar').addEventListener('click', () => controls.lock());
 $('bPausa').addEventListener('click', (e) => { e.stopPropagation(); controls.unlock(); mostrar('tPausa'); });
@@ -212,17 +263,28 @@ function redimensionar() {
 addEventListener('resize', redimensionar);
 redimensionar();
 const direcao = new THREE.Vector3();
+let semConexao = false;
 function passo() {
   if (!world.isInitialized) return;
   interacao.update();
   controls.update();
+  if (conectado) {
+    // caiu da ilha (fundo ou borda): volta para o meio, sem castigo
+    const p = controls.object.position;
+    if (p.y < -8 || Math.abs(p.x) > 90 || Math.abs(p.z) > 90) { controls.teleportToTop(0.5, 0.5); aviso('Ops! De volta para o meio da ilha.'); }
+    // conexão caiu no meio do jogo: avisa enquanto o motor reconecta sozinho
+    if (!network.connected !== semConexao) {
+      semConexao = !network.connected;
+      const t = $('toast'); t.textContent = 'Reconectando à ilha…'; t.hidden = !semConexao;
+    }
+  }
   world.update(controls.object.position, camera.getWorldDirection(direcao));
   renderer.render(world, camera);
 }
 function quadro() { requestAnimationFrame(quadro); passo(); }
 requestAnimationFrame(quadro);
 montarBarra();
-mostrar('tInicio');
+telaInicio();
 
 if (DEBUG) (window as unknown as { __ilha: object }).__ilha = {
   world, controls, network, interacao, VOXELIZE, THREE,

@@ -1,12 +1,15 @@
 # Estado — Ilha dos Blocos
 
-- Slug: `ilha-dos-blocos` (catálogo: `em-breve`; vira `pronto` só na BLK-065)
+- Slug: `ilha-dos-blocos` — **prévia 0.1 no catálogo como `pronto`** (pedido do Boaz em 2026-11-01; DEC-013)
 - Data e fuso: 2026-11-01, America/Sao_Paulo (-03:00)
 - Base: Voxelize — **@voxelize/core 3.0.0 (npm) + crate `voxelize` =3.0.0 (crates.io)**, par publicado e casado.
   A prova da BLK-010 usou o commit `7ae1c20` (mais novo); a versão publicada também tem `MobileRigidControls`.
   Ver `docs/blocos/ADR-001-base.md`.
 - Etapa atual: **BLK-030 em execução — incremento 1 (primeiro trecho jogável) feito, local**
-- Fonte: `desenvolvimento/jogos/ilha-dos-blocos/{servidor,cliente}` · ainda sem build no portal, sem VPS
+- Fonte: `desenvolvimento/jogos/ilha-dos-blocos/{servidor,cliente}` · build em `_privado/jogos/ilha-dos-blocos/`
+- Servidor: VPS `srv2114451.hstgr.cloud`, serviço `ilha-dos-blocos` atrás do nginx em `https://srv2114451.hstgr.cloud:8443`
+  (infra em `desenvolvimento/infra/vps/`); entrada com o **código da ilha** (cópia do Boaz em `~/samuel-tech-ilha-codigo.txt`,
+  no servidor em `/opt/ilha/ilha.env`)
 
 ## O que funciona (local)
 

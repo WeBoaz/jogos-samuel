@@ -28,9 +28,11 @@ ABSOLUTO = re.compile(
     r"""(?:\b(?:src|href)\s*=\s*["']/(?!/|jogos/))"""
     r"""|(?:\bfrom\s*["']/(?!/))|(?:\bimport\(\s*["']/(?!/))|(?:(?-i:url)\(\s*["']?/(?!/))""",   # url() do CSS; new URL("/x", base) do JS não
     re.I)
+# em CSS/HTML o url() vale com qualquer caixa (no JS, URL( é o construtor e fica de fora)
+ABSOLUTO_CSS = re.compile(r"""url\(\s*["']?/(?!/)""", re.I)
 RASTREADOR = re.compile(
     r"googletagmanager|google-analytics|\bgtag\s*\(|\bdataLayer\b|connect\.facebook|fbq\(|hotjar|"
-    r"plausible\.io|clarity\.ms|mixpanel|segment\.io|amplitude\.com|@amplitude/|amplitude\.getInstance|posthog|sentry\.io|doubleclick|adsbygoogle",
+    r"plausible\.io|clarity\.ms|mixpanel|segment\.io|amplitude\.com|@amplitude/|amplitude\.(?:getInstance|init)\b|posthog|sentry\.io|doubleclick|adsbygoogle",
     re.I)
 
 
@@ -88,8 +90,11 @@ def verificar(slug, exts, cat):
             if not nome.lower().endswith(TEXTO):
                 continue
             texto = open(arq, encoding="utf-8", errors="replace").read()
-            for rx, msg in ((EXTERNO, "recurso de outro domínio"), (ABSOLUTO, "caminho absoluto do site"),
-                            (RASTREADOR, "rastreador/analytics")):
+            regras = [(EXTERNO, "recurso de outro domínio"), (ABSOLUTO, "caminho absoluto do site"),
+                      (RASTREADOR, "rastreador/analytics")]
+            if nome.lower().endswith((".css", ".html", ".htm", ".svg")):
+                regras.append((ABSOLUTO_CSS, "caminho absoluto do site"))
+            for rx, msg in regras:
                 for m in rx.finditer(texto):
                     trecho = texto[m.start():m.start() + 60].splitlines()[0]
                     erros.append(f"{msg}: {rel}:{linha(texto, m.start())}: {trecho}")

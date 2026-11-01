@@ -16,7 +16,7 @@ Um caminho só (regra da seção 5): não manter noa, zardoy ou Luanti em parale
 
 | Critério | Resultado | Evidência / o que falta |
 |---|---|---|
-| Recursos distribuíveis | **Aprovado** | código MIT; dependências do cliente 43 MIT, 3 ISC, 2 zlib, 1 domínio público (`noisejs`); assets de exemplo (CC BY-SA, fontes, imagens) **não** entram — ver [`RECURSOS.md`](RECURSOS.md) |
+| Recursos distribuíveis | **Aprovado** | código MIT; no bundle da Ilha 0.1: 16 MIT, 7 BSD-3-Clause (protobufjs), 1 Apache-2.0 (long), 2 zlib — avisos completos gerados no build; assets de exemplo (CC BY-SA, fontes, imagens) **não** entram — ver [`RECURSOS.md`](RECURSOS.md) |
 | Navegador | **Inconclusivo (falta ambiente)** | desktop (Chromium) e WebKit 26.6 emulando iPad/iPhone ok; falta sessão em aparelho real com toque nativo |
 | Save | **Aprovado** | construir → parada abrupta do servidor → reabrir com as mudanças; reconexão automática |
 | Hostinger/player | **Inconclusivo (falta ambiente)** | cliente estático em outra origem ok e porteiro já entrega `.wasm`; o processo Rust fica **fora** da hospedagem compartilhada (VPS, infraestrutura separada e explícita), mas o servidor ainda não está na VPS com `wss://` |
@@ -45,7 +45,7 @@ a "Em revisão" e a prova mínima de noa (Babylon) entra antes de continuar.
 
 ```
 Portal PHP (Hostinger compartilhada)            VPS (srv2114451.hstgr.cloud)
-/jogar/?jogo=ilha-dos-blocos  ──iframe──►        Caddy :443 (TLS Let's Encrypt)
+/jogar/?jogo=ilha-dos-blocos  ──iframe──►        nginx :8443 (TLS Let's Encrypt já existente)
 /jogo/ilha-dos-blocos/*  (estático, jogo.php)        └─► servidor Rust da Ilha (127.0.0.1, systemd)
   cliente @voxelize/core + nossa UI  ──wss://──►         mundos em disco + backup diário
 ```

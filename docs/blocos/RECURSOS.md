@@ -10,7 +10,7 @@ com licença conferida**. Atualizar a cada recurso novo (BLK-030 em diante). Lev
 | Voxelize (servidor, crate `voxelize`) | `7ae1c20` / 3.0.0 | MIT (© 2022 Shaoru Ian Huang) | VPS | não (binário fica na VPS) |
 | `@voxelize/core`, `aabb`, `physics-engine`, `raycast`, `protocol`, `wasm-mesher` | 3.0.0 (mesmo commit) | MIT | navegador | sim, no bundle — aviso em `THIRD_PARTY_NOTICES.txt` |
 | three.js | 0.183.x (dependência do core) | MIT | navegador | sim — aviso |
-| Dependências de produção do core (pnpm licenses) | lockfile do commit | 43 MIT, 3 ISC (`fastq`, `glob-parent`, `lz4js`), 2 zlib (`postprocessing`, `gl-vec3`), 1 domínio público (`noisejs`, declarado no `index.js`) | navegador | as que o bundler incluir — gerar a lista do bundle real na BLK-065 |
+| Pacotes que entram no bundle da Ilha 0.1 (lista gerada no build) | `package-lock.json` | 16 MIT, 7 BSD-3-Clause (`protobufjs` e 6 `@protobufjs/*`), 1 Apache-2.0 (`long`), 2 zlib (`postprocessing`, `gl-vec3`) | navegador | sim — texto completo de cada licença em `THIRD_PARTY_NOTICES.txt`, gerado pelo plugin `avisosDeLicenca` do `vite.config.ts` a partir dos módulos do bundle |
 | Crates Rust do servidor | ~500 no `Cargo.lock` | a conferir com `cargo-deny`/`cargo-about` na BLK-065 | VPS | não |
 | `controles-toque.js`, `ui-blocos.css` | da casa | nosso | navegador | sim |
 
