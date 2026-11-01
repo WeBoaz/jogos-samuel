@@ -4,9 +4,12 @@
 - Ficha no Notion: https://app.notion.com/p/40b0a726d055815b96a7e71134a36414 (Estado: Publicado sem revisão)
 - Data e fuso: 2026-11-01, America/Sao_Paulo (-03:00)
 - Branch: `main` local = `exp-01-minigolfe-dos-pets` no fork AndaimeOS/jogos-samuel → PR https://github.com/WeBoaz/jogos-samuel/pull/1
-- Último commit do código: `8b3e383` · manifesto: `040829f`
-- Etapa atual: EXP-01-E publicado e aguardando revisão (EXP-01-F, ChatGPT)
-- Versão: 1.0 (`minigolfe-dos-pets@1.0+8b3e383.producao`)
+- Último commit do código: `c0b67d9` · manifesto: `752744b` (1.0.1) — 1.0 era `8b3e383`/`040829f`
+- Etapa atual: 1.0.1 publicada (RV-MG-001/003); aguardando teste no celular (Boaz) e revisão EXP-01-F
+- Versão: 1.0.1 (`minigolfe-dos-pets@1.0.1+c0b67d9.producao`), em produção desde 2026-11-01 14:04 (-03:00)
+- Pacote publicado: SHA-256 `eb76b1220f6eae07e097ed59a4becc98214e04bf434b078958ccb605c9204473`; QA em `docs/qa/minigolfe-dos-pets/1.0.1+c0b67d9/`
+- Identidade pública: https://samuel.tech/jogo/minigolfe-dos-pets/release.json (SHA-256 de cada arquivo em `files`)
+- Teste de FPS no aparelho: https://samuel.tech/jogo/minigolfe-dos-pets/index.html?fps (roteiro em `ROTEIRO-CELULAR.md`)
 - URL local: http://127.0.0.1:8770/jogar/?jogo=minigolfe-dos-pets (Docker PHP, config `samuel-tech-php`)
 - URL de produção: https://samuel.tech/jogar/?jogo=minigolfe-dos-pets
 - Registro de deploy: https://app.notion.com/p/40b0a726d05581d69440cf9fa623464f (SHA256 do pacote `3d9b77d3…5379`)
@@ -35,7 +38,8 @@ DEC-010 (Three.js 0.170 + TS + Vite, física própria, sem Rapier) e DEC-011 (ma
 | Mira com mouse e toque sem rolar a página; cancelar não taca | cumprido — gestos simulados (soltar perto, pointercancel, blur) e testes da mira |
 | Reiniciar limpa tudo; dois circuitos sem duplicar listeners | cumprido — ouvintes estáveis após vários circuitos; GPU estável |
 | Aceites globais (rotas, 403, pt-BR, sem rolagem, pausa, save, sem erro de console, licenças, regressão) | cumprido — ver QA-QUALIDADE.md e verificação pós-deploy |
-| Desempenho ≥ 30 FPS no celular de referência | **não testado** (só Mac: ~120 FPS, 54–103 draw calls) |
+| Desempenho ≥ 30 FPS no celular de referência | **não testado** — medidor `?fps` publicado na 1.0.1; Mac ~120 FPS; WebKit emulado ~57 FPS (não vale como aparelho) |
+| Recordes não se perdem com duas abas (RV-MG-003) | cumprido — 1.0.1, testes de mescla no save |
 | Playtest com o Samuel | **não testado** |
 
 ## Pendências e bloqueios
@@ -47,8 +51,8 @@ DEC-010 (Three.js 0.170 + TS + Vite, física própria, sem Rapier) e DEC-011 (ma
 
 ## Próxima ação exata
 
-Ler o parecer da revisão (EXP-01-F) no Notion/PR #1. Se "Ajustes", corrigir os P0/P1 e republicar com
-`python3 ferramentas/release_jogo.py minigolfe-dos-pets 1.1`. Se aprovado, seguir para o próximo jogo pedido.
+Boaz roda `ROTEIRO-CELULAR.md` no celular e manda o resumo do `?fps`; com ele, registrar em RV-MG-001 e pedir a
+reavaliação EXP-01-F. Fila P2 para a próxima versão: painel do `?fps` cobre os botões da pausa; `git ls-files -z`.
 
 ## Arquivos alterados
 

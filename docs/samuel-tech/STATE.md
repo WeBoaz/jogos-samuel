@@ -3,6 +3,18 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (Minigolfe 1.0.1 — RV-MG-001/003)
+
+- **Publicado:** `minigolfe-dos-pets@1.0.1+c0b67d9` em produção desde 2026-11-01 14:04 (-03:00); pacote SHA-256
+  `eb76b122…4473` (= `git archive 752744b`); produção conferida byte a byte (23/23 arquivos de jogos) e rotas 403 ok.
+- **O que mudou:** medidor `?fps` (média, p95, quedas, travadas, aparelho/GPU, resumo após 5 min, nada sai do aparelho),
+  recordes mesclados entre abas (RV-MG-003), `release.json` com SHA-256 por arquivo (identidade pública verificável).
+- **QA:** rodada 1 (`c3c2f99`) reprovada pelo REV-01 (P1: medidor ordenava o histórico) → corrigido; rodada 2 aprovada
+  por REV-01 e QA-PERF; G3 em `docs/qa/minigolfe-dos-pets/1.0.1+c0b67d9/G3-LIBERACAO.md`. vitest 53/53.
+- **Não executado:** celular real (toque nativo, 30 FPS) — roteiro para o Boaz; iOS Simulator indisponível (sem Xcode
+  completo; WebKit 26.6 via Playwright usado como apoio); playtest com o Samuel.
+- **NEXT:** resultado do celular → RV-MG-001 → EXP-01-F. Programa de blocos: BLK-010 (Voxelize) depende de Rust + VPS.
+
 ## 2026-11-01 — Claude (BLK-000 — programa de blocos)
 
 - **Pedido do Boaz:** programa "Minecraft no navegador, mods, Roblox e arenas de blocos" (v1.1, protocolo de QA G0–G5),
