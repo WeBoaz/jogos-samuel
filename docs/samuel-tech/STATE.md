@@ -3,6 +3,21 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (Ilha dos Blocos 0.2 — celular e tablet)
+
+- **Pedido do Boaz:** Ilha jogável em celular/iPad com direcionais na tela, e publicar.
+- **Publicado:** `ilha-dos-blocos@0.2+a2d073f` desde 2026-11-01 20:34 (-03:00); pacote `0a8e5416…48b1` (= `git archive 91acf90`);
+  produção = zip (30/30); servidor da VPS no commit `04d916f` (anterior guardado como `.0.1.1`).
+- **O que mudou:** controles de toque (joystick da casa, olhar arrastando, ⛏ 🧱 ⤒ 🪽 ⤓, barra no alto, ▦), velocidades de
+  criança, Criativo sempre de dia (relógio parado sem gravar stats a cada tick), avisos compactos, volta ao meio sem encalhar.
+  `desenvolvimento/compartilhado/controles-toque.js`: centro lógico do joystick perto de onde o dedo encosta.
+- **QA:** 3 rodadas — rodada 1 e 2 reprovadas (REV-01 + QA-UX), rodada 3 aprovada pelos dois. G3 em
+  `docs/qa/ilha-dos-blocos/0.2+a2d073f/`. Sessões reais em samuel.tech com o código: iPhone emulado (anda, põe e tira bloco,
+  manhã) e computador (põe e tira bloco).
+- **Não executado:** aparelho real, Safari real, 120 Hz, playtest com o Samuel.
+- **NEXT:** 0.2.1 com os P2 da G3 (voo vertical por tempo de quadro, joystick colado na borda, volta ao meio olhando a altura,
+  avisos longos) ou BLK-030 incremento 2 (porta, girar, exportar/importar, mundos por código).
+
 ## 2026-11-01 — Claude (Ilha dos Blocos 0.1.1)
 
 - **Publicado:** `ilha-dos-blocos@0.1.1+479f2f1` desde 2026-11-01 17:57 (-03:00); pacote `1244fa66…6629` (= `git archive
