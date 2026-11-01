@@ -3,6 +3,18 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (BLK-030 — Ilha dos Blocos, incremento 1)
+
+- **Feito (local):** servidor Rust da Ilha (32 blocos + água, ilha por seed 2026, save, 127.0.0.1, sem chat) e
+  cliente (telas da casa, céu do kit, texturas próprias em código, barra de 9, catálogo de 32, quebrar/colocar).
+  Estado detalhado: `docs/jogos/ilha-dos-blocos/ESTADO.md`.
+- **Testes:** `cargo test` 5/5, `vitest` 12/12, `tsc` ok; sessão no navegador: quebrar tronco, colocar 3 blocos
+  trocando vaga, servidor parado → "a ilha está dormindo" → tentar de novo → tudo persistido.
+- **Decisão:** dependências = par publicado `@voxelize/core` 3.0.0 + crate `voxelize` =3.0.0 (ADR atualizada).
+- **Não executado:** toque, celular, build de produção/orçamento, VPS.
+- **NEXT:** BLK-030 incremento 2 — porta que abre, girar blocos, exportar/importar mundo, mundos por código,
+  build ≤ 450 KB gzip, robô da casa de referência.
+
 ## 2026-11-01 — Claude (BLK-020 — decisão da base)
 
 - **Decisão:** DEC-012 / `docs/blocos/ADR-001-base.md` — Voxelize `7ae1c20` aceito **com condições** (servidor na VPS

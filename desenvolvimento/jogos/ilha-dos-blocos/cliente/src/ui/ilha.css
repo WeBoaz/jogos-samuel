@@ -1,0 +1,40 @@
+/* Ilha dos Blocos — HUD e telas próprias (o resto vem de ui-blocos.css). */
+#jogo { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: #a9dcf2; }
+
+.mira { position: fixed; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; z-index: 5; pointer-events: none; }
+.mira::before, .mira::after { content: ''; position: absolute; background: #fff; box-shadow: 0 0 0 1.5px var(--ink); }
+.mira::before { left: 10px; top: 0; width: 2px; height: 22px; }
+.mira::after { top: 10px; left: 0; height: 2px; width: 22px; }
+
+.ilha-topo { position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); z-index: 6; }
+
+.barra-rapida { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 6; display: flex; gap: 4px; padding: 6px; background: rgba(245, 242, 232, .92); border: var(--line); box-shadow: var(--shadow); }
+.vaga { position: relative; width: 56px; height: 56px; border: 2px solid rgba(25, 51, 55, .35); background: var(--cream);
+  display: grid; place-items: center; padding: 0; }
+.vaga canvas { width: 40px; height: 40px; image-rendering: pixelated; }
+.vaga b { position: absolute; left: 3px; top: 1px; font: 700 11px var(--mono); color: var(--muted); }
+.vaga[aria-pressed="true"] { border: 3px solid var(--ink); background: var(--play); transform: translateY(-4px); }
+
+.nome-bloco { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(max(12px, env(safe-area-inset-bottom)) + 82px);
+  z-index: 6; font: 800 16px var(--sans); color: var(--ink); background: var(--paper); border: var(--line); padding: 4px 12px;
+  pointer-events: none; transition: opacity .3s; }
+.nome-bloco:empty { opacity: 0; }
+
+.grade-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; max-height: min(52vh, 460px);
+  overflow: auto; padding: 4px; }
+.grade-catalogo button { border: var(--line); background: var(--cream); box-shadow: 3px 3px 0 var(--ink); padding: 6px 4px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font: 700 12px var(--sans); min-height: var(--alvo); }
+.grade-catalogo button canvas { width: 44px; height: 44px; image-rendering: pixelated; }
+.grade-catalogo button:hover, .grade-catalogo button:focus-visible { background: var(--play); }
+.dica-catalogo { margin: 0 0 10px; }
+.aviso-toque { font: 700 14px var(--sans); background: var(--gold); border: var(--line); padding: 8px 10px; margin: 14px 0 0; }
+
+#toast { position: fixed; top: max(12px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 7; }
+
+@media (max-width: 560px) {
+  .vaga { width: 36px; height: 36px; }
+  .vaga canvas { width: 28px; height: 28px; }
+  .vaga b { display: none; }
+  .nome-bloco { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 58px); }
+}

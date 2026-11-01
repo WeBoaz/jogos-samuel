@@ -1,0 +1,14 @@
+[package]
+name = "ilha-dos-blocos-servidor"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Servidor autoritativo da Ilha dos Blocos (samuel.tech), sobre o Voxelize 3.0.0 (MIT)."
+license = "UNLICENSED"
+
+[dependencies]
+voxelize = "=3.0.0"
+actix-web = "4.5.1"
+
+[profile.release]
+debug = "line-tables-only"

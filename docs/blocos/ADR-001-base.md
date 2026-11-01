@@ -5,8 +5,9 @@
 
 ## Decisão
 
-A Ilha dos Blocos usa o **Voxelize** (`voxelize/voxelize`, MIT, commit `7ae1c202c4ed33e6f18ea2e947c5c6f9a373b605`,
-pacotes 3.0.0): cliente `@voxelize/core` (Three.js 0.183) servido estático pelo portal em
+A Ilha dos Blocos usa o **Voxelize** (`voxelize/voxelize`, MIT; prova no commit `7ae1c202c4ed33e6f18ea2e947c5c6f9a373b605`;
+**dependências do jogo: `@voxelize/core` 3.0.0 no npm + crate `voxelize` =3.0.0 no crates.io**, o par publicado e casado,
+reproduzível pelos lockfiles — decidido na BLK-030): cliente `@voxelize/core` (Three.js 0.183) servido estático pelo portal em
 `/jogo/ilha-dos-blocos/`, e **servidor Rust autoritativo na VPS** (`srv2114451.hstgr.cloud`), acessado por `wss://`.
 
 Um caminho só (regra da seção 5): não manter noa, zardoy ou Luanti em paralelo para o mesmo jogo.
