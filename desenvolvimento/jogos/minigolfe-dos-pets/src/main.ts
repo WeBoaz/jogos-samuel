@@ -92,7 +92,7 @@ class Jogo {
     if (FPS) this.medidor = new Medidor(this.mundo.renderer.getContext(), () => {
       const r = this.mundo.renderer;
       return `qualidade ${this.mundo.nivelQualidade} · ${r.info.render.calls} draw calls · ${r.domElement.width}×${r.domElement.height} px`;
-    }, FPS_SEG);
+    }, FPS_SEG, () => this.pausado || this.estado !== 'jogando');
     requestAnimationFrame(() => this.quadro());
     $('carregando').remove();
     if (CAPA) this.modoCapa(); else this.mostrarTela('tMenu');

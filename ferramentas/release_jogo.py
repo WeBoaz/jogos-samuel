@@ -38,15 +38,14 @@ def main(argv):
         print("commite o código e o build do jogo antes de gerar o manifesto:\n" + "\n".join(sujos))
         return 1
     commit = git("rev-parse", "HEAD")
+    # os mesmos arquivos que o empacotar.sh leva (git archive): os versionados da pasta do jogo
     arquivos = {}
-    for raiz, _, nomes in os.walk(pasta):
-        for nome in nomes:
-            caminho = os.path.join(raiz, nome)
-            rel = os.path.relpath(caminho, pasta).replace(os.sep, "/")
-            if rel == "release.json" or nome.startswith("."):
-                continue
-            with open(caminho, "rb") as f:
-                arquivos[rel] = hashlib.sha256(f.read()).hexdigest()
+    for rel in git("ls-files", "--", f"_privado/jogos/{slug}").splitlines():
+        nome = rel[len(f"_privado/jogos/{slug}/"):]
+        if nome == "release.json":
+            continue
+        with open(os.path.join(RAIZ, rel), "rb") as f:
+            arquivos[nome] = hashlib.sha256(f.read()).hexdigest()
     agora = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(timespec="seconds")
     manifesto = {
         "schema_version": 1,
