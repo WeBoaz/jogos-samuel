@@ -3,6 +3,27 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (ST-030)
+
+- **Tarefa atual:** ST-030 — Definir interface e identidade dos dois jogos. **Concluída.**
+- **Branch e commit:** `main` local, sem push (ver `git log`; commits ST-010, ST-020, ST-030).
+- **Concluído:** `desenvolvimento/compartilhado/ui-blocos.css` (tokens do kit + componentes),
+  `desenvolvimento/compartilhado/controles-toque.js` (joystick + ações com multitoque),
+  `desenvolvimento/interface/prototipo.html` (15 telas de Hordas e Dungeons),
+  `docs/samuel-tech/INTERFACE.md` (decisões, telas, cores do mundo, validação, skills).
+- **Testes executados:** auditoria automática das 15 telas em 815×881, 375×812 e 812×375
+  (rolagem, alvos ≥ 64 px, sobreposição HUD/controles) — tudo ok depois de 5 correções;
+  contraste ≥ 6:1 em todos os pares; multitoque simulado com 3 dedos; blur solta tudo;
+  `destruir()` remove ouvintes; P/Esc/1-2-3 no teclado; console limpo.
+- **Não executado:** toque real em aparelho, iPhone/Android, leitor de tela, teste com criança.
+- **Deploy e release:** nenhum. **Bloqueio real:** nenhum.
+- **NEXT:** HO-010 — copiar `ui-blocos.css` e `controles-toque.js` para
+  `_privado/jogos/hordas-dos-blocos/`, montar a arena com 1 herói, 1 arma, 1 inimigo a partir de
+  `desenvolvimento/jogos/hordas-dos-blocos/upstream-voxel-survivors/` (sem GA, Three.js com
+  versão exata), entrada `rascunho` no `jogos.json`, provar 90 s jogáveis e passar no
+  `verificar_jogo.py`. ST-040 (manifesto de release + `release.json` no roteador local)
+  continua Pronta e pode ser feita antes da publicação (HO-050).
+
 ## 2026-11-01 — Claude (ST-000, ST-010, ST-020)
 
 - **Tarefa atual:** ST-020 — Preparar fonte, build e retomada de contexto.
