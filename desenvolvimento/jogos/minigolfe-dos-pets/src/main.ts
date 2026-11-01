@@ -14,6 +14,7 @@ import { CameraGolf } from './render/camera';
 import { Mira } from './input/mira';
 import { Som } from './audio/som';
 import { Save } from './storage/save';
+import { Medidor } from './ui/medidor';
 
 /** Cada jogador tem o próprio jeito: "com ajuda" (prévia longa, ímã, rampa amiga) ou "desafio". */
 const AJUSTES: Record<Modo, Ajustes> = {
@@ -26,6 +27,8 @@ const NOME_MODO: Record<Modo, string> = { assistido: '🐾 com ajuda', normal: '
 const params = new URLSearchParams(location.search);
 const DEBUG = params.has('debug');
 const CAPA = params.has('capa');
+const FPS = params.has('fps');
+const FPS_SEG = Math.min(1800, Math.max(10, Number(params.get('fps')) || 300));
 const EMBUTIDO = (() => { try { return window.top !== window; } catch { return true; } })();
 
 type Estado = 'menu' | 'jogando' | 'placar' | 'fim';
@@ -66,6 +69,7 @@ class Jogo {
   private ouvintesDom = 0;
   private confirmando: HTMLElement | null = null;
   private entrada: Mira;
+  private medidor: Medidor | null = null;
 
   constructor() {
     if (EMBUTIDO) document.body.classList.add('embutido');
@@ -85,6 +89,10 @@ class Jogo {
     this.redimensionar();
     this.montarMenu();
     this.carregarPista(PISTAS[0], true);
+    if (FPS) this.medidor = new Medidor(this.mundo.renderer.getContext(), () => {
+      const r = this.mundo.renderer;
+      return `qualidade ${this.mundo.nivelQualidade} · ${r.info.render.calls} draw calls · ${r.domElement.width}×${r.domElement.height} px`;
+    }, FPS_SEG);
     requestAnimationFrame(() => this.quadro());
     $('carregando').remove();
     if (CAPA) this.modoCapa(); else this.mostrarTela('tMenu');
@@ -519,6 +527,7 @@ class Jogo {
     const dtReal = Math.min(this.relogio.getDelta(), 0.1);
     this.avancar(dtReal);
     this.mundo.renderer.render(this.mundo.cena, this.camera.cam);
+    this.medidor?.quadro(performance.now());
     // qualidade adaptativa (ignora os primeiros segundos de cada pista, quando os shaders compilam)
     this.mediaQuadro += (dtReal * 1000 - this.mediaQuadro) * 0.05;
     this.tempoMedida += dtReal;

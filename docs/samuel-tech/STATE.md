@@ -3,6 +3,20 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (BLK-000 — programa de blocos)
+
+- **Pedido do Boaz:** programa "Minecraft no navegador, mods, Roblox e arenas de blocos" (v1.1, protocolo de QA G0–G5),
+  começando pela BLK-000. Plano aprovado: Voxelize primeiro (noa alternativa, Colyseus para salas); VPS liberada para
+  Arena online + servidor família.
+- **Checkpoint:** `main` = `dc7628c`, árvore limpa; EXP-01 (Minigolfe) em EXP-01-E publicado, aguardando EXP-01-F;
+  revisão RV-MG-001 (P1: identidade pública verificável, toque/30 FPS em aparelho real) vira Minigolfe 1.0.1 antes de
+  conteúdo novo. Slug `ilha-dos-blocos` confirmado em `_app/jogos.json`.
+- **BLK-000:** Concluída no Notion. BLK-010 Pronta (Voxelize principal; zardoy só auditoria — `mc-assets` são texturas
+  extraídas, não publicáveis; noa só se Voxelize reprovar).
+- **Bloqueio real para BLK-010:** Rust não instalado; acesso SSH à VPS não configurado (etapa de infra proposta como
+  sessão separada).
+- **NEXT:** Minigolfe 1.0.1 (`?fps` + página de evidências) → REV-01 + QA-PERF → publicação → BLK-010.
+
 ## 2026-11-01 — Claude (EXP-01 Minigolfe dos Pets)
 
 - **Pedido do Boaz:** executar o Minigolfe dos Pets (documento "12 jogos 2D/3D") no automático, com várias

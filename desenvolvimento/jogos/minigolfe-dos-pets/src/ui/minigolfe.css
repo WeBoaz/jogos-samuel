@@ -135,3 +135,14 @@ body.embutido #tMenu .corpo { padding-top: 12px; }
   .aviso { font-size: 28px; }
 }
 @media (prefers-reduced-motion: reduce) { .dica-toque .mao { animation: none; } .aviso.pop { animation: none; } }
+
+/* medidor de quadros (?fps) — só em teste de aparelho */
+#medidor { position: fixed; left: 6px; bottom: calc(6px + env(safe-area-inset-bottom)); z-index: 40; pointer-events: none;
+  max-width: calc(100vw - 12px); padding: 4px 8px; background: rgba(25, 51, 55, 0.82); color: #fff;
+  font: 600 11px/1.35 ui-monospace, Menlo, monospace; border-radius: 4px; }
+#medidorResumo { position: fixed; inset: auto 8px 40px 8px; z-index: 41; margin: auto; max-width: 560px; padding: 14px;
+  background: var(--paper, #fff); border: var(--line, 4px solid #193337); box-shadow: var(--shadow, 6px 6px 0 #193337);
+  max-height: calc(100vh - 60px); overflow: auto; }
+#medidorResumo pre { white-space: pre-wrap; word-break: break-word; font: 12px/1.45 ui-monospace, Menlo, monospace;
+  margin: 0 0 12px; user-select: text; -webkit-user-select: text; }
+#medidorResumo .btn { margin-right: 8px; }

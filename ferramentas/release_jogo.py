@@ -7,8 +7,10 @@ O manifesto identifica o commit do CÓDIGO (source_commit = HEAD no momento da c
 precisa estar limpo para os arquivos do jogo). Depois: commitar o release.json junto com o
 build e empacotar. O hash do zip, a hora real do deploy e o link do Notion ficam no recibo
 externo (Notion + comentário SAMUEL_TECH_DEPLOY_READY), nunca dentro do pacote.
-Sem dados sensíveis: só slug, versão, commit, ambiente, data e URL pública."""
-import datetime, json, os, re, subprocess, sys
+Sem dados sensíveis: só slug, versão, commit, ambiente, data e URL pública.
+`files` lista o SHA-256 de cada arquivo publicado do jogo (menos o próprio release.json), para quem revisa
+conferir os bytes servidos em /jogo/<slug>/<arquivo> sem acesso ao Git."""
+import datetime, hashlib, json, os, re, subprocess, sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,6 +38,15 @@ def main(argv):
         print("commite o código e o build do jogo antes de gerar o manifesto:\n" + "\n".join(sujos))
         return 1
     commit = git("rev-parse", "HEAD")
+    arquivos = {}
+    for raiz, _, nomes in os.walk(pasta):
+        for nome in nomes:
+            caminho = os.path.join(raiz, nome)
+            rel = os.path.relpath(caminho, pasta).replace(os.sep, "/")
+            if rel == "release.json" or nome.startswith("."):
+                continue
+            with open(caminho, "rb") as f:
+                arquivos[rel] = hashlib.sha256(f.read()).hexdigest()
     agora = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(timespec="seconds")
     manifesto = {
         "schema_version": 1,
@@ -46,6 +57,8 @@ def main(argv):
         "environment": ambiente,
         "built_at": agora,
         "public_url": f"https://samuel.tech/jogar/?jogo={slug}",
+        "files_base_url": f"https://samuel.tech/jogo/{slug}/",
+        "files": dict(sorted(arquivos.items())),
     }
     with open(os.path.join(pasta, "release.json"), "w", encoding="utf-8") as f:
         json.dump(manifesto, f, ensure_ascii=False, indent=2)

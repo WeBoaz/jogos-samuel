@@ -1,5 +1,7 @@
 // Save local: melhor placar por circuito e preferências. Chave samuel:minigolfe-dos-pets:<perfil>:v1.
 // Nunca guarda objetos de física/renderização. Se o armazenamento falhar, o jogo continua.
+// Duas abas no mesmo perfil: antes de gravar relê o disco e fica com o melhor recorde de cada circuito;
+// as preferências seguem a aba que gravou por último.
 import type { Modo } from '../core/partida';
 
 export const SCHEMA = 1;
@@ -35,6 +37,13 @@ export function validar(bruto: unknown): Dados {
   return d;
 }
 
+/** União dos recordes: em cada circuito vale o de menos tacadas (empate mantém o que já estava em `a`). */
+export function mesclarMelhores(a: Record<string, Melhor>, b: Record<string, Melhor>): Record<string, Melhor> {
+  const r: Record<string, Melhor> = { ...a };
+  for (const [k, v] of Object.entries(b)) if (!r[k] || v.tacadas < r[k].tacadas) r[k] = v;
+  return r;
+}
+
 /** Explorador do portal: o player passa ?perfil=<id> (o cookie do portal é HttpOnly e o jogo não o lê). */
 export function perfilLocal(busca = typeof location !== 'undefined' ? location.search : '', cookie = typeof document !== 'undefined' ? document.cookie : ''): string {
   const daUrl = new URLSearchParams(busca).get('perfil');
@@ -56,12 +65,20 @@ export class Save {
     // conteúdo corrompido só volta ao padrão; o armazenamento continua valendo
     try { if (txt) this.dados = validar(JSON.parse(txt)); } catch { this.dados = padrao(); }
   }
+  /** Traz para a memória os recordes que outra aba gravou depois que esta abriu. */
+  private sincronizar(): void {
+    let txt: string | null = null;
+    try { txt = this.armazenamento?.getItem(this.chave) ?? null; } catch { return; }
+    try { if (txt) this.dados.melhores = mesclarMelhores(validar(JSON.parse(txt)).melhores, this.dados.melhores); } catch { /* disco corrompido: vale o da memória */ }
+  }
   gravar(): boolean {
+    this.sincronizar();
     try { this.armazenamento?.setItem(this.chave, JSON.stringify(this.dados)); return !!this.armazenamento; }
     catch { this.funciona = false; return false; }
   }
   /** Registra o resultado; devolve true se é recorde novo para o circuito. */
   registrar(circuito: string, tacadas: number, par: number, jogadores: number, modo: Modo): boolean {
+    this.sincronizar();
     const atual = this.dados.melhores[circuito];
     if (atual && atual.tacadas <= tacadas) return false;
     this.dados.melhores[circuito] = { tacadas, par, jogadores, modo, data: new Date().toISOString().slice(0, 10) };

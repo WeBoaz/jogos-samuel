@@ -92,3 +92,37 @@ describe('Save — armazenamento', () => {
     expect(s.funciona).toBe(true);
   });
 });
+
+describe('Save — duas abas no mesmo perfil (RV-MG-003)', () => {
+  it('A registra recorde e B (aberta antes) muda preferência: o recorde de A fica', () => {
+    const mem = new Memoria();
+    const a = new Save(mem, 'samuel');
+    const b = new Save(mem, 'samuel');
+    expect(a.registrar('circuito-normal', 20, 18, 1, 'normal')).toBe(true);
+    b.dados.prefs.som = false;
+    b.gravar();
+    const relido = new Save(mem, 'samuel').dados;
+    expect(relido.melhores['circuito-normal'].tacadas).toBe(20);
+    expect(relido.prefs.som).toBe(false);                     // preferência: vale a última aba que gravou
+  });
+
+  it('B não chama de recorde um resultado pior que o que A já gravou', () => {
+    const mem = new Memoria();
+    const a = new Save(mem, 'samuel');
+    const b = new Save(mem, 'samuel');
+    a.registrar('circuito-normal', 20, 18, 1, 'normal');
+    expect(b.registrar('circuito-normal', 25, 18, 1, 'normal')).toBe(false);
+    expect(b.registrar('pista-1-normal', 3, 2, 1, 'normal')).toBe(true);
+    const relido = new Save(mem, 'samuel').dados.melhores;
+    expect(relido['circuito-normal'].tacadas).toBe(20);
+    expect(relido['pista-1-normal'].tacadas).toBe(3);
+  });
+
+  it('disco corrompido por outra aba não derruba a gravação', () => {
+    const mem = new Memoria();
+    const a = new Save(mem, 'samuel');
+    mem.setItem(a.chave, '{quebrado');
+    expect(a.registrar('circuito-normal', 19, 18, 1, 'normal')).toBe(true);
+    expect(new Save(mem, 'samuel').dados.melhores['circuito-normal'].tacadas).toBe(19);
+  });
+});

@@ -1,7 +1,7 @@
 {
   "name": "minigolfe-dos-pets",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Minigolfe dos Pets — samuel.tech. Build estático em _privado/jogos/minigolfe-dos-pets/.",
   "scripts": {
