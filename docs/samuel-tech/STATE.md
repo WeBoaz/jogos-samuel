@@ -3,6 +3,19 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (BLK-010 — provas da base de blocos)
+
+- **Resultado:** Voxelize `7ae1c20` **aprovado como base** (com ressalvas); zardoy **reprovado** para publicação
+  (`mc-assets` = recursos extraídos do Minecraft); noa não executado (não foi preciso). Relatório:
+  `docs/blocos/BLK-010-PROVAS.md`.
+- **Provado:** build servidor Rust + cliente WASM; seed determinística; quebrar/colocar; 2 clientes sincronizados;
+  persistência após parada abrupta; reconexão automática; build estático em outra origem; WebKit 26.6 iPad/iPhone;
+  API de toque (`MobileRigidControls`); porteiro já entrega `.wasm`.
+- **Instalado nesta máquina:** Rust 1.99.1 (rustup, `~/.cargo`, sem mexer no perfil do shell), wasm-pack 0.15.1,
+  protoc 36.2 (brew). Clone em `desenvolvimento/provas/` (ignorado pelo Git).
+- **Não executado:** aparelho real, VPS/`wss://`, Safari iOS real.
+- **NEXT:** BLK-020 (ADR-001, RECURSOS, TESTES, matriz de fidelidade).
+
 ## 2026-11-01 — Claude (Minigolfe 1.0.1 — RV-MG-001/003)
 
 - **Publicado:** `minigolfe-dos-pets@1.0.1+c0b67d9` em produção desde 2026-11-01 14:04 (-03:00); pacote SHA-256
