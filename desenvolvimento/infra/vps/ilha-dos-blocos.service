@@ -15,6 +15,8 @@ Environment=ILHA_PORTA=4100 ILHA_DADOS=/opt/ilha/dados RUST_LOG=error ILHA_PRODU
 ExecStart=/opt/ilha/bin/ilha-dos-blocos-servidor
 Restart=on-failure
 RestartSec=3
+# código fraco ou ausente sai com 2: não adianta reiniciar em laço
+RestartPreventExitStatus=2
 # endurecimento
 NoNewPrivileges=yes
 PrivateTmp=yes
