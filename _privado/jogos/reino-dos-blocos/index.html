@@ -1008,7 +1008,7 @@ function atualizarParticulas(dt) {
 redimensionar();
 estado.nivel = 0; irMenu();
 requestAnimationFrame((t) => { ultimo = t; quadro(t); });
-window.__reino = { estado, get jogador() { return jogador; }, FASES, carregarFase, comecar };   // usado só nos testes automáticos
+window.__reino = { estado, get jogador() { return jogador; }, get plataformas() { return plataformas; }, get inimigos() { return inimigos; }, get itens() { return itens; }, FASES, carregarFase, comecar };   // usado só nos testes automáticos
 })();
 </script>
 </body>
