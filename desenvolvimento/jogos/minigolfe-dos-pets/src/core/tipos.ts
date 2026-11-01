@@ -14,7 +14,7 @@ export interface Piso {
 export interface Parede {
   a: P2;
   b: P2;
-  esp?: number;               // meia espessura (padrão 0.12)
+  esp?: number;               // meia espessura (padrão 0.14)
   alta?: number;              // altura visual (padrão 0.32)
   tipo?: 'madeira' | 'para-choque' | 'pedra';
 }
@@ -36,12 +36,15 @@ export interface Pista {
   agua?: P2[][];              // só visual: onde a bola cai se sair do chão
   tunel?: { de: P2; ate: P2; largura: number };
   dica?: string;
+  rotulo: string;             // nome curto para o botão do menu
+  foco?: P2[];                // pontos que a câmera também precisa mostrar (ex.: o canto da curva)
 }
 
 export interface Ajustes {
   velMax: number;             // velocidade da tacada com força 1
   capturaBuraco: number;      // abaixo desta velocidade a bola cai no buraco
   ima: number;                // 0 = sem ajuda; raio extra que puxa a bola devagar para o buraco
+  rampaGravidade: number;     // 1 = rampa normal; < 1 = rampa "amiga" (sobe mais fácil, volta mais devagar)
 }
 
 export type EventoFisica =

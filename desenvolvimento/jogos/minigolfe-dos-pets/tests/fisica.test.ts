@@ -3,8 +3,8 @@ import { Fisica, PASSO, RAIO_BOLA } from '../src/core/fisica';
 import { PISTAS } from '../src/content/pistas';
 import type { Ajustes, EventoFisica, Pista } from '../src/core/tipos';
 
-const NORMAL: Ajustes = { velMax: 11, capturaBuraco: 4.2, ima: 0 };
-const ASSISTIDO: Ajustes = { velMax: 8, capturaBuraco: 5.4, ima: 0.55 };
+const NORMAL: Ajustes = { velMax: 11, capturaBuraco: 4.2, ima: 0, rampaGravidade: 1 };
+const ASSISTIDO: Ajustes = { velMax: 10, capturaBuraco: 5.4, ima: 0.55, rampaGravidade: 0.6 };
 
 function rolar(f: Fisica, max = 30): EventoFisica[] {
   const ev: EventoFisica[] = [];
@@ -45,7 +45,8 @@ describe('BallPhysics', () => {
 
   it('bola devagar no buraco cai e é detectada', () => {
     const f = new Fisica(PISTAS[0], NORMAL);
-    f.colocar(0, -2.6);
+    const [hx, hz] = PISTAS[0].buraco;
+    f.colocar(hx, hz + 1.8);
     f.tacar(0, 0.12);
     const ev = rolar(f);
     expect(ev.some((e) => e.tipo === 'buraco')).toBe(true);
@@ -54,7 +55,7 @@ describe('BallPhysics', () => {
 
   it('bola rápida passando pelo buraco é detectada (borda) e não some', () => {
     const f = new Fisica(PISTAS[0], NORMAL);
-    f.colocar(0, 1);
+    f.colocar(PISTAS[0].buraco[0], 1);
     f.tacar(0, 1);
     const ev = rolar(f);
     expect(ev.some((e) => e.tipo === 'borda' || e.tipo === 'buraco')).toBe(true);

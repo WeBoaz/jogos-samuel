@@ -24,7 +24,7 @@ export class Pet {
   private baseY = 0;
 
   colocar(x: number, y: number, z: number, olhandoPara: number): void {
-    this.grupo.scale.setScalar(1.45);
+    this.grupo.scale.setScalar(1.8);
     this.grupo.position.set(x, y, z);
     this.grupo.rotation.y = olhandoPara;
     this.baseY = y;

@@ -18,6 +18,8 @@ export interface OpcoesMira {
 
 const FRACAO_TELA = 0.36;       // arrastar 36% do menor lado da tela = força máxima
 const FORCA_MINIMA = 0.07;
+/** Letra minúscula independente de Shift/Caps Lock ('D' e 'd' são a mesma tecla). */
+const tecla = (e: KeyboardEvent) => (e.key.length === 1 ? e.key.toLowerCase() : e.key);
 
 export class Mira {
   readonly estado: EstadoMira = { ativa: false, angulo: 0, forca: 0, origem: null };
@@ -39,7 +41,7 @@ export class Mira {
     ouvir(o.alvo, 'lostpointercapture', (e: PointerEvent) => { if (e.pointerId === this.dedo) this.cancelar(); });
     ouvir(o.alvo, 'contextmenu', (e: Event) => e.preventDefault());
     ouvir(window, 'keydown', (e: KeyboardEvent) => this.teclaDesce(e));
-    ouvir(window, 'keyup', (e: KeyboardEvent) => this.teclas.delete(e.key));
+    ouvir(window, 'keyup', (e: KeyboardEvent) => this.teclas.delete(tecla(e)));
     ouvir(window, 'blur', () => { this.teclas.clear(); this.cancelar(); });
   }
 
@@ -94,7 +96,7 @@ export class Mira {
   }
 
   private teclaDesce(e: KeyboardEvent): void {
-    const k = e.key;
+    const k = tecla(e);
     if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' ', 'a', 'd', 'w', 's'].includes(k)) return;
     if (!this.o.pode()) return;
     e.preventDefault();

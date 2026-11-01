@@ -65,3 +65,23 @@ Não apagar decisões antigas: acrescentar uma nova com alternativa, motivo e ef
   (`voxel.js` para paredes/chão, mesmo herói, mesmo combate), como o plano já sugeria
   ("compartilhar o núcleo de combate de Hordas"). carlesvallve/voxel-engine continua
   reservado (sem `LICENSE` na raiz).
+
+## DEC-010 — Motor do Minigolfe dos Pets (EXP-01, 2026-11-01)
+
+- **Decisão:** Three.js 0.170.0 (mesma versão do Turbo e do Caça às Estrelas) + TypeScript
+  5.9.3 + Vite 6.4.5 com `base: './'`, **física própria** em `src/core/fisica.ts` (bola num
+  plano com rampas, colisão contra cápsulas, sub-passos de no máximo 40% do raio).
+- **Alternativas descartadas:** Rapier (WASM ~2 MB, porteiro e MIME a validar, sem ganho para
+  bola rolando em plano); LCmaster/minigolf como base (SvelteKit/Threlte/Firebase, sem toque) —
+  ficou só como referência de gênero, nenhum código copiado.
+- **Efeito:** jogo com build (fonte em `desenvolvimento/jogos/minigolfe-dos-pets/`, saída
+  commitada em `_privado/jogos/minigolfe-dos-pets/`), 157 KB gzip, sem arquivos de arte externos
+  (texturas e pets gerados por código), aviso MIT do three.js em `THIRD_PARTY_NOTICES.txt`.
+
+## DEC-011 — Contrato de release (ST-040, 2026-11-01)
+
+- `python3 ferramentas/release_jogo.py <slug> <versão>` grava `_privado/jogos/<slug>/release.json`
+  com o commit do código (exige árvore limpa para o jogo). O manifesto vai no pacote e é servido em
+  `/jogo/<slug>/release.json`; o roteador local deixou de bloquear `.json` dentro de `/jogo/`.
+- Hash do zip, hora do deploy e link do Notion ficam fora do pacote (Notion + comentário
+  `SAMUEL_TECH_DEPLOY_READY` no PR), nunca o hash do próprio zip dentro dele.

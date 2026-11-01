@@ -1,63 +1,137 @@
-/* Peças da interface próprias do Minigolfe (o resto vem de ui-blocos.css). */
+/* Peças da interface próprias do Minigolfe (o resto vem de ui-blocos.css, cópia da pasta compartilhada). */
 canvas#jogo { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
-.carregando { position: fixed; inset: 0; display: grid; place-items: center; background: #a9dcf2; z-index: 30; transition: opacity .4s; }
-.carregando.some { opacity: 0; pointer-events: none; }
+.carregando { position: fixed; inset: 0; display: grid; place-items: center; background: #a9dcf2; z-index: 30; }
 
-.painel small.par { font: 700 13px var(--mono); color: var(--muted); }
+/* telas por cima da cena: véu leve com desfoque (a pista continua bonita atrás) */
+.tela { background: rgba(25, 51, 55, .2); -webkit-backdrop-filter: blur(3px) saturate(1.1); backdrop-filter: blur(3px) saturate(1.1); }
+.logo { letter-spacing: -.05em; text-shadow: .05em .05em 0 var(--play), .1em .1em 0 var(--ink); }
+.secao { font-size: 14px; }
+.secao small { font: 700 12px var(--sans); color: var(--muted); text-transform: none; letter-spacing: 0; }
+.dica-icones span { border: none; background: transparent; padding: 2px 6px; font-size: 16px; }
+.dica-icones .so-mouse { display: none; }
+@media (pointer: fine) { .dica-icones .so-mouse { display: inline; } }
+
+/* HUD */
+.painel { font-size: 24px; }
+.painel small.par { font: 900 18px var(--mono); color: var(--forest); }
 .painel.jogador { gap: 8px; }
-.bolinha { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--ink); border-radius: 50%; background: var(--adventure); flex: none; }
-.painel .tacadas { background: var(--ink); color: var(--paper); padding: 0 7px; font-size: 18px; min-width: 28px; text-align: center; }
-.painel .tacadas::before { content: '🏌️ '; font-size: 14px; }
+.bolinha { display: inline-grid; place-items: center; width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 50%;
+  background: var(--adventure); flex: none; font: 900 15px var(--mono); color: var(--ink); font-style: normal; }
+.bolinha b { font: inherit; }
+.modo-hud { font-size: 18px; }
+.painel .tacadas { background: var(--ink); color: var(--paper); padding: 0 7px; font-size: 20px; min-width: 30px; text-align: center; }
+.painel .tacadas::before { content: '🏌️ '; font-size: 15px; }
 
-.medidor-forca { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 11;
-  pointer-events: none; display: flex; align-items: center; gap: 8px; background: var(--paper); border: var(--line);
-  box-shadow: var(--shadow); padding: 6px 10px; width: min(360px, 80vw); }
-.medidor-forca b { font: 900 13px var(--mono); }
-.medidor-forca .medidor { flex: 1; height: 16px; }
-.medidor-forca .medidor > i { transition: none; background: linear-gradient(90deg, #b9ed80, #ffd56b 60%, #ff9d52); }
-
-.dica-toque { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(max(18px, env(safe-area-inset-bottom)) + 60px); z-index: 11;
-  pointer-events: none; background: var(--gold); border: var(--line); box-shadow: var(--shadow); padding: 8px 14px; font: 900 18px var(--mono); white-space: nowrap; }
+/* força e dica ficam no alto, logo abaixo do HUD: nunca cobrem a bola */
+.medidor-forca, .dica-toque { position: fixed; left: 50%; transform: translateX(-50%); z-index: 11; pointer-events: none;
+  top: var(--abaixo-hud, 72px); }
+.medidor-forca { display: flex; align-items: center; gap: 8px; background: var(--paper); border: var(--line);
+  box-shadow: var(--shadow); padding: 6px 10px; width: min(360px, 76vw); }
+.medidor-forca b { font: 900 15px var(--mono); }
+.medidor-forca .medidor { flex: 1; height: 18px; }
+.medidor-forca .medidor > i { transition: none; background: linear-gradient(90deg, #b9ed80, #ffd56b 55%, #ff9d52); }
+.dica-toque { background: var(--gold); border: var(--line); box-shadow: var(--shadow); padding: 8px 14px; font: 900 18px var(--mono); white-space: nowrap; }
 .dica-toque .mao { display: inline-block; animation: puxa 1.4s ease-in-out infinite; }
-@keyframes puxa { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+@keyframes puxa { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
+/* avisos em cartão dourado no alto (legível sobre qualquer grama, longe do buraco) */
+.aviso { color: var(--ink); background: var(--gold); border: var(--line); box-shadow: var(--shadow); text-shadow: none;
+  padding: 8px 18px; top: var(--abaixo-hud, 72px); transform: translate(-50%, 0);
+  font-size: clamp(24px, 7.5vw, 44px); max-width: calc(100vw - 24px); white-space: normal; line-height: 1.05; }
+.aviso small { font: 700 clamp(14px, 3.6vw, 18px)/1.3 var(--sans); margin-top: 4px; }
+.aviso.pop { animation: popTopo .4s ease-out; }
+@keyframes popTopo { from { transform: translate(-50%, 0) scale(.85); opacity: 0; } }
+.toast { top: calc(var(--abaixo-hud, 72px) + 96px); bottom: auto; font-size: 18px; }
+
+/* menu */
 .opcoes.quatro { grid-template-columns: repeat(4, 1fr); }
-.opcoes.quatro .opcao { padding: 6px 2px; min-height: 64px; }
-.opcoes.quatro .ic { font-size: 18px; letter-spacing: -3px; }
+.opcoes.quatro .opcao { padding: 4px 2px; min-height: 64px; flex-direction: column; gap: 0; }
+.opcoes.quatro .num { font: 900 26px/1 var(--mono); }
+.opcoes.quatro .ic { font-size: 14px; letter-spacing: -2px; white-space: nowrap; }
+.modos { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 8px; margin: 0 0 10px; }
+.modo-btn { border: var(--line); box-shadow: 3px 3px 0 var(--ink); min-height: 64px; padding: 4px 6px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px; font: 800 16px var(--sans); color: var(--ink); }
+.modo-btn.assistido { background: #fff4d9; }
+.modo-btn.normal { background: #eef8e2; }
+.modo-btn .quem { font: 900 18px var(--mono); }
+.modo-btn .jeito { font-size: 15px; }
+.modo-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 .pistas { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 0 0 6px; }
 .pista-btn { border: var(--line); box-shadow: 3px 3px 0 var(--ink); background: var(--cream); min-height: 72px; padding: 4px 2px;
-  font: 800 12px var(--sans); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.1; }
-.pista-btn .ic { font-size: 24px; }
+  font: 800 14px var(--sans); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.1; color: var(--ink); }
+.pista-btn .ic { font-size: 26px; }
 .pista-btn[aria-pressed="true"] { background: var(--play); transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
 .pista-btn.circuito { background: #fff4d9; }
 .pista-btn.circuito[aria-pressed="true"] { background: var(--gold); }
-.aviso-save { font: 12px var(--mono); color: var(--muted); margin: 8px 0 0; }
+.rodape-menu .mini { box-shadow: var(--shadow); }
+.aviso-save { font: 13px var(--mono); color: var(--muted); margin: 8px 0 0; }
+.btn.confirmar { background: var(--gold); font-size: 15px; }
+.sub-pausa { font: 700 16px var(--sans); margin: -4px 0 12px; }
 
+/* placar */
 .tabela-placar { overflow-x: auto; margin: 4px 0 6px; }
-.tabela-placar table { border-collapse: collapse; margin: 0 auto; font: 800 16px var(--mono); background: var(--cream); }
-.tabela-placar th, .tabela-placar td { border: 2px solid var(--ink); padding: 6px 8px; text-align: center; min-width: 34px; }
-.tabela-placar th { background: var(--bar); font-size: 12px; }
+.tabela-placar table { border-collapse: collapse; margin: 0 auto; font: 800 18px var(--mono); background: var(--cream); }
+.tabela-placar th, .tabela-placar td { border: 2px solid var(--ink); padding: 6px 8px; text-align: center; min-width: 36px; }
+.tabela-placar th { background: var(--bar); font-size: 14px; }
+.tabela-placar th .ic { display: block; font-size: 20px; }
 .tabela-placar td.nome { text-align: left; white-space: nowrap; }
-.tabela-placar td.total { background: var(--gold); }
-.tabela-placar td.agora { background: #eef8e2; }
+.tabela-placar td small { color: var(--muted); }
+.tabela-placar tr.meta td { font-size: 14px; color: var(--forest); }
+.tabela-placar td.total { background: var(--gold); font-size: 22px; }
+.tabela-placar td.agora, .tabela-placar th.agora { background: #eef8e2; }
 
-.podio { display: flex; flex-direction: column; gap: 8px; margin: 6px auto 4px; max-width: 420px; }
+/* fim */
+.podio { display: flex; flex-direction: column; gap: 8px; margin: 6px auto 4px; max-width: 460px; }
 .podio .linha { display: flex; align-items: center; gap: 10px; border: var(--line); box-shadow: 3px 3px 0 var(--ink); background: var(--cream);
   padding: 8px 12px; font: 900 20px var(--mono); }
 .podio .linha:first-child { background: #fff4d9; }
 .podio .medalha { font-size: 28px; }
-.podio .nome { flex: 1; text-align: left; display: flex; align-items: center; gap: 8px; }
-.podio .pts small { display: block; font: 700 11px var(--sans); color: var(--muted); }
+.podio .nome { flex: 1; text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.podio .nome small { flex-basis: 100%; font: 700 13px var(--sans); color: var(--muted); }
+.podio .pts small { display: block; font: 700 12px var(--sans); color: var(--muted); }
+
+/* dentro do player do portal: o portal já desenha a janela .exe — menu mais compacto */
+body.embutido #tMenu .cartao > .barra { display: none; }
+body.embutido #tMenu .dica-icones { display: none; }
+body.embutido #tMenu .logo { font-size: clamp(26px, 6vw, 44px); margin-bottom: 6px; }
+body.embutido #tMenu .corpo { padding-top: 12px; }
 
 @media (max-width: 560px) {
-  .pistas { grid-template-columns: repeat(4, 1fr); }
+  .pistas { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .pista-btn { min-height: 64px; }
   .painel.jogador #hNome { display: none; }
-  .dica-toque { font-size: 15px; }
+  .painel { font-size: 20px; }
+  .dica-toque { font-size: 16px; }
+  .dica-icones { display: none; }
+  .logo { font-size: 30px; }
+  .corpo { padding: 14px 14px 16px; }
+  .tabela-placar table { font-size: 16px; }
+  .tabela-placar th, .tabela-placar td { padding: 4px 4px; min-width: 28px; }
+  .tabela-placar td.nome .txt { display: none; }
 }
 @media (min-width: 700px) and (max-height: 500px) {
-  .escolhas.tres { grid-template-columns: 1fr 1fr; }
+  .escolhas.tres { grid-template-columns: 1fr 1.3fr; }
   .pista-btn { min-height: 64px; }
   .pista-btn .ic { font-size: 20px; }
   .dica-icones { display: none; }
+  .corpo { padding: 8px 14px 10px; }
+  .logo { font-size: 26px; margin: 0 0 4px; }
+  .secao { margin: 4px 0; }
+  .acoes { margin-top: 6px; }
+  .modos { margin-bottom: 4px; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 6px; }
+  .modo-btn { min-height: 56px; padding: 2px 4px; }
+  .modo-btn .quem { font-size: 15px; }
+  .modo-btn .jeito { font-size: 12px; }
+  .opcoes.quatro .opcao { min-height: 56px; }
+  .pista-btn { min-height: 56px; font-size: 12px; }
+  .rodape-menu .btn.grande, .rodape-menu .btn { min-height: 56px; }
+  .titulo { font-size: 24px; margin-bottom: 4px; }
+  .tabela-placar table { font-size: 15px; }
+  .tabela-placar th, .tabela-placar td { padding: 2px 6px; }
+  .tabela-placar th .ic { display: inline; font-size: 15px; margin-right: 2px; }
+  .tabela-placar td.total { font-size: 17px; }
+  .bolinha { width: 22px; height: 22px; font-size: 13px; }
+  .podio .linha { padding: 4px 10px; font-size: 17px; }
+  .aviso { font-size: 28px; }
 }
-@media (prefers-reduced-motion: reduce) { .dica-toque .mao { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dica-toque .mao { animation: none; } .aviso.pop { animation: none; } }

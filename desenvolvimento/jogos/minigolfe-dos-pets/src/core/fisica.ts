@@ -28,12 +28,14 @@ function alturaPiso(p: Piso, x: number, z: number): number {
   if (!p.rampa) return p.h ?? 0;
   const r = p.rampa;
   const c = r.eixo === 'x' ? x : z;
+  if (r.ate === r.de) return r.h1;
   const t = Math.min(1, Math.max(0, (c - r.de) / (r.ate - r.de)));
   return r.h0 + (r.h1 - r.h0) * t;
 }
 function gradPiso(p: Piso): P2 {
   if (!p.rampa) return [0, 0];
   const r = p.rampa;
+  if (r.ate === r.de) return [0, 0];
   const g = (r.h1 - r.h0) / (r.ate - r.de);
   return r.eixo === 'x' ? [g, 0] : [0, g];
 }
@@ -58,11 +60,12 @@ function distSeg(px: number, pz: number, ax: number, az: number, bx: number, bz:
 
 export class Fisica {
   readonly pista: Pista;
-  readonly ajustes: Ajustes;
+  ajustes: Ajustes;               // muda a cada vez (cada jogador tem o seu jeito de jogar)
   bola: EstadoBola;
   tempo = 0;                       // relógio da simulação (obstáculos móveis usam este, não o relógio real)
   private fixos: Segmento[];
   private eventos: EventoFisica[] = [];
+  private sombra: Fisica | null = null;   // cópia reaproveitada pela prévia
 
   constructor(pista: Pista, ajustes: Ajustes) {
     this.pista = pista;
@@ -95,6 +98,7 @@ export class Fisica {
     const b = this.bola;
     if (b.movendo || b.noBuraco) return false;
     const f = Math.max(0, Math.min(1, forca));
+    this.desencostar();
     const v = 0.6 + f * (this.ajustes.velMax - 0.6);
     b.vx = Math.sin(angulo) * v;
     b.vz = -Math.cos(angulo) * v;
@@ -114,7 +118,7 @@ export class Fisica {
     this.eventos = [];
     this.tempo += dt;
     const b = this.bola;
-    if (!b.movendo) return this.eventos;
+    if (!b.movendo) { if (!b.noBuraco) this.empurrarParada(); return this.eventos; }
     b.tempoRolando += dt;
 
     const moveis = this.segmentosMoveis();
@@ -133,7 +137,7 @@ export class Fisica {
     const piso = this.pisoEm(b.x, b.z);
     // gravidade na rampa
     let gx = 0, gz = 0;
-    if (piso) { [gx, gz] = gradPiso(piso); b.vx -= GRAVIDADE * gx * h; b.vz -= GRAVIDADE * gz * h; }
+    if (piso) { [gx, gz] = gradPiso(piso); const g = GRAVIDADE * this.ajustes.rampaGravidade; b.vx -= g * gx * h; b.vz -= g * gz * h; }
     // atrito de rolamento
     let v = Math.hypot(b.vx, b.vz);
     if (v > 0) {
@@ -152,8 +156,9 @@ export class Fisica {
     }
     b.x += b.vx * h; b.z += b.vz * h;
 
-    for (const s of this.fixos) this.colidir(s);
+    // móveis primeiro e paredes fixas por último: o portão nunca espreme a bola para fora da pista
     for (const s of moveis) this.colidir(s);
+    for (const s of this.fixos) this.colidir(s);
 
     // buraco
     const [hx, hz] = this.pista.buraco;
@@ -190,6 +195,38 @@ export class Fisica {
     } else b.tempoParada = 0;
   }
 
+  /** Antes da tacada: se a pá/portão está encostado na bola, afasta a bola (só posição), para a tacada sair limpa. */
+  private desencostar(): void {
+    const b = this.bola;
+    for (const s of this.segmentosMoveis()) {
+      const dx = s.bx - s.ax, dz = s.bz - s.az, l2 = dx * dx + dz * dz;
+      const t = l2 ? Math.max(0, Math.min(1, ((b.x - s.ax) * dx + (b.z - s.az) * dz) / l2)) : 0;
+      const px = s.ax + t * dx, pz = s.az + t * dz;
+      let nx = b.x - px, nz = b.z - pz;
+      const d = Math.hypot(nx, nz), lim = RAIO_BOLA + s.esp + 0.01;
+      if (d >= lim) continue;
+      if (d < 1e-6) { nx = l2 ? -dz : 1; nz = l2 ? dx : 0; }
+      const k = Math.hypot(nx, nz) || 1;
+      b.x = px + (nx / k) * lim; b.z = pz + (nz / k) * lim;
+    }
+    for (const f of this.fixos) this.colidir(f);
+  }
+
+  /** Bola parada e um obstáculo móvel chega nela: empurra (não atravessa) e a bola volta a rolar. */
+  private empurrarParada(): void {
+    const b = this.bola;
+    for (const s of this.segmentosMoveis()) {
+      const dx = s.bx - s.ax, dz = s.bz - s.az, l2 = dx * dx + dz * dz;
+      const t = l2 ? Math.max(0, Math.min(1, ((b.x - s.ax) * dx + (b.z - s.az) * dz) / l2)) : 0;
+      const px = s.ax + t * dx, pz = s.az + t * dz;
+      if (Math.hypot(b.x - px, b.z - pz) < RAIO_BOLA + s.esp) {
+        b.movendo = true; b.tempoParada = 0; b.tempoRolando = 0;
+        this.colidir(s);
+        for (const f of this.fixos) this.colidir(f);
+      }
+    }
+  }
+
   private parar(): void {
     const b = this.bola;
     b.vx = 0; b.vz = 0; b.movendo = false; b.tempoParada = 0;
@@ -223,7 +260,8 @@ export class Fisica {
 
   /** Prévia da trajetória (modo Assistido mostra mais longa). Não altera o estado. */
   previa(angulo: number, forca: number, segundos: number): P2[] {
-    const copia = new Fisica(this.pista, { ...this.ajustes, ima: 0 });
+    const copia = this.sombra ?? (this.sombra = new Fisica(this.pista, this.ajustes));
+    copia.ajustes = { ...this.ajustes, ima: 0 };
     copia.tempo = this.tempo;
     copia.colocar(this.bola.x, this.bola.z);
     copia.tacar(angulo, forca);
@@ -240,7 +278,7 @@ export class Fisica {
 }
 
 function segFixo(p: Parede): Segmento {
-  return { ax: p.a[0], az: p.a[1], bx: p.b[0], bz: p.b[1], esp: p.esp ?? 0.12, vx: 0, vz: 0, w: 0, cx: 0, cz: 0 };
+  return { ax: p.a[0], az: p.a[1], bx: p.b[0], bz: p.b[1], esp: p.esp ?? 0.14, vx: 0, vz: 0, w: 0, cx: 0, cz: 0 };
 }
 
 export function segmentosObstaculo(o: Obstaculo, t: number): Segmento[] {

@@ -49,7 +49,31 @@ describe('TurnManager + Scorecard', () => {
     for (let i = 0; i < lim; i++) { p.tacar(); r = p.parou(); }
     expect(r.estourouLimite).toBe(true);
     expect(p.tacadas[0][0]).toBe(lim);
+    // durante o aviso a vez ainda não passou e NÃO há tacada (era o P0: tacada no aviso travava a partida)
+    expect(p.vez).toBe(0);
+    expect(p.podeTacar()).toBe(false);
+    expect(p.tacar()).toBe(false);
+    expect(p.continuar().trocouJogador).toBe(true);
     expect(p.vez).toBe(1);
+    expect(p.tacadas[1][0]).toBe(0);
+  });
+
+  it('cada jogador tem o próprio jeito de jogar (limite e penalidade por jogador)', () => {
+    const p = new Partida(2, [2], ['assistido', 'normal']);
+    expect(p.modo).toBe('assistido'); expect(p.limite()).toBe(5);
+    p.tacar(); p.acertou(); p.continuar();
+    expect(p.modo).toBe('normal'); expect(p.limite()).toBe(6);
+    p.tacar(); p.parou(true);
+    expect(p.tacadasAgora).toBe(2);
+  });
+
+  it('última pista: limite estourado leva ao fim só depois do continuar()', () => {
+    const p = new Partida(1, [2], 'normal');
+    for (let i = 0; i < p.limite(); i++) { p.tacar(); p.parou(); }
+    expect(p.fase).toBe('encerrou');
+    expect(p.proximoPasso()).toBe('fim');
+    expect(p.continuar().fim).toBe(true);
+    expect(p.fase).toBe('fim');
   });
 
   it('água: Normal soma penalidade, Assistido não', () => {
@@ -64,11 +88,17 @@ describe('TurnManager + Scorecard', () => {
     p.tacar(); p.acertou(); p.continuar();
     p.tacar(); p.acertou(); p.continuar();
     expect(p.ranking().map((r) => r.posicao)).toEqual([1, 1]);
+    const q = new Partida(3, [2], 'normal');
+    q.tacar(); q.acertou(); q.continuar();
+    q.tacar(); q.acertou(); q.continuar();
+    q.tacar(); q.parou(); q.tacar(); q.acertou(); q.continuar();
+    expect(q.ranking().map((r) => r.posicao)).toEqual([1, 1, 2]);   // posição densa: ninguém vira "4º"
+
   });
 
   it('apelidos são sempre positivos', () => {
-    expect(apelido(1, 3)).toBe('BURACO EM UMA!');
-    expect(apelido(3, 3)).toBe('NO PAR!');
-    expect(apelido(9, 3)).toBe('CONSEGUIU!');
+    expect(apelido(1, 3)).toBe('DE PRIMEIRA! 🎯');
+    expect(apelido(3, 3)).toBe('NA META! ⭐');
+    expect(apelido(9, 3)).toBe('CONSEGUIU! 🎉');
   });
 });

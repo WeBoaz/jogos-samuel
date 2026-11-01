@@ -15,11 +15,12 @@ export class Bola {
   constructor() {
     this.mat = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.28, clearcoat: 0.8, clearcoatRoughness: 0.15 });
     this.malha = new THREE.Mesh(new THREE.SphereGeometry(RAIO_BOLA, 32, 24), this.mat);
-    this.faixa = new THREE.Mesh(new THREE.TorusGeometry(RAIO_BOLA * 0.995, RAIO_BOLA * 0.16, 10, 40), new THREE.MeshStandardMaterial({ color: '#ff9d52', roughness: 0.4 }));
+    // bola inteira na cor do jogador, com faixa branca (cor nunca é a única pista: o HUD mostra o número)
+    this.faixa = new THREE.Mesh(new THREE.TorusGeometry(RAIO_BOLA * 0.99, RAIO_BOLA * 0.22, 10, 40), new THREE.MeshStandardMaterial({ color: '#fffdf7', roughness: 0.35 }));
     this.malha.add(this.faixa);
     this.malha.castShadow = true;
   }
-  cor(c: string): void { (this.faixa.material as THREE.MeshStandardMaterial).color.set(c); }
+  cor(c: string): void { this.mat.color.set(c); }
   /** Gira a bola de acordo com o deslocamento (parece rolar de verdade). */
   rolar(dx: number, dz: number): void {
     const d = Math.hypot(dx, dz);
@@ -42,14 +43,18 @@ export class Mira {
     const forma = new THREE.Shape();
     forma.moveTo(-0.07, 0); forma.lineTo(0.07, 0); forma.lineTo(0.07, 0.75); forma.lineTo(0.17, 0.75); forma.lineTo(0, 1); forma.lineTo(-0.17, 0.75); forma.lineTo(-0.07, 0.75); forma.closePath();
     const geo = new THREE.ShapeGeometry(forma); geo.rotateX(-Math.PI / 2); // aponta para −z
-    this.matSeta = new THREE.MeshBasicMaterial({ color: '#b9ed80', transparent: true, opacity: 0.92, depthWrite: false });
+    // cores sólidas do kit, sem tone mapping (antes saía creme quase invisível no verde) e contorno tinta
+    this.matSeta = new THREE.MeshBasicMaterial({ color: '#b9ed80', toneMapped: false, depthWrite: false, transparent: true });
     this.seta = new THREE.Mesh(geo, this.matSeta);
-    this.seta.renderOrder = 3;
-    this.pontos = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045, 10, 8), new THREE.MeshBasicMaterial({ color: '#fffdf7', transparent: true, opacity: 0.9 }), this.maxPontos);
+    this.seta.renderOrder = 4;
+    const contorno = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#193337', toneMapped: false, depthWrite: false, transparent: true }));
+    contorno.scale.set(1.28, 1, 1.1); contorno.position.set(0, -0.004, 0.035); contorno.renderOrder = 3;
+    this.seta.add(contorno);
+    this.pontos = new THREE.InstancedMesh(new THREE.SphereGeometry(0.06, 10, 8), new THREE.MeshBasicMaterial({ color: '#fffdf7', toneMapped: false }), this.maxPontos);
     this.pontos.count = 0; this.pontos.frustumCulled = false;
-    this.anel = new THREE.Mesh(new THREE.RingGeometry(RAIO_BOLA * 1.5, RAIO_BOLA * 1.85, 40), new THREE.MeshBasicMaterial({ color: '#fffdf7', transparent: true, opacity: 0.85, depthWrite: false }));
+    this.anel = new THREE.Mesh(new THREE.RingGeometry(RAIO_BOLA * 1.45, RAIO_BOLA * 1.95, 40), new THREE.MeshBasicMaterial({ color: '#fffdf7', toneMapped: false, depthWrite: false, transparent: true }));
     this.anel.rotation.x = -Math.PI / 2;
-    this.alvo = new THREE.Mesh(new THREE.RingGeometry(0.14, 0.2, 28), new THREE.MeshBasicMaterial({ color: '#ffd56b', transparent: true, opacity: 0.9, depthWrite: false }));
+    this.alvo = new THREE.Mesh(new THREE.RingGeometry(0.15, 0.24, 28), new THREE.MeshBasicMaterial({ color: '#ffd56b', toneMapped: false, depthWrite: false, transparent: true }));
     this.alvo.rotation.x = -Math.PI / 2;
     this.grupo.add(this.seta, this.pontos, this.anel, this.alvo);
     this.esconder();
@@ -62,8 +67,8 @@ export class Mira {
     this.seta.position.set(x, y + 0.02, z);
     this.seta.rotation.set(0, -angulo, 0);
     this.seta.scale.set(0.8 + forca * 0.6, 1, comp);
-    // verde (fraca) → amarelo → laranja (forte)
-    this.matSeta.color.setHSL(0.27 - forca * 0.2, 0.85, 0.62);
+    // verde (fraca) → amarelo → laranja (forte), em faixas do kit
+    this.matSeta.color.set(forca < 0.35 ? '#b9ed80' : forca < 0.7 ? '#ffd56b' : '#ff9d52');
     this.anel.position.set(x, y + 0.015, z);
     this.anel.scale.setScalar(1 + Math.sin(t * 6) * 0.06);
     const m = new THREE.Matrix4();

@@ -10,7 +10,7 @@ export class CameraGolf {
   private distDesejada = 10;
   private azimute = 0;          // radianos; 0 = câmera atrás (+z) olhando para −z
   private azimuteDesejado = 0;
-  private readonly inclinacao = 0.92;  // ~53° acima do horizonte
+  private inclinacao = 0.74;           // ~42° acima do horizonte: dá profundidade (rampa, casinha, céu)
 
   constructor() {
     this.cam = new THREE.PerspectiveCamera(42, 1, 0.1, 160);
@@ -18,20 +18,22 @@ export class CameraGolf {
 
   redimensionar(w: number, h: number): void {
     this.cam.aspect = w / h;
-    this.cam.fov = w / h < 0.8 ? 54 : 42;
+    this.cam.fov = w / h < 0.8 ? 52 : 38;
     this.cam.updateProjectionMatrix();
   }
 
-  /** Enquadra os pontos (bola, buraco...) com margem; `alinhar` recalcula o ângulo da linha bola→buraco. */
-  enquadrar(pontos: THREE.Vector3[], margem: number, alinharDe?: THREE.Vector3, alinharPara?: THREE.Vector3): void {
-    const caixa = new THREE.Box3().setFromPoints(pontos);
-    caixa.getCenter(this.alvoDesejado);
-    const tam = new THREE.Vector3(); caixa.getSize(tam);
-    const raio = Math.max(2.6, Math.hypot(tam.x, tam.z) / 2 + margem);
+  /** Enquadra os pontos (bola, buraco...) com margem; `alinhar` recalcula o ângulo da linha bola→buraco;
+   *  `centro` (opcional) fixa o ponto de mira da câmera (ex.: 42% do caminho bola→buraco). */
+  enquadrar(pontos: THREE.Vector3[], margem: number, alinharDe?: THREE.Vector3, alinharPara?: THREE.Vector3, centro?: THREE.Vector3): void {
+    this.caixa.setFromPoints(pontos);
+    if (centro) this.alvoDesejado.copy(centro); else this.caixa.getCenter(this.alvoDesejado);
+    let raio = 0;
+    for (const p of pontos) raio = Math.max(raio, Math.hypot(p.x - this.alvoDesejado.x, p.z - this.alvoDesejado.z));
+    raio = Math.max(2.4, raio + margem);
     const vfov = THREE.MathUtils.degToRad(this.cam.fov);
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * this.cam.aspect);
     // a projeção encolhe a profundidade pela inclinação; compensa um pouco
-    this.distDesejada = Math.min(26, raio / Math.sin(Math.min(vfov, hfov) / 2) * 0.82);
+    this.distDesejada = Math.min(24, raio / Math.sin(Math.min(vfov, hfov) / 2) * 0.74);
     if (alinharDe && alinharPara) {
       const dx = alinharPara.x - alinharDe.x, dz = alinharPara.z - alinharDe.z;
       if (Math.hypot(dx, dz) > 0.8) {
@@ -67,10 +69,14 @@ export class CameraGolf {
 
   /** Converte um ponto de tela num ponto do plano horizontal y = altura. */
   noPlano(xNdc: number, yNdc: number, altura: number, saida: THREE.Vector3): boolean {
-    const r = new THREE.Raycaster();
-    r.setFromCamera(new THREE.Vector2(xNdc, yNdc), this.cam);
-    const plano = new THREE.Plane(new THREE.Vector3(0, 1, 0), -altura);
-    return r.ray.intersectPlane(plano, saida) !== null;
+    this.raio.setFromCamera(this.ndc.set(xNdc, yNdc), this.cam);
+    this.plano.set(this.cima, -altura);
+    return this.raio.ray.intersectPlane(this.plano, saida) !== null;
   }
+  private raio = new THREE.Raycaster();
+  private ndc = new THREE.Vector2();
+  private plano = new THREE.Plane();
+  private cima = new THREE.Vector3(0, 1, 0);
+  private caixa = new THREE.Box3();
   get angulo(): number { return this.azimute; }
 }

@@ -31,17 +31,18 @@ export class Mundo {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    // Neutral preserva as cores do kit (o ACES deixava o laranja com cara de bege)
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.cena.background = texCeu();
     this.cena.fog = new THREE.Fog('#d9eff3', 26, 62);
 
-    const ceu = new THREE.HemisphereLight('#d6ecff', '#6f9a4a', 1.15);
+    const ceu = new THREE.HemisphereLight('#d6ecff', '#7a9a56', 0.95);
     this.cena.add(ceu);
-    this.sol = new THREE.DirectionalLight('#fff0d4', 2.5);
+    this.sol = new THREE.DirectionalLight('#fff0d4', 1.9);
     this.sol.position.set(7, 14, 6);
     this.sol.castShadow = true;
     this.sol.shadow.mapSize.set(2048, 2048);
@@ -77,11 +78,21 @@ export class Mundo {
   }
 
   private refazerDecoracao(p: Pista, L: Limites, livres: P2[]): void {
-    this.decoracao.traverse((o) => { if (o instanceof THREE.Mesh || o instanceof THREE.InstancedMesh) { o.geometry.dispose(); } });
+    // libera geometria, material e buffers de instância da decoração anterior (sem vazamento na GPU)
+    this.decoracao.traverse((o) => {
+      if (o instanceof THREE.Mesh) {
+        o.geometry.dispose();
+        for (const mt of Array.isArray(o.material) ? o.material : [o.material]) mt.dispose();
+        if (o instanceof THREE.InstancedMesh) o.dispose();
+      }
+    });
     this.decoracao.clear();
+    // caixa da pista + água (o lago é maior que os pisos)
+    const todos: P2[] = [...p.pisos.flatMap((q) => q.poly), ...(p.agua ?? []).flat()];
+    const B = { x0: Math.min(...todos.map((q) => q[0])), x1: Math.max(...todos.map((q) => q[0])), z0: Math.min(...todos.map((q) => q[1])), z1: Math.max(...todos.map((q) => q[1])) };
     const r = rnd(p.id * 97 + 13);
     const ocupado = (x: number, z: number, folga: number) => {
-      if (x > L.x0 - folga && x < L.x1 + folga && z > L.z0 - folga && z < L.z1 + folga) {
+      if (x > B.x0 - folga && x < B.x1 + folga && z > B.z0 - folga && z < B.z1 + folga) {
         for (const q of p.pisos) if (dentro(q.poly, x, z, folga)) return true;
         for (const a of p.agua ?? []) if (dentro(a, x, z, folga)) return true;
       }
@@ -99,26 +110,39 @@ export class Mundo {
       return out;
     };
 
-    // árvores: tronco + 3 copas facetadas (InstancedMesh por parte)
-    const arvores = sorteia(26, 4.6, 9.5, 1.1);
-    const tronco = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09, 0.14, 1, 7), new THREE.MeshStandardMaterial({ color: '#8b5a35', roughness: 0.9 }), arvores.length);
+    // árvores redondas: tronco + 3 copas facetadas (InstancedMesh por parte); pinheiros: 3 cones
+    const todasArvores = sorteia(30, 4.6, 9.5, 1.1);
+    const arvores = todasArvores.filter((_, i) => i % 3 !== 2), pinheiros = todasArvores.filter((_, i) => i % 3 === 2);
+    const tronco = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.12, 0.18, 1, 7), new THREE.MeshStandardMaterial({ color: '#8b5a35', roughness: 0.9 }), todasArvores.length);
     const copaGeo = new THREE.IcosahedronGeometry(0.62, 1);
     const copaMat = new THREE.MeshStandardMaterial({ roughness: 0.85, flatShading: true });
     const copas = new THREE.InstancedMesh(copaGeo, copaMat, arvores.length * 3);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), pos = new THREE.Vector3(), cor = new THREE.Color();
     const verdes = ['#4f9d3a', '#5fae45', '#3f8c37', '#6bbd4e', '#82c45a'];
     arvores.forEach(([x, z], i) => {
-      const k = 0.8 + r() * 0.7;
+      const k = 0.8 + r() * 0.8;
       m.compose(pos.set(x, CHAO_Y + 0.5 * k, z), q.identity(), s.set(k, k, k)); tronco.setMatrixAt(i, m);
       for (let c = 0; c < 3; c++) {
         const kk = k * (1 - c * 0.22) * (0.9 + r() * 0.25);
         m.compose(pos.set(x + (r() - 0.5) * 0.2, CHAO_Y + k * (1.05 + c * 0.55), z + (r() - 0.5) * 0.2), q.setFromEuler(new THREE.Euler(r(), r() * 6, r())), s.set(kk, kk * 0.92, kk));
         copas.setMatrixAt(i * 3 + c, m);
-        copas.setColorAt(i * 3 + c, cor.set(verdes[Math.floor(r() * verdes.length)]));
+        copas.setColorAt(i * 3 + c, cor.set(['#3f8c37', '#55a640', '#6bbd4e'][c]).offsetHSL((r() - 0.5) * 0.03, 0, (r() - 0.5) * 0.05));
       }
     });
-    tronco.castShadow = copas.castShadow = true;
-    this.decoracao.add(tronco, copas);
+    const conesGeo = new THREE.ConeGeometry(0.7, 1.1, 8);
+    const cones = new THREE.InstancedMesh(conesGeo, new THREE.MeshStandardMaterial({ roughness: 0.85, flatShading: true }), pinheiros.length * 3);
+    pinheiros.forEach(([x, z], i) => {
+      const k = 0.9 + r() * 0.7, j = arvores.length + i;
+      m.compose(pos.set(x, CHAO_Y + 0.4 * k, z), q.identity(), s.set(k * 0.8, k * 0.8, k * 0.8)); tronco.setMatrixAt(j, m);
+      for (let c = 0; c < 3; c++) {
+        const kk = k * (1 - c * 0.25);
+        m.compose(pos.set(x, CHAO_Y + k * (1.0 + c * 0.6), z), q.setFromEuler(new THREE.Euler(0, r() * 6, 0)), s.set(kk, kk, kk));
+        cones.setMatrixAt(i * 3 + c, m);
+        cones.setColorAt(i * 3 + c, cor.set(['#2f7a3a', '#3a8c43', '#4a9e4c'][c]));
+      }
+    });
+    tronco.castShadow = copas.castShadow = cones.castShadow = true;
+    this.decoracao.add(tronco, copas, cones);
 
     // arbustos
     const arb = sorteia(34, 3.2, 8, 0.55);
@@ -136,19 +160,22 @@ export class Mundo {
     // flores (cores do kit) em tufos
     const tufos = sorteia(60, 2.4, 9, 0.35);
     const nFlores = tufos.length * 5;
-    const flores = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.07, 0), new THREE.MeshStandardMaterial({ roughness: 0.6 }), nFlores);
+    const petalas = new THREE.CircleGeometry(0.075, 5); petalas.rotateX(-Math.PI / 2);
+    const flores = new THREE.InstancedMesh(petalas, new THREE.MeshStandardMaterial({ roughness: 0.6, side: THREE.DoubleSide }), nFlores);
+    const miolos = new THREE.InstancedMesh(new THREE.SphereGeometry(0.028, 8, 6), new THREE.MeshStandardMaterial({ color: '#ffd56b', roughness: 0.5 }), nFlores);
     const caules = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.012, 0.012, 1, 4), new THREE.MeshStandardMaterial({ color: '#4c8f36' }), nFlores);
-    const coresFlor = ['#ffffff', '#ffd56b', '#ff9ad0', '#ceb7ef', '#ff9d52', '#fffdf7'];
+    const coresFlor = ['#ffffff', '#ff9ad0', '#ceb7ef', '#ff9d52', '#fffdf7', '#ff7a7a'];
     let n = 0;
     for (const [x, z] of tufos) {
       const c = coresFlor[Math.floor(r() * coresFlor.length)];
       for (let k = 0; k < 5; k++, n++) {
         const fx = x + (r() - 0.5) * 0.5, fz = z + (r() - 0.5) * 0.5, h = 0.12 + r() * 0.12;
-        m.compose(pos.set(fx, CHAO_Y + h, fz), q.identity(), s.set(1, 1, 1)); flores.setMatrixAt(n, m); flores.setColorAt(n, cor.set(c));
+        m.compose(pos.set(fx, CHAO_Y + h, fz), q.setFromEuler(new THREE.Euler(0, r() * 6, 0)), s.set(1, 1, 1)); flores.setMatrixAt(n, m); flores.setColorAt(n, cor.set(c));
+        m.compose(pos.set(fx, CHAO_Y + h + 0.012, fz), q.identity(), s.set(1, 1, 1)); miolos.setMatrixAt(n, m);
         m.compose(pos.set(fx, CHAO_Y + h / 2, fz), q.identity(), s.set(1, h, 1)); caules.setMatrixAt(n, m);
       }
     }
-    this.decoracao.add(flores, caules);
+    this.decoracao.add(flores, miolos, caules);
 
     // pedras
     const ped = sorteia(12, 3, 8, 0.5);
@@ -159,11 +186,11 @@ export class Mundo {
   }
 
   private criarMorros(): void {
-    const mat = new THREE.MeshStandardMaterial({ color: '#7fbf63', roughness: 1, flatShading: true });
+    const mats = [new THREE.MeshStandardMaterial({ color: '#8fca6c', roughness: 1, flatShading: true }), new THREE.MeshStandardMaterial({ color: '#79b85c', roughness: 1, flatShading: true })];
     const r = rnd(5);
     for (let i = 0; i < 14; i++) {
       const a = (i / 14) * Math.PI * 2 + r() * 0.3, d = 44 + r() * 10;
-      const morro = new THREE.Mesh(new THREE.SphereGeometry(8 + r() * 6, 12, 8), mat);
+      const morro = new THREE.Mesh(new THREE.SphereGeometry(8 + r() * 6, 12, 8), mats[i % 2]);
       morro.scale.set(1, 0.35 + r() * 0.25, 1);
       morro.position.set(Math.cos(a) * d, CHAO_Y - 1, Math.sin(a) * d);
       this.cena.add(morro);

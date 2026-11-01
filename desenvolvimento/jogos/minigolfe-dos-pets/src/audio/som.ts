@@ -10,7 +10,7 @@ function iniciar(): AudioContext | null {
   if (!ctx) {
     try {
       ctx = new AudioContext();
-      mestre = ctx.createGain(); mestre.gain.value = 0.22; mestre.connect(ctx.destination);
+      mestre = ctx.createGain(); mestre.gain.value = 0.12; mestre.connect(ctx.destination);   // teto da casa: pico ≈ 0,08
     } catch { return null; }
   }
   if (ctx.state === 'suspended') void ctx.resume();

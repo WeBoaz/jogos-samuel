@@ -15,8 +15,8 @@
 <!-- HUD -->
 <div class="hud" id="hud" hidden>
   <div class="hud-linha">
-    <div class="painel" id="hPista"><span class="ic">⛳</span><span id="hPistaTxt">1/6</span><small class="par" id="hPar">par 2</small></div>
-    <div class="painel jogador" id="hJogador"><i class="bolinha" id="hCor"></i><span id="hNome">Jogador 1</span><span class="tacadas" id="hTacadas">0</span></div>
+    <div class="painel" id="hPista"><span class="ic">⛳</span><span id="hPistaTxt">1/6</span><small class="par" id="hPar">⭐ 2</small></div>
+    <div class="painel jogador" id="hJogador"><i class="bolinha" id="hCor"><b id="hNum">1</b></i><span id="hNome">Jogador 1</span><span class="modo-hud" id="hModo">🐾</span><span class="tacadas" id="hTacadas">0</span></div>
     <div class="topo-btns empurra">
       <button class="mini" id="bSom" aria-label="Som ligado">🔊</button>
       <button class="mini" id="bPausa" aria-label="Pausar">II</button>
@@ -34,23 +34,20 @@
     <div class="barra"><span>minigolfe_dos_pets.exe</span><span><i></i><i></i><i></i></span></div>
     <div class="corpo">
       <div class="logo">MINIGOLFE DOS PETS<small>6 pistas com o Doguinho e o Gatinho</small></div>
-      <div class="dica-icones some-baixo"><span>👆 puxe e solte</span><span>⛳ acerte o buraco</span><span>🐾 um de cada vez</span></div>
+      <div class="dica-icones some-baixo"><span>👆 puxe e solte</span><span>⛳ acerte o buraco</span><span>🐾 um de cada vez</span><span class="so-mouse">⌨️ setas + Enter</span></div>
       <div class="escolhas tres">
         <div>
           <div class="secao">1 · quantos vão jogar?</div>
           <div class="opcoes quatro" id="oJogadores">
-            <button class="opcao" data-n="1" aria-pressed="true"><span class="ic">🧡</span></button>
-            <button class="opcao" data-n="2" aria-pressed="false"><span class="ic">🧡💜</span></button>
-            <button class="opcao" data-n="3" aria-pressed="false"><span class="ic">🧡💜💚</span></button>
-            <button class="opcao" data-n="4" aria-pressed="false"><span class="ic">🧡💜💚💙</span></button>
+            <button class="opcao" data-n="1" aria-pressed="true" aria-label="1 jogador"><b class="num">1</b><span class="ic">🧡</span></button>
+            <button class="opcao" data-n="2" aria-pressed="false" aria-label="2 jogadores"><b class="num">2</b><span class="ic">🧡💜</span></button>
+            <button class="opcao" data-n="3" aria-pressed="false" aria-label="3 jogadores"><b class="num">3</b><span class="ic">🧡💜💚</span></button>
+            <button class="opcao" data-n="4" aria-pressed="false" aria-label="4 jogadores"><b class="num">4</b><span class="ic">🧡💜💚💙</span></button>
           </div>
         </div>
         <div>
-          <div class="secao">2 · jeito de jogar</div>
-          <div class="opcoes" id="oModo">
-            <button class="opcao" data-modo="assistido" aria-pressed="true"><span class="ic">🐾</span><span>Assistido<small>mira com ajuda</small></span></button>
-            <button class="opcao" data-modo="normal" aria-pressed="false"><span class="ic">⭐</span><span>Normal<small>vale cada tacada</small></span></button>
-          </div>
+          <div class="secao">2 · jeito de cada um <small>(toque para trocar)</small></div>
+          <div class="modos" id="oModos"></div>
         </div>
       </div>
       <div class="secao">3 · onde jogar</div>
@@ -58,6 +55,7 @@
       <div class="acoes rodape-menu">
         <a class="btn sec" href="/jogos/" target="_top">← Jogos</a>
         <button class="btn grande" id="bJogar">▶ JOGAR!</button>
+        <button class="mini" id="bSomMenu" aria-label="Som ligado">🔊</button>
         <span class="selo" id="recorde" hidden></span>
       </div>
       <p class="aviso-save" id="avisoSave" hidden>Este navegador não deixa guardar o recorde, mas dá para jogar normalmente.</p>
@@ -86,8 +84,10 @@
     <div class="barra"><span>pausa.exe</span><span><i></i><i></i><i></i></span></div>
     <div class="corpo">
       <div class="titulo">PAUSA</div>
+      <p class="sub-pausa" id="pausaSub"></p>
       <button class="btn grande" id="bContinuar">▶ Continuar</button>
       <div class="acoes">
+        <button class="btn sec" id="bSomPausa" aria-label="Som ligado">🔊</button>
         <button class="btn sec" id="bRecomecar">↻ Recomeçar</button>
         <button class="btn sec" id="bMenuPausa">☰ Menu</button>
         <a class="btn sec" href="/jogos/" target="_top">← Jogos</a>
@@ -99,7 +99,7 @@
 <!-- Fim -->
 <section class="tela" id="tFim" hidden>
   <div class="cartao largo">
-    <div class="barra"><span>fim_do_circuito.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="barra"><span id="fimBarra">fim_do_circuito.exe</span><span><i></i><i></i><i></i></span></div>
     <div class="corpo">
       <div class="titulo" id="fimTitulo">FIM DO CIRCUITO! 🎉</div>
       <div class="selo" id="fimSelo" hidden></div>
@@ -107,6 +107,7 @@
       <div class="acoes">
         <button class="btn grande" id="bDeNovo">↻ Jogar de novo</button>
         <button class="btn sec" id="bMenuFim">☰ Menu</button>
+        <button class="btn sec" id="bSomFim" aria-label="Som ligado">🔊</button>
         <a class="btn sec" href="/jogos/" target="_top">← Jogos</a>
       </div>
     </div>
