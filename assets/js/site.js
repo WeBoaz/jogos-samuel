@@ -105,6 +105,8 @@
       if (d && d.readyState === 'complete' && jogo.contentWindow.location.href !== 'about:blank') { clearTimeout(espera); carregando.hidden = true; }
     } catch {}
     const moldura = $('#moldura');
+    // celular/tablet: rola até o jogo para ele ocupar a tela
+    if (matchMedia('(max-width:760px), (max-height:560px)').matches) setTimeout(() => window.scrollTo(0, moldura.getBoundingClientRect().top + window.scrollY), 150);
     const tela = $('[data-tela-cheia]');
     if (document.fullscreenEnabled && moldura.requestFullscreen) {
       tela.hidden = false;

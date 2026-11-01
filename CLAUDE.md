@@ -30,6 +30,8 @@ _app/                    Núcleo PHP (bloqueado na web)
   perfis.php             perfis (apelido + avatar SVG)
   config-publica.php     só o SHA-256 do código de primeiro acesso
 _privado/jogos/<slug>/   Arquivos dos jogos (bloqueado na web; só via jogo.php)
+  turbo-dos-blocos/      Corrida 3D (Three.js 0.170 local, licença MIT em three-LICENSE.txt; import map relativo).
+                         `window.__turbo` expõe o estado só para os testes automáticos.
 assets/css/samuel.css    Bloco 1 = CSS original do kit; bloco 2 = páginas novas
 assets/js/site.js        Favoritos, busca, filtro, diálogos, player
 assets/img/              Artes do kit otimizadas (.webp) + capas

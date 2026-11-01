@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Turbo dos Blocos</title>
+<style>
+  :root{--ink:#193337;--paper:#f5f2e8;--green:#b9ed80;--orange:#ff9d52;--purple:#ceb7ef;--gold:#ffd56b;--mono:'Courier New',monospace}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#7ec8f5;font-family:Arial,Helvetica,sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:none}
+  canvas#cena{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .tela{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding:16px;z-index:10;overflow:auto}
+  .tela>.cartao{margin:auto 0}
+  .tela[hidden],[hidden]{display:none!important}
+  .cartao{background:var(--paper);border:2px solid var(--ink);box-shadow:7px 7px 0 var(--ink);width:min(640px,100%)}
+  .barra{background:#e8e7db;border-bottom:2px solid var(--ink);padding:8px 12px;font:12px var(--mono);display:flex;justify-content:space-between}
+  .corpo{padding:22px 22px 24px;text-align:center}
+  .logo{font:900 clamp(34px,8vw,64px)/.95 var(--mono);letter-spacing:-3px;margin:4px 0 6px;color:var(--ink);text-shadow:3px 3px 0 var(--orange),6px 6px 0 var(--ink)}
+  .logo small{display:block;font-size:.42em;letter-spacing:2px;color:#326344;text-shadow:none;margin-top:6px}
+  h2{font:900 30px var(--mono);letter-spacing:-2px;margin:0 0 6px}
+  p{margin:0 0 14px;color:#526568;line-height:1.5}
+  .kicker{font:11px var(--mono);letter-spacing:1.6px;text-transform:uppercase;display:block;margin-bottom:8px}
+  .btn{border:2px solid var(--ink);background:var(--green);box-shadow:4px 4px 0 var(--ink);padding:13px 22px;font:800 17px Arial,sans-serif;cursor:pointer;min-height:52px;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+  .btn:focus-visible,.opcao:focus-visible{outline:3px solid #9956e0;outline-offset:4px}
+  .btn.sec{background:var(--paper)}
+  .btn.grande{font-size:22px;padding:16px 34px;min-height:64px}
+  .acoes{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+  .opcoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:14px 0 18px}
+  .opcao{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);background:#fffdf7;padding:14px 10px;cursor:pointer;font:800 16px Arial,sans-serif;color:var(--ink);text-align:center}
+  .opcao[aria-pressed=true]{background:var(--green);transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+  .opcao .ic{display:block;font-size:40px;line-height:1.1;margin-bottom:6px}
+  .opcao small{display:block;font:400 12px var(--mono);color:#526568;margin-top:4px}
+  .linha-sel{font:700 12px var(--mono);text-transform:uppercase;letter-spacing:1px;text-align:left;margin-top:6px}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5;font-family:var(--mono)}
+  .painel{position:absolute;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:6px 12px;font-weight:900}
+  #hPos{top:12px;left:50%;transform:translateX(-50%);font-size:40px;padding:2px 16px;background:var(--gold)}
+  #hPos small{font-size:16px}
+  #hVolta{top:12px;left:12px;font-size:18px}
+  #hTempo{top:12px;right:12px;font-size:16px;text-align:right;line-height:1.3}
+  #hTempo span{display:block;font-size:12px;font-weight:400}
+  #mapa{position:absolute;left:12px;top:60px;width:150px;height:150px;background:#f5f2e8cc;border:2px solid var(--ink)}
+  #hVel{position:absolute;right:12px;bottom:14px;width:190px;padding:6px 10px}
+  #hVel b{font-size:26px}
+  .barra-turbo{height:14px;border:2px solid var(--ink);background:#fff;margin-top:4px;position:relative}
+  .barra-turbo i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,var(--orange) 0 8px,#ffb47d 8px 12px)}
+  .barra-turbo.cheia i{background:repeating-linear-gradient(90deg,#ffd56b 0 8px,#fff2b8 8px 12px);animation:pisca .5s steps(2) infinite}
+  @keyframes pisca{50%{filter:brightness(1.4)}}
+  #aviso{position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);font:900 clamp(48px,14vw,130px) var(--mono);color:var(--paper);text-shadow:4px 4px 0 var(--ink),-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink);letter-spacing:-4px;white-space:nowrap}
+  #aviso.pequeno{font-size:clamp(26px,6vw,48px);letter-spacing:-1px}
+  .pop{animation:pop .5s ease-out}
+  @keyframes pop{from{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
+  #velocidade{position:fixed;inset:0;pointer-events:none;z-index:4;opacity:0;transition:opacity .25s;background:radial-gradient(ellipse at center,transparent 45%,rgba(255,213,107,.0) 55%,rgba(255,157,82,.35) 100%)}
+  #velocidade.on{opacity:1}
+  .topo-btns{position:fixed;top:78px;right:12px;z-index:6;display:flex;gap:8px}
+  .mini{width:44px;height:44px;padding:0;font-size:20px;min-height:44px;background:var(--paper);box-shadow:3px 3px 0 var(--ink)}
+  /* Toque */
+  #toque{position:fixed;inset:auto 0 0 0;height:0;z-index:6}
+  .tbtn{position:fixed;bottom:16px;width:80px;height:80px;border:2px solid var(--ink);background:#f5f2e8dd;box-shadow:4px 4px 0 var(--ink);font:900 34px var(--mono);color:var(--ink);display:grid;place-items:center;touch-action:none}
+  .tbtn.on{background:var(--green);transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+  #tEsq{left:16px}#tDir{left:104px}
+  #tFreio{right:16px}#tGas{right:104px;background:#b9ed80dd}#tTurbo{right:16px;bottom:104px;font-size:30px}
+  body.toque .topo-btns{left:12px;right:auto;top:222px}
+  #tTurbo.pronto{background:var(--gold);animation:pisca .5s steps(2) infinite}
+  body.toque #hVel{bottom:auto;top:60px}
+  body.facil #tGas{display:none}
+  .podio{list-style:none;padding:0;margin:10px 0 18px;text-align:left}
+  .podio li{display:flex;align-items:center;gap:12px;border:2px solid var(--ink);margin-bottom:8px;padding:8px 12px;background:#fffdf7;font-weight:800}
+  .podio li.eu{background:var(--green)}
+  .podio .n{font:900 22px var(--mono);width:44px}
+  .podio .t{margin-left:auto;font:400 13px var(--mono)}
+  .recorde{display:inline-block;background:var(--gold);border:2px solid var(--ink);padding:4px 10px;font:900 14px var(--mono);margin-bottom:12px;transform:rotate(-2deg)}
+  .dica{font:12px var(--mono);color:#526568;margin-top:14px}
+  @media (max-height:760px){.corpo{padding:14px 18px 16px}.logo{font-size:clamp(28px,6vw,46px)}.opcoes{margin:8px 0 12px;gap:10px}.opcao{padding:8px}.opcao .ic{font-size:28px}.dica{margin-top:8px}}
+  @media (max-height:500px){.corpo>p,.corpo>.kicker,.dica{display:none}.logo{font-size:30px;text-shadow:2px 2px 0 var(--orange),4px 4px 0 var(--ink)}.logo small{display:none}.opcoes{grid-template-columns:repeat(2,1fr);margin:6px 0 8px}.opcao .ic{font-size:22px;display:inline;margin-right:6px}.opcao small{display:none}.btn.grande{min-height:52px;padding:10px 26px}#mapa{width:90px;height:90px}body.toque .topo-btns{top:160px}}
+  @media (max-width:640px){#mapa{width:110px;height:110px}#hPos{font-size:30px}body.toque .topo-btns{top:180px}#hTempo{font-size:13px}#hVel{width:150px}}
+  @media (max-width:420px){.tbtn{width:66px;height:66px;font-size:28px}#tDir{left:88px}#tGas{right:88px}#tTurbo{bottom:88px}}
+  @media (prefers-reduced-motion:reduce){.pop{animation:none}#velocidade{display:none}}
+</style>
+</head>
+<body>
+<canvas id="cena" aria-label="Pista de corrida 3D"></canvas>
+<div id="velocidade"></div>
+
+<div id="hud" hidden>
+  <div class="painel" id="hVolta">VOLTA 1/3</div>
+  <div class="painel" id="hPos">1º<small>/6</small></div>
+  <div class="painel" id="hTempo">0:00.00<span>melhor volta —</span></div>
+  <canvas id="mapa" width="300" height="300" aria-hidden="true"></canvas>
+  <div class="painel" id="hVel"><b id="kmh">0</b> km/h<div class="barra-turbo" id="barraTurbo"><i></i></div><span style="font-size:11px;font-weight:400" id="txtTurbo">⭐ pegue estrelas para o turbo</span></div>
+  <div id="aviso"></div>
+</div>
+<div class="topo-btns" id="topoBtns" hidden>
+  <button class="btn mini" id="btnSom" aria-label="Som">🔊</button>
+  <button class="btn mini" id="btnMusica" aria-label="Música">🎵</button>
+  <button class="btn mini" id="btnPausa" aria-label="Pausar" style="font:900 18px var(--mono)">II</button>
+</div>
+<div id="toque" hidden>
+  <button class="tbtn" id="tEsq" aria-label="Virar para a esquerda">◀</button>
+  <button class="tbtn" id="tDir" aria-label="Virar para a direita">▶</button>
+  <button class="tbtn" id="tGas" aria-label="Acelerar">▲</button>
+  <button class="tbtn" id="tFreio" aria-label="Frear">▼</button>
+  <button class="tbtn" id="tTurbo" aria-label="Turbo">🚀</button>
+</div>
+
+<!-- MENU -->
+<section class="tela" id="telaInicio">
+  <div class="cartao">
+    <div class="barra"><span>turbo_dos_blocos.exe</span><span>▣ ▣ ▣</span></div>
+    <div class="corpo">
+      <span class="kicker">Samuel.tech apresenta</span>
+      <div class="logo">TURBO<br>DOS BLOCOS<small>GRANDE PRÊMIO DA ILHA</small></div>
+      <p>Escolha seu piloto, a pista e acelere! Pegue as estrelas ⭐ para encher o turbo.</p>
+      <div class="linha-sel">1 · Piloto</div>
+      <div class="opcoes" id="selPiloto">
+        <button class="opcao" data-piloto="samuel" aria-pressed="true"><span class="ic">🧡</span>Samuel<small>kart laranja</small></button>
+        <button class="opcao" data-piloto="player2" aria-pressed="false"><span class="ic">💜</span>Player 2<small>kart lilás</small></button>
+      </div>
+      <div class="linha-sel">2 · Pista</div>
+      <div class="opcoes" id="selPista">
+        <button class="opcao" data-pista="ilha" aria-pressed="true"><span class="ic">🏝️</span>Ilha dos Blocos<small id="recIlha">dia · cachoeiras</small></button>
+        <button class="opcao" data-pista="estrelas" aria-pressed="false"><span class="ic">🌌</span>Rota das Estrelas<small id="recEstrelas">noite · cristais</small></button>
+      </div>
+      <div class="linha-sel">3 · Jeito de jogar</div>
+      <div class="opcoes" id="selModo">
+        <button class="opcao" data-modo="facil" aria-pressed="false"><span class="ic">🐢</span>Fácil<small>acelera sozinho</small></button>
+        <button class="opcao" data-modo="normal" aria-pressed="true"><span class="ic">🏎️</span>Normal<small>você acelera</small></button>
+      </div>
+      <button class="btn grande" id="btnCorrer">▶ CORRER!</button>
+      <p class="dica">Teclado: ← → virar · ↑ acelerar · ↓ frear · ESPAÇO turbo · P pausa</p>
+      <a class="dica" href="/jogos/" target="_top">← Voltar aos jogos</a>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="telaPausa" hidden>
+  <div class="cartao" style="width:min(420px,100%)">
+    <div class="barra"><span>pausa.exe</span><span>⏸</span></div>
+    <div class="corpo">
+      <h2>Pausado</h2>
+      <div class="acoes" style="flex-direction:column;align-items:center">
+        <button class="btn grande" id="btnContinuar">▶ Continuar</button>
+        <button class="btn sec" id="btnReiniciar">↻ Recomeçar corrida</button>
+        <button class="btn sec" id="btnMenu">☰ Trocar piloto ou pista</button>
+        <a class="btn sec" href="/jogos/" target="_top">← Voltar aos jogos</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="telaFim" hidden>
+  <div class="cartao" style="width:min(480px,100%)">
+    <div class="barra"><span>resultado.exe</span><span>🏁</span></div>
+    <div class="corpo">
+      <h2 id="fimTitulo">Você chegou!</h2>
+      <div id="fimRecorde"></div>
+      <ol class="podio" id="podio"></ol>
+      <p id="fimInfo"></p>
+      <div class="acoes">
+        <button class="btn" id="btnDeNovo">↻ Correr de novo</button>
+        <button class="btn sec" id="btnOutra">☰ Outra pista</button>
+      </div>
+      <a class="dica" href="/jogos/" target="_top" style="display:inline-block;margin-top:12px">← Voltar aos jogos</a>
+    </div>
+  </div>
+</section>
+
+<script type="importmap">{"imports":{"three":"./three.module.min.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* =====================================================================
+   TURBO DOS BLOCOS — corrida de karts em um mundo de blocos.
+   Jogo original feito para o Samuel.tech. Tudo é gerado por código:
+   pistas (curvas), texturas (pixel art em canvas), karts e música.
+   ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const guardar = {
+  ler(k, f) { try { const v = localStorage.getItem('turbo:' + k); return v === null ? f : JSON.parse(v); } catch { return f; } },
+  gravar(k, v) { try { localStorage.setItem('turbo:' + k, JSON.stringify(v)); } catch {} },
+};
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const angDif = (a, b) => { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; };
+const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- Pistas ---------------- */
+const PISTAS = {
+  ilha: {
+    nome: 'Ilha dos Blocos', tema: 'dia', largura: 16, voltas: 3, seed: 7,
+    // [x, z, altura]
+    pontos: [[0,0,0],[60,0,1],[110,10,4],[140,50,8],[130,100,10],[90,122,8],[50,105,5],[30,75,3],[0,68,2],[-40,95,4],[-90,92,6],[-122,50,4],[-112,0,2],[-72,-26,0],[-30,-16,0]],
+    turbos: [0.12, 0.47, 0.8], estrelas: [0.06, 0.22, 0.34, 0.55, 0.66, 0.9],
+  },
+  estrelas: {
+    nome: 'Rota das Estrelas', tema: 'noite', largura: 16, voltas: 3, seed: 21,
+    pontos: [[0,0,0],[80,0,0],[150,22,3],[172,72,6],[140,112,9],[82,100,12],[40,132,10],[-20,142,7],[-82,122,4],[-112,72,2],[-92,20,0],[-50,-10,0]],
+    turbos: [0.1, 0.42, 0.74], estrelas: [0.05, 0.2, 0.3, 0.52, 0.62, 0.86],
+  },
+};
+
+const PILOTOS = {
+  samuel:  { nome: 'Samuel',  cor: 0xff9d52, ic: '🧡', tipo: 'samuel' },
+  player2: { nome: 'Player 2', cor: 0xceb7ef, ic: '💜', tipo: 'player2' },
+  dog:     { nome: 'Doguinho', cor: 0x8fd3f0, ic: '🐶', tipo: 'dog' },
+  cat:     { nome: 'Gatinho',  cor: 0xffd56b, ic: '🐱', tipo: 'cat' },
+  roboV:   { nome: 'Robô Verde', cor: 0x7ad86a, ic: '🤖', tipo: 'robo', visor: 0x5bf5c9 },
+  roboA:   { nome: 'Robô Azul',  cor: 0x5f86c0, ic: '🤖', tipo: 'robo', visor: 0x9ad8ff },
+};
+
+/* ---------------- Renderização ---------------- */
+const canvas = $('cena');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+let qualidade = Math.min(window.devicePixelRatio || 1, 1.75);
+renderer.setPixelRatio(qualidade);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(62, 1, 0.3, 2200);
+function redimensionar() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', redimensionar);
+redimensionar();
+
+/* ---------------- Texturas pixel art ---------------- */
+const ANISO = renderer.capabilities.getMaxAnisotropy();
+function textura(w, h, desenhar, opts = {}) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); desenhar(g, w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = ANISO;
+  if (opts.repeat) t.repeat.set(opts.repeat[0], opts.repeat[1]);
+  return t;
+}
+function ruido(cores, seed, w = 16, h = 16) {
+  const r = rng(seed);
+  return (g) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { g.fillStyle = cores[Math.floor(r() * cores.length)]; g.fillRect(x, y, 1, 1); } };
+}
+const TEMAS = {
+  dia: {
+    ceuTopo: 0x3f9ae8, ceuHorizonte: 0xcdeffa, nevoa: 0xcdeffa, nevoaDist: [140, 650],
+    hemi: [0xdff4ff, 0x6a8f3c, 1.15], sol: [0xfff1d6, 2.4], solDir: [-60, 120, 40],
+    chao: ['#5dbb3f', '#5dbb3f', '#6cc94a', '#4ea535', '#57b23b'], lado: ['#8b5a2b', '#7a4e24', '#9c6b3a', '#5e3a1a'],
+    asfalto: ['#596273', '#4f5868', '#646d7e', '#566072'], faixa: '#f5f2e8', zebra: ['#ff9d52', '#fffdf7'], zebraEmissivo: 0,
+    cerca: 0xb98a4e,
+  },
+  noite: {
+    ceuTopo: 0x0b0830, ceuHorizonte: 0x3b2a7a, nevoa: 0x24195a, nevoaDist: [120, 600],
+    hemi: [0x8f86ff, 0x2a1d4f, 0.75], sol: [0xbcc8ff, 1.2], solDir: [70, 120, -50],
+    chao: ['#4a3a8c', '#3f327a', '#56459c', '#3a2d70', '#6a55b5'], lado: ['#2c2350', '#251d45', '#352a60', '#1d1638'],
+    asfalto: ['#2e3048', '#2a2c42', '#34374f', '#282a40'], faixa: '#9ad8ff', zebra: ['#ff4fd8', '#4ee6e0'], zebraEmissivo: 0.9,
+    cerca: 0x8a4fff,
+  },
+};
+
+/* ---------------- Áudio (WebAudio, tudo sintetizado) ---------------- */
+const Audio = {
+  ctx: null, master: null, sfx: null, mus: null, motor: null,
+  somLigado: guardar.ler('som', true), musicaLigada: guardar.ler('musica', true),
+  iniciar() {
+    if (this.ctx) { this.ctx.resume(); return; }
+    try {
+      const C = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new C();
+      this.master = this.ctx.createGain(); this.master.gain.value = this.somLigado ? 0.9 : 0; this.master.connect(this.ctx.destination);
+      this.sfx = this.ctx.createGain(); this.sfx.gain.value = 0.7; this.sfx.connect(this.master);
+      this.mus = this.ctx.createGain(); this.mus.gain.value = this.musicaLigada ? 0.32 : 0; this.mus.connect(this.master);
+      // motor: duas ondas passando por um filtro
+      const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900;
+      const g = this.ctx.createGain(); g.gain.value = 0;
+      const o1 = this.ctx.createOscillator(); o1.type = 'sawtooth';
+      const o2 = this.ctx.createOscillator(); o2.type = 'square';
+      const g2 = this.ctx.createGain(); g2.gain.value = 0.35;
+      o1.connect(f); o2.connect(g2).connect(f); f.connect(g).connect(this.sfx);
+      o1.start(); o2.start();
+      this.motor = { o1, o2, g, f };
+    } catch { this.ctx = null; }
+  },
+  motorAtualiza(vel, turbo, ativo) {
+    if (!this.motor) return;
+    const t = this.ctx.currentTime, v = Math.abs(vel);
+    const base = 48 + v * 2.4 + turbo * 35;
+    this.motor.o1.frequency.setTargetAtTime(base, t, 0.05);
+    this.motor.o2.frequency.setTargetAtTime(base * 0.502, t, 0.05);
+    this.motor.f.frequency.setTargetAtTime(500 + v * 22 + turbo * 600, t, 0.08);
+    this.motor.g.gain.setTargetAtTime(ativo ? 0.05 + v * 0.0016 : 0, t, 0.1);
+  },
+  nota(freq, dur, tipo = 'square', vol = 0.12, quando = 0, destino) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + quando;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = tipo; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(destino || this.sfx); o.start(t); o.stop(t + dur + 0.02);
+  },
+  ruido(dur, vol = 0.2, freq = 1200, quando = 0, destino) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + quando;
+    const n = Math.floor(this.ctx.sampleRate * dur);
+    const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+    const d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const s = this.ctx.createBufferSource(); s.buffer = buf;
+    const f = this.ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq;
+    const g = this.ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f).connect(g).connect(destino || this.sfx); s.start(t);
+  },
+  bip(n) { this.nota(n ? 880 : 440, 0.25, 'square', 0.16); },
+  estrela() { [988, 1319, 1568].forEach((f, i) => this.nota(f, 0.12, 'square', 0.09, i * 0.05)); },
+  turbo() { this.ruido(0.6, 0.25, 900); this.nota(220, 0.5, 'sawtooth', 0.06); },
+  batida() { this.ruido(0.18, 0.35, 180); this.nota(90, 0.2, 'triangle', 0.2); },
+  volta() { [784, 988, 1175].forEach((f, i) => this.nota(f, 0.18, 'triangle', 0.14, i * 0.09)); },
+  fim(primeiro) {
+    const m = primeiro ? [523, 659, 784, 1047, 784, 1047, 1319] : [523, 659, 784, 1047];
+    m.forEach((f, i) => this.nota(f, 0.22, 'square', 0.12, i * 0.13));
+  },
+  alternarSom() { this.somLigado = !this.somLigado; guardar.gravar('som', this.somLigado); if (this.master) this.master.gain.value = this.somLigado ? 0.9 : 0; },
+  alternarMusica() { this.musicaLigada = !this.musicaLigada; guardar.gravar('musica', this.musicaLigada); if (this.mus) this.mus.gain.value = this.musicaLigada ? 0.32 : 0; },
+};
+
+/* Música 8-bit original: sequenciador simples */
+const Musica = {
+  tocando: false, passo: 0, proxima: 0, timer: null, bpm: 148,
+  // graus em Dó maior, 16 passos por compasso; 4 compassos (C, G, Am, F)
+  baixo: [48, 43, 45, 41],
+  melodia: [
+    [72,0,76,0,79,0,76,0,74,0,76,0,72,0,67,0],
+    [71,0,74,0,79,0,74,0,72,0,71,0,67,0,0,0],
+    [69,0,72,0,76,0,72,0,74,0,76,0,77,0,76,0],
+    [77,0,76,0,74,0,72,0,74,0,72,0,71,0,74,0],
+  ],
+  midi(n) { return 440 * Math.pow(2, (n - 69) / 12); },
+  iniciar() {
+    if (!Audio.ctx || this.tocando) return;
+    this.tocando = true; this.passo = 0; this.proxima = Audio.ctx.currentTime + 0.1;
+    this.timer = setInterval(() => this.agendar(), 40);
+  },
+  parar() { this.tocando = false; clearInterval(this.timer); },
+  agendar() {
+    const dur = 60 / this.bpm / 4;
+    while (this.proxima < Audio.ctx.currentTime + 0.15) {
+      const comp = Math.floor(this.passo / 16) % 4, p = this.passo % 16, q = this.proxima - Audio.ctx.currentTime;
+      const m = this.melodia[comp][p];
+      if (m) Audio.nota(this.midi(m), dur * 1.8, 'square', 0.07, q, Audio.mus);
+      if (p % 4 === 0) Audio.nota(this.midi(this.baixo[comp]), dur * 3.5, 'triangle', 0.22, q, Audio.mus);
+      if (p % 4 === 2) Audio.nota(this.midi(this.baixo[comp] + 12), dur * 1.5, 'triangle', 0.12, q, Audio.mus);
+      if (p % 2 === 0) Audio.ruido(0.03, p % 8 === 4 ? 0.12 : 0.05, p % 8 === 4 ? 2500 : 7000, q, Audio.mus);
+      this.proxima += dur; this.passo++;
+    }
+  },
+};
+
+/* ---------------- Mundo ---------------- */
+let mundo = null;          // Group com tudo da pista atual
+let pista = null;          // dados geométricos da pista
+const animaveis = [];      // funções chamadas a cada quadro (texturas animadas etc.)
+
+function construirMundo(chave) {
+  if (mundo) { scene.remove(mundo); mundo.traverse((o) => { if (o.geometry) o.geometry.dispose(); }); }
+  animaveis.length = 0;
+  const def = PISTAS[chave], tema = TEMAS[def.tema];
+  const r = rng(def.seed);
+  mundo = new THREE.Group(); scene.add(mundo);
+
+  // Céu em degradê + névoa
+  scene.fog = new THREE.Fog(tema.nevoa, tema.nevoaDist[0], tema.nevoaDist[1]);
+  scene.background = new THREE.Color(tema.ceuHorizonte);
+  const ceu = new THREE.Mesh(new THREE.SphereGeometry(1500, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: { topo: { value: new THREE.Color(tema.ceuTopo) }, horiz: { value: new THREE.Color(tema.ceuHorizonte) } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 topo; uniform vec3 horiz; varying vec3 vP; void main(){ float h = clamp(vP.y*1.6+0.15,0.0,1.0); gl_FragColor = vec4(mix(horiz, topo, pow(h,0.8)),1.0); }',
+  }));
+  mundo.add(ceu);
+
+  // Luzes
+  const hemi = new THREE.HemisphereLight(tema.hemi[0], tema.hemi[1], tema.hemi[2]); mundo.add(hemi);
+  const sol = new THREE.DirectionalLight(tema.sol[0], tema.sol[1]);
+  sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048);
+  const sc = sol.shadow.camera; sc.left = -70; sc.right = 70; sc.top = 70; sc.bottom = -70; sc.near = 10; sc.far = 400;
+  sol.shadow.bias = -0.0005; sol.shadow.normalBias = 0.6;
+  mundo.add(sol, sol.target);
+  sol.position.set(def.pontos[0][0] + tema.solDir[0], tema.solDir[1], def.pontos[0][1] + tema.solDir[2]);
+  sol.target.position.set(def.pontos[0][0], 0, def.pontos[0][1]);
+
+  // ----- Curva da pista -----
+  const pts = def.pontos.map(([x, z, y]) => new THREE.Vector3(x, y, z));
+  const curva = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+  const comp = curva.getLength();
+  const N = Math.round(comp / 1.5);
+  const amostras = curva.getSpacedPoints(N);
+  const P = [], T = [], L = [], D = [];
+  for (let i = 0; i < N; i++) P.push(amostras[i].clone());
+  let acc = 0;
+  for (let i = 0; i < N; i++) {
+    const a = P[(i - 1 + N) % N], b = P[(i + 1) % N];
+    const t = new THREE.Vector3().subVectors(b, a).normalize(); T.push(t);
+    L.push(new THREE.Vector3(t.z, 0, -t.x).normalize());
+    D.push(acc); acc += P[i].distanceTo(P[(i + 1) % N]);
+  }
+  const W = def.largura;
+  pista = { def, tema, N, P, T, L, D, W, comprimento: acc, turbos: [], estrelas: [], sol, mapa: null };
+
+  // ----- Malhas em faixa ao longo da pista -----
+  // faixa(de, ate, alturaExtra, vPorUnidade) → BufferGeometry
+  function faixa(de, ate, dy = 0, vEscala = 1 / 8) {
+    const pos = [], uv = [], idx = [];
+    for (let i = 0; i <= N; i++) {
+      const k = i % N, p = P[k], l = L[k], v = (i === N ? acc : D[k]) * vEscala;
+      pos.push(p.x + l.x * de, p.y + dy, p.z + l.z * de, p.x + l.x * ate, p.y + dy, p.z + l.z * ate);
+      uv.push(0, v, 1, v);
+      if (i < N) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx); g.computeVertexNormals();
+    return g;
+  }
+  // parede vertical ao longo do lado (para os barrancos de terra e cercas)
+  function parede(lat, yBase, altura, vEscala = 1 / 4, absoluto = true) {
+    const pos = [], uv = [], idx = [];
+    for (let i = 0; i <= N; i++) {
+      const k = i % N, p = P[k], l = L[k], v = (i === N ? acc : D[k]) * vEscala;
+      const x = p.x + l.x * lat, z = p.z + l.z * lat;
+      const y0 = absoluto ? yBase : p.y + yBase, y1 = absoluto ? p.y + altura : p.y + yBase + altura;
+      pos.push(x, y0, z, x, y1, z);
+      uv.push(v, 0, v, (y1 - y0) / 2);
+      if (i < N) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx); g.computeVertexNormals();
+    return g;
+  }
+
+  const texAsfalto = textura(32, 32, (g) => {
+    ruido(tema.asfalto, def.seed + 1, 32, 32)(g);
+    g.fillStyle = tema.faixa; g.fillRect(15, 0, 2, 16);           // faixa central tracejada
+  });
+  const asfalto = new THREE.Mesh(faixa(-W / 2, W / 2, 0.05, 1 / 10), new THREE.MeshLambertMaterial({ map: texAsfalto }));
+  asfalto.receiveShadow = true; mundo.add(asfalto);
+
+  const texZebra = textura(1, 2, (g) => { g.fillStyle = tema.zebra[0]; g.fillRect(0, 0, 1, 1); g.fillStyle = tema.zebra[1]; g.fillRect(0, 1, 1, 1); });
+  const matZebra = new THREE.MeshLambertMaterial({ map: texZebra, emissive: tema.zebraEmissivo ? 0xffffff : 0x000000, emissiveMap: tema.zebraEmissivo ? texZebra : null, emissiveIntensity: tema.zebraEmissivo });
+  for (const s of [-1, 1]) {
+    const z = new THREE.Mesh(faixa(s * W / 2, s * (W / 2 + 1.4), 0.07, 1 / 3), matZebra);
+    z.receiveShadow = true; mundo.add(z);
+  }
+  const texChao = textura(16, 16, ruido(tema.chao, def.seed + 2));
+  const texLado = textura(16, 16, ruido(tema.lado, def.seed + 3));
+  const matAcost = new THREE.MeshLambertMaterial({ map: texChao, side: THREE.DoubleSide });
+  for (const s of [-1, 1]) {
+    const a = new THREE.Mesh(faixa(s * (W / 2 + 1.4), s * (W / 2 + 3.4), 0.04, 1 / 2), matAcost);
+    a.receiveShadow = true; mundo.add(a);
+    const barranco = new THREE.Mesh(parede(s * (W / 2 + 3.4), -0.4, 0.04, 1 / 2), new THREE.MeshLambertMaterial({ map: texLado, side: THREE.DoubleSide }));
+    barranco.receiveShadow = true; mundo.add(barranco);
+  }
+  // por baixo do asfalto (aparece nos morros)
+  const baixo = new THREE.Mesh(faixa(-W / 2 - 3.4, W / 2 + 3.4, -0.35, 1 / 2), new THREE.MeshLambertMaterial({ map: texLado, side: THREE.BackSide }));
+  mundo.add(baixo);
+
+  // Cerca: corrimão + postes (instanciados)
+  const matCerca = new THREE.MeshLambertMaterial({ color: tema.cerca, emissive: def.tema === 'noite' ? tema.cerca : 0x000000, emissiveIntensity: def.tema === 'noite' ? 0.6 : 0 });
+  for (const s of [-1, 1]) {
+    const c = new THREE.Mesh(parede(s * (W / 2 + 3.3), 0.7, 0.35, 1 / 4, false), matCerca);
+    c.castShadow = true; mundo.add(c);
+  }
+  const nPostes = Math.floor(N / 3) * 2;
+  const postes = new THREE.InstancedMesh(new THREE.BoxGeometry(0.45, 1.3, 0.45), matCerca, nPostes);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e3 = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1);
+  let ip = 0;
+  for (let i = 0; i < N && ip < nPostes; i += 3) for (const s of [-1, 1]) {
+    const p = P[i], l = L[i];
+    v3.set(p.x + l.x * s * (W / 2 + 3.3), p.y + 0.6, p.z + l.z * s * (W / 2 + 3.3));
+    q.setFromEuler(e3.set(0, Math.atan2(T[i].x, T[i].z), 0));
+    postes.setMatrixAt(ip++, m4.compose(v3, q, s3));
+  }
+  postes.castShadow = true; mundo.add(postes);
+
+  // Platô: uma grande ilha de blocos flutuando no céu
+  const plato = new THREE.Mesh(new THREE.BoxGeometry(760, 40, 760), [
+    new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.lado, 91), { repeat: [95, 5] }) }),
+    new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.lado, 92), { repeat: [95, 5] }) }),
+    new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.chao, 93), { repeat: [190, 190] }) }),
+    new THREE.MeshLambertMaterial({ color: 0x5c5c5c }),
+    new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.lado, 94), { repeat: [95, 5] }) }),
+    new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.lado, 95), { repeat: [95, 5] }) }),
+  ]);
+  plato.position.set(10, -20.4, 55); plato.receiveShadow = true; mundo.add(plato);
+
+  // Linha de chegada + pórtico
+  const texXadrez = textura(8, 2, (g) => { for (let x = 0; x < 8; x++) for (let y = 0; y < 2; y++) { g.fillStyle = (x + y) % 2 ? '#193337' : '#fffdf7'; g.fillRect(x, y, 1, 1); } });
+  const linha = new THREE.Mesh(new THREE.PlaneGeometry(W, 2.4), new THREE.MeshLambertMaterial({ map: texXadrez }));
+  linha.rotation.x = -Math.PI / 2; linha.rotation.z = Math.atan2(T[0].x, T[0].z);
+  linha.position.set(P[0].x, P[0].y + 0.08, P[0].z); linha.receiveShadow = true; mundo.add(linha);
+  const portico = new THREE.Group();
+  const matPilar = new THREE.MeshLambertMaterial({ color: 0x193337 });
+  for (const s of [-1, 1]) { const pil = new THREE.Mesh(new THREE.BoxGeometry(1.6, 9, 1.6), matPilar); pil.position.set(s * (W / 2 + 2.4), 4.5, 0); pil.castShadow = true; portico.add(pil); }
+  const faixaTopo = new THREE.Mesh(new THREE.BoxGeometry(W + 6.4, 2.2, 1.2), [matPilar, matPilar, matPilar, matPilar,
+    new THREE.MeshLambertMaterial({ map: textura(16, 4, (g) => { for (let x = 0; x < 16; x++) for (let y = 0; y < 4; y++) { g.fillStyle = (x + y) % 2 ? '#193337' : '#b9ed80'; g.fillRect(x, y, 1, 1); } }) }),
+    new THREE.MeshLambertMaterial({ map: textura(16, 4, (g) => { for (let x = 0; x < 16; x++) for (let y = 0; y < 4; y++) { g.fillStyle = (x + y) % 2 ? '#193337' : '#ff9d52'; g.fillRect(x, y, 1, 1); } }) })]);
+  faixaTopo.position.y = 9.4; faixaTopo.castShadow = true; portico.add(faixaTopo);
+  portico.position.copy(P[0]); portico.rotation.y = Math.atan2(T[0].x, T[0].z); mundo.add(portico);
+
+  // Placas de turbo (setas animadas)
+  const texSeta = textura(16, 16, (g) => {
+    g.fillStyle = '#193337'; g.fillRect(0, 0, 16, 16);
+    g.fillStyle = '#ffd56b';
+    for (let k = 0; k < 2; k++) for (let i = 0; i < 6; i++) { g.fillRect(2 + i, 2 + i + k * 8 - 2, 2, 2); g.fillRect(12 - i, 2 + i + k * 8 - 2, 2, 2); }
+  });
+  texSeta.wrapS = THREE.ClampToEdgeWrapping;
+  for (const frac of def.turbos) {
+    const i = Math.floor(frac * N), lat = (r() - 0.5) * (W - 7);
+    const t = texSeta.clone(); t.needsUpdate = true; t.repeat.set(1, 3);
+    const placa = new THREE.Mesh(new THREE.PlaneGeometry(5, 9), new THREE.MeshBasicMaterial({ map: t, color: 0xffffff }));
+    const p = P[(i + 3) % N];
+    placa.rotation.x = -Math.PI / 2; placa.rotation.z = Math.atan2(T[i].x, T[i].z) + Math.PI;
+    placa.position.set(p.x + L[i].x * lat, p.y + 0.1, p.z + L[i].z * lat);
+    mundo.add(placa);
+    animaveis.push((dt) => { t.offset.y -= dt * 1.6; });
+    pista.turbos.push({ i, lat, de: i, ate: (i + 6) % N });
+  }
+
+  // Estrelas para coletar (fileiras de 3)
+  const forma = new THREE.Shape();
+  for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 0.5 : 1.15; forma[k ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr); }
+  const geoEstrela = new THREE.ExtrudeGeometry(forma, { depth: 0.35, bevelEnabled: true, bevelSize: 0.08, bevelThickness: 0.08, bevelSegments: 1 });
+  geoEstrela.center();
+  const matEstrela = new THREE.MeshLambertMaterial({ color: 0xffd56b, emissive: 0xffa31a, emissiveIntensity: 0.55 });
+  for (const frac of def.estrelas) {
+    const i = Math.floor(frac * N);
+    for (const lat of [-4.5, 0, 4.5]) {
+      const m = new THREE.Mesh(geoEstrela, matEstrela);
+      const p = P[i];
+      m.position.set(p.x + L[i].x * lat, p.y + 1.6, p.z + L[i].z * lat); m.castShadow = true;
+      mundo.add(m);
+      pista.estrelas.push({ m, i, lat, volta: 0, ativo: true, base: m.position.y });
+    }
+  }
+
+  // ----- Cenário instanciado -----
+  const longeDaPista = (x, z, folga) => {
+    for (let i = 0; i < N; i += 3) { const dx = P[i].x - x, dz = P[i].z - z; if (dx * dx + dz * dz < folga * folga) return false; }
+    return true;
+  };
+  const sorteiaPontos = (qtd, folga, raio) => {
+    const out = []; let t = 0;
+    while (out.length < qtd && t++ < qtd * 30) {
+      const x = 10 + (r() - 0.5) * raio * 2, z = 55 + (r() - 0.5) * raio * 2;
+      if (longeDaPista(x, z, folga)) out.push([x, z]);
+    }
+    return out;
+  };
+  if (def.tema === 'dia') {
+    // Árvores de blocos
+    const lugares = sorteiaPontos(230, W / 2 + 9, 340);
+    const troncos = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ map: textura(8, 8, ruido(['#7a4e24', '#6a421d', '#8b5a2b'], 5)) }), lugares.length);
+    const folhas = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ map: textura(8, 8, ruido(['#3f9b3a', '#2a6e27', '#4caf47', '#36873a'], 6)) }), lugares.length * 2);
+    const cor = new THREE.Color();
+    lugares.forEach(([x, z], k) => {
+      const esc = 0.8 + r() * 0.8, h = 3 + r() * 3;
+      troncos.setMatrixAt(k, m4.compose(v3.set(x, h * esc / 2 - 0.3, z), q.identity(), new THREE.Vector3(1.1 * esc, h * esc, 1.1 * esc)));
+      const fl = 4.5 * esc;
+      folhas.setMatrixAt(k * 2, m4.compose(v3.set(x, h * esc + fl / 2 - 0.8, z), q.identity(), new THREE.Vector3(fl, fl * 0.9, fl)));
+      folhas.setMatrixAt(k * 2 + 1, m4.compose(v3.set(x + (r() - 0.5), h * esc + fl - 0.2, z + (r() - 0.5)), q.identity(), new THREE.Vector3(fl * 0.6, fl * 0.55, fl * 0.6)));
+      cor.setHSL(0.27 + r() * 0.08, 0.5, 0.42 + r() * 0.14); folhas.setColorAt(k * 2, cor); folhas.setColorAt(k * 2 + 1, cor);
+    });
+    troncos.castShadow = folhas.castShadow = true; troncos.receiveShadow = folhas.receiveShadow = true;
+    mundo.add(troncos, folhas);
+    // Flores
+    const fl = sorteiaPontos(500, W / 2 + 4.5, 260);
+    const flores = new THREE.InstancedMesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshLambertMaterial({ color: 0xffffff }), fl.length);
+    const coresFlor = [0xff6fa8, 0xffd56b, 0xceb7ef, 0xffffff, 0xff9d52];
+    fl.forEach(([x, z], k) => { flores.setMatrixAt(k, m4.compose(v3.set(x, -0.05, z), q.identity(), s3)); flores.setColorAt(k, cor.set(coresFlor[k % 5])); });
+    mundo.add(flores);
+  } else {
+    // Cristais brilhantes
+    const lugares = sorteiaPontos(160, W / 2 + 8, 340);
+    const cristais = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x6a3cff, emissiveIntensity: 0.55 }), lugares.length * 3);
+    const cor = new THREE.Color();
+    lugares.forEach(([x, z], k) => {
+      for (let j = 0; j < 3; j++) {
+        const h = 2 + r() * 7, w = 0.8 + r() * 1.2;
+        q.setFromEuler(e3.set((r() - 0.5) * 0.5, r() * 3, (r() - 0.5) * 0.5));
+        cristais.setMatrixAt(k * 3 + j, m4.compose(v3.set(x + (r() - 0.5) * 3, h / 2 - 0.4, z + (r() - 0.5) * 3), q, new THREE.Vector3(w, h, w)));
+        cristais.setColorAt(k * 3 + j, cor.set([0xceb7ef, 0x9ad8ff, 0xff9ad0, 0x7af0e0][(k + j) % 4]));
+      }
+    });
+    cristais.castShadow = true; mundo.add(cristais);
+    // Estrelas do céu
+    const n = 1400, pos = new Float32Array(n * 3);
+    for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2, b = r() * 0.9 + 0.05, rr = 1200; pos.set([Math.cos(a) * Math.cos(b) * rr, Math.sin(b) * rr, Math.sin(a) * Math.cos(b) * rr], k * 3); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    mundo.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 2.2, sizeAttenuation: false, fog: false })));
+    // Planeta com anéis
+    const planeta = new THREE.Group();
+    const esfera = new THREE.Mesh(new THREE.IcosahedronGeometry(110, 2), new THREE.MeshLambertMaterial({ color: 0x4ee6e0, emissive: 0x1a4a8a, emissiveIntensity: 0.6, flatShading: true, fog: false }));
+    const anel = new THREE.Mesh(new THREE.RingGeometry(150, 205, 48, 1), new THREE.MeshBasicMaterial({ color: 0xceb7ef, side: THREE.DoubleSide, transparent: true, opacity: 0.75, fog: false }));
+    anel.rotation.x = Math.PI / 2.4;
+    planeta.add(esfera, anel); planeta.position.set(-500, 330, -700); planeta.rotation.z = 0.3; mundo.add(planeta);
+    animaveis.push((dt) => { planeta.rotation.y += dt * 0.03; });
+  }
+
+  // Ilhas flutuantes com cachoeiras ao redor
+  const texAgua = textura(4, 16, (g) => { for (let y = 0; y < 16; y++) { g.fillStyle = ['#bfe9ff', '#7ec8f5', '#9ad8ff', '#e9f8ff'][y % 4]; g.fillRect(0, y, 4, 1); } });
+  const matAgua = new THREE.MeshBasicMaterial({ map: texAgua, transparent: true, opacity: 0.9, fog: true });
+  animaveis.push((dt) => { texAgua.offset.y += dt * 1.5; });
+  const matTopo = new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.chao, 31)) });
+  const matTerra = new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(tema.lado, 32)) });
+  const matPedra = new THREE.MeshLambertMaterial({ map: textura(16, 16, ruido(['#8c8c8c', '#7a7a7a', '#9a9a9a', '#5c5c5c'], 33)) });
+  for (let k = 0; k < 11; k++) {
+    const a = (k / 11) * Math.PI * 2 + r() * 0.3, dist = 470 + r() * 220, y = 10 + r() * 70, w = 30 + r() * 50;
+    const ilha = new THREE.Group();
+    const topo = new THREE.Mesh(new THREE.BoxGeometry(w, 4, w * 0.8), matTopo); ilha.add(topo);
+    const terra = new THREE.Mesh(new THREE.BoxGeometry(w * 0.9, 8, w * 0.7), matTerra); terra.position.y = -6; ilha.add(terra);
+    const pedra = new THREE.Mesh(new THREE.BoxGeometry(w * 0.55, 10, w * 0.45), matPedra); pedra.position.y = -15; ilha.add(pedra);
+    const pedra2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.25, 8, w * 0.2), matPedra); pedra2.position.y = -24; ilha.add(pedra2);
+    if (k % 2 === 0) { const cach = new THREE.Mesh(new THREE.PlaneGeometry(6, 70), matAgua); cach.position.set(0, -35, w * 0.4 + 0.2); ilha.add(cach); }
+    ilha.position.set(10 + Math.cos(a) * dist, y, 55 + Math.sin(a) * dist);
+    ilha.lookAt(10, y, 55);
+    mundo.add(ilha);
+  }
+  // Nuvens de blocos (abaixo e ao redor do platô)
+  const nuvens = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: def.tema === 'dia' ? 0xffffff : 0x8a7fd0, emissive: def.tema === 'dia' ? 0x445566 : 0x221a55 }), 160);
+  for (let k = 0; k < 40; k++) {
+    const a = r() * Math.PI * 2, dist = 300 + r() * 500, y = (k % 3 === 0 ? 60 + r() * 60 : -30 - r() * 60), cx = 10 + Math.cos(a) * dist, cz = 55 + Math.sin(a) * dist;
+    for (let j = 0; j < 4; j++) nuvens.setMatrixAt(k * 4 + j, m4.compose(v3.set(cx + (j - 1.5) * 12 + r() * 6, y + (j % 2) * 5, cz + r() * 10), q.identity(), new THREE.Vector3(16 + r() * 14, 6 + r() * 5, 12 + r() * 10)));
+  }
+  mundo.add(nuvens);
+  const grupoNuvens = nuvens;
+  animaveis.push((dt) => { grupoNuvens.rotation.y += dt * 0.004; });
+
+  desenharMinimapaBase();
+}
+
+/* ---------------- Karts ---------------- */
+function caixa(w, h, d, cor, x, y, z, extra = {}) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: cor, ...extra }));
+  m.position.set(x, y, z); m.castShadow = true; return m;
+}
+function criarKart(cfg) {
+  const g = new THREE.Group();
+  const corpo = new THREE.Group(); g.add(corpo);
+  const c = cfg.cor, escuro = new THREE.Color(c).multiplyScalar(0.7).getHex();
+  corpo.add(caixa(2.3, 0.5, 3.3, c, 0, 0.55, 0));                 // chassi
+  corpo.add(caixa(1.7, 0.45, 1.0, c, 0, 0.6, 1.95));              // bico
+  corpo.add(caixa(2.5, 0.25, 0.7, 0x193337, 0, 0.45, 2.45));      // para-choque
+  corpo.add(caixa(0.5, 0.55, 2.0, escuro, -1.25, 0.7, -0.1));     // laterais
+  corpo.add(caixa(0.5, 0.55, 2.0, escuro, 1.25, 0.7, -0.1));
+  corpo.add(caixa(2.6, 0.16, 0.6, c, 0, 1.55, -1.65));            // aerofólio
+  corpo.add(caixa(0.18, 0.75, 0.18, 0x193337, -0.8, 1.15, -1.65));
+  corpo.add(caixa(0.18, 0.75, 0.18, 0x193337, 0.8, 1.15, -1.65));
+  corpo.add(caixa(1.1, 0.5, 0.6, 0x34374f, 0, 0.95, -1.15));      // motor
+  corpo.add(caixa(0.3, 0.3, 0.5, 0x8c8c8c, -0.35, 0.95, -1.55));  // escapamentos
+  corpo.add(caixa(0.3, 0.3, 0.5, 0x8c8c8c, 0.35, 0.95, -1.55));
+  corpo.add(caixa(0.7, 0.12, 0.12, 0x193337, 0, 1.25, 0.65));     // volante
+  const rodas = [];
+  for (const [x, z] of [[-1.3, 1.15], [1.3, 1.15], [-1.3, -1.1], [1.3, -1.1]]) {
+    const roda = new THREE.Group(); roda.position.set(x, 0.45, z);
+    roda.add(caixa(0.6, 0.9, 0.9, 0x1d1f2b, 0, 0, 0));
+    roda.add(caixa(0.62, 0.35, 0.35, 0xd9d9d9, 0, 0, 0));
+    g.add(roda); rodas.push(roda);
+  }
+  // Piloto
+  const p = new THREE.Group(); p.position.set(0, 0.8, -0.25); corpo.add(p);
+  const pele = 0xedb482;
+  if (cfg.tipo === 'samuel' || cfg.tipo === 'player2') {
+    const roupa = cfg.tipo === 'samuel' ? 0xff7a2e : 0xb48be6, blusa = cfg.tipo === 'samuel' ? 0xffd23f : 0xffc4a8;
+    p.add(caixa(1.0, 0.9, 0.65, roupa, 0, 0.55, 0));
+    p.add(caixa(0.45, 0.6, 0.12, blusa, 0, 0.6, 0.33));
+    p.add(caixa(0.25, 0.25, 0.75, roupa, -0.55, 0.55, 0.35));     // braços no volante
+    p.add(caixa(0.25, 0.25, 0.75, roupa, 0.55, 0.55, 0.35));
+    const cab = new THREE.Group(); cab.position.y = 1.45; p.add(cab);
+    cab.add(caixa(0.95, 0.95, 0.9, pele, 0, 0, 0));
+    cab.add(caixa(0.14, 0.18, 0.05, 0x193337, -0.22, 0.05, 0.46));  // olhos
+    cab.add(caixa(0.14, 0.18, 0.05, 0x193337, 0.22, 0.05, 0.46));
+    cab.add(caixa(0.3, 0.07, 0.05, 0x9a3a3a, 0, -0.22, 0.46));      // sorriso
+    cab.add(caixa(0.18, 0.1, 0.05, 0xff9aa8, -0.33, -0.12, 0.46));  // bochechas
+    cab.add(caixa(0.18, 0.1, 0.05, 0xff9aa8, 0.33, -0.12, 0.46));
+    const cabelo = cfg.tipo === 'samuel' ? 0x3b2416 : 0x6b4226;
+    cab.add(caixa(1.02, 0.32, 0.98, cabelo, 0, 0.42, -0.02));
+    cab.add(caixa(1.02, 0.7, 0.3, cabelo, 0, 0.1, -0.36));
+    if (cfg.tipo === 'samuel') {
+      for (const [x, z, h] of [[-0.3, 0.2, 0.32], [0, 0.05, 0.4], [0.3, 0.15, 0.3], [-0.12, -0.25, 0.34], [0.2, -0.2, 0.28]]) cab.add(caixa(0.22, h, 0.22, cabelo, x, 0.58 + h / 2, z));
+    } else {
+      cab.add(caixa(1.04, 0.95, 0.3, cabelo, 0, -0.3, -0.36));      // cabelo comprido
+      cab.add(caixa(0.3, 0.75, 0.3, cabelo, -0.5, -0.25, 0));
+      cab.add(caixa(0.3, 0.75, 0.3, cabelo, 0.5, -0.25, 0));
+      cab.add(caixa(0.36, 0.22, 0.22, 0xceb7ef, -0.5, 0.45, 0.1));  // laço
+      cab.add(caixa(0.36, 0.22, 0.22, 0xceb7ef, -0.82, 0.45, 0.1));
+      cab.add(caixa(0.2, 0.14, 0.05, 0xff3e9a, -0.22, 0.2, 0.47));   // óculos de coração na testa
+      cab.add(caixa(0.2, 0.14, 0.05, 0xff3e9a, 0.22, 0.2, 0.47));
+    }
+    // capacete aberto
+    cab.add(caixa(1.08, 0.12, 1.04, cfg.cor, 0, 0.6, 0));
+  } else if (cfg.tipo === 'dog') {
+    p.add(caixa(1.0, 0.8, 0.7, 0xffffff, 0, 0.5, 0));
+    const cab = new THREE.Group(); cab.position.y = 1.35; p.add(cab);
+    cab.add(caixa(1.0, 0.9, 0.9, 0xffffff, 0, 0, 0));
+    cab.add(caixa(0.5, 0.9, 0.92, 0x9b5a2c, -0.27, 0.02, 0));        // metade castanha
+    cab.add(caixa(0.5, 0.9, 0.92, 0x9b5a2c, 0.27, 0.02, 0));
+    cab.add(caixa(0.22, 0.9, 0.94, 0xffffff, 0, 0.02, 0));           // faixa branca
+    cab.add(caixa(0.55, 0.38, 0.4, 0xffffff, 0, -0.2, 0.55));        // focinho
+    cab.add(caixa(0.2, 0.15, 0.1, 0x193337, 0, -0.08, 0.76));        // nariz
+    cab.add(caixa(0.14, 0.16, 0.05, 0x193337, -0.24, 0.12, 0.47));
+    cab.add(caixa(0.14, 0.16, 0.05, 0x193337, 0.24, 0.12, 0.47));
+    for (const s of [-1, 1]) { const orelha = caixa(0.32, 0.36, 0.2, 0x7a431e, s * 0.48, 0.5, 0); orelha.rotation.z = -s * 0.5; cab.add(orelha); }
+    cab.add(caixa(0.2, 0.08, 0.2, 0xff6fa8, 0, -0.42, 0.62));        // linguinha
+    p.add(caixa(1.05, 0.15, 0.75, 0x193337, 0, 0.95, 0));             // coleira
+  } else if (cfg.tipo === 'cat') {
+    p.add(caixa(0.95, 0.8, 0.65, 0xf2a03d, 0, 0.5, 0));
+    const cab = new THREE.Group(); cab.position.y = 1.35; p.add(cab);
+    cab.add(caixa(1.0, 0.85, 0.85, 0xf2a03d, 0, 0, 0));
+    for (const x of [-0.25, 0, 0.25]) cab.add(caixa(0.1, 0.06, 0.88, 0xc46a1a, x, 0.36, 0)); // listras
+    cab.add(caixa(0.3, 0.35, 0.18, 0xf2a03d, -0.33, 0.58, 0));        // orelhas
+    cab.add(caixa(0.3, 0.35, 0.18, 0xf2a03d, 0.33, 0.58, 0));
+    cab.add(caixa(0.14, 0.18, 0.05, 0xd98a00, -0.22, 0.08, 0.44));     // olhos âmbar
+    cab.add(caixa(0.14, 0.18, 0.05, 0xd98a00, 0.22, 0.08, 0.44));
+    cab.add(caixa(0.06, 0.18, 0.06, 0x193337, -0.22, 0.08, 0.46));
+    cab.add(caixa(0.06, 0.18, 0.06, 0x193337, 0.22, 0.08, 0.46));
+    cab.add(caixa(0.14, 0.1, 0.05, 0xff8fa8, 0, -0.1, 0.44));          // nariz
+    const rabo = caixa(0.18, 1.1, 0.18, 0xf2a03d, 0, 0.9, -0.55); rabo.rotation.x = -0.4; p.add(rabo);
+  } else {
+    p.add(caixa(1.0, 0.85, 0.7, 0xb7b2c9, 0, 0.5, 0));
+    const cab = new THREE.Group(); cab.position.y = 1.4; p.add(cab);
+    cab.add(caixa(0.95, 0.85, 0.85, 0xd9d6e6, 0, 0, 0));
+    cab.add(caixa(0.8, 0.28, 0.06, cfg.visor, 0, 0.05, 0.44, { emissive: cfg.visor, emissiveIntensity: 0.8 }));
+    cab.add(caixa(0.08, 0.4, 0.08, 0x8c8c8c, 0, 0.6, 0));
+    cab.add(caixa(0.18, 0.18, 0.18, 0xff3b5c, 0, 0.85, 0, { emissive: 0xff3b5c, emissiveIntensity: 0.6 }));
+  }
+  // número/bandeirinha no bico
+  return { grupo: g, corpo, rodas };
+}
+
+/* ---------------- Estado da corrida ---------------- */
+const estado = {
+  fase: 'menu',           // menu | contagem | corrida | fim | pausa
+  piloto: guardar.ler('piloto', 'samuel'), pistaChave: guardar.ler('pista', 'ilha'), modo: guardar.ler('modo', 'normal'),
+  karts: [], eu: null, tempo: 0, contagem: 0, chegada: [], camOrbita: 0, voltaAtualInicio: 0, melhorVoltaCorrida: Infinity,
+  avisoAte: 0, contraMao: 0, camShake: 0,
+};
+const entrada = { esq: false, dir: false, gas: false, freio: false, turbo: false };
+
+function localizar(k) {
+  // procura o ponto da pista mais perto, perto do último conhecido
+  const { P, N, L } = pista;
+  let melhor = k.idx, md = Infinity;
+  for (let d = -14; d <= 14; d++) {
+    const i = (k.idx + d + N) % N, dx = P[i].x - k.pos.x, dz = P[i].z - k.pos.z, dd = dx * dx + dz * dz;
+    if (dd < md) { md = dd; melhor = i; }
+  }
+  // se ficou muito longe (ex.: respawn), procura em toda a pista
+  if (md > 900) { for (let i = 0; i < N; i++) { const dx = P[i].x - k.pos.x, dz = P[i].z - k.pos.z, dd = dx * dx + dz * dz; if (dd < md) { md = dd; melhor = i; } } }
+  let i = melhor, j = (i + 1) % N;
+  let ax = P[j].x - P[i].x, az = P[j].z - P[i].z;
+  let t = ((k.pos.x - P[i].x) * ax + (k.pos.z - P[i].z) * az) / (ax * ax + az * az);
+  if (t < 0) { j = i; i = (i - 1 + N) % N; ax = P[j].x - P[i].x; az = P[j].z - P[i].z; t = ((k.pos.x - P[i].x) * ax + (k.pos.z - P[i].z) * az) / (ax * ax + az * az); }
+  t = clamp(t, 0, 1);
+  const cx = P[i].x + ax * t, cz = P[i].z + az * t;
+  const lx = lerp(L[i].x, L[j].x, t), lz = lerp(L[i].z, L[j].z, t);
+  k.idx = i; k.t = t;
+  k.lateral = (k.pos.x - cx) * lx + (k.pos.z - cz) * lz;
+  k.alturaPista = lerp(P[i].y, P[j].y, t);
+  k.inclinacao = Math.atan2(P[j].y - P[i].y, Math.hypot(ax, az));
+}
+
+function novaCorrida() {
+  // remove karts antigos
+  for (const k of estado.karts) scene.remove(k.grupo);
+  estado.karts = []; estado.chegada = []; estado.tempo = 0; estado.melhorVoltaCorrida = Infinity; estado.contraMao = 0;
+  const ordem = ['dog', 'roboV', 'cat', estado.piloto, estado.piloto === 'samuel' ? 'player2' : 'samuel', 'roboA'];
+  const { N, P, L, T, W } = pista;
+  const facil = estado.modo === 'facil';
+  ordem.forEach((id, n) => {
+    const cfg = PILOTOS[id];
+    const modelo = criarKart(cfg);
+    const fila = Math.floor(n / 2), lado = n % 2 ? 1 : -1;
+    const i = (N - 8 - fila * 6) % N;
+    const pos = new THREE.Vector3(P[i].x + L[i].x * lado * 3.6, P[i].y, P[i].z + L[i].z * lado * 3.6);
+    const k = {
+      id, cfg, ...modelo, pos, rumo: Math.atan2(T[i].x, T[i].z), vel: 0, idx: i, t: 0, lateral: 0, alturaPista: P[i].y, inclinacao: 0,
+      volta: -1, meio: true, progresso: 0, turbo: 0, carga: 0, estrelas: 0, impacto: 0, terminou: false, tempoFinal: 0,
+      euSou: id === estado.piloto, volante: 0, rodaGiro: 0, vy: 0, y: P[i].y,
+      ia: { habil: (facil ? 0.8 : 0.9) + n * 0.018 + Math.random() * 0.03, fase: Math.random() * 6, faixa: lado * 3, turboEspera: 1 + Math.random() * 3 },
+    };
+    k.grupo.position.copy(pos);
+    scene.add(k.grupo);
+    estado.karts.push(k);
+  });
+  estado.eu = estado.karts.find((k) => k.euSou);
+  for (const s of pista.estrelas) { s.ativo = true; s.m.visible = true; }
+  document.body.classList.toggle('facil', facil);
+}
+
+/* ---------------- Física e IA ---------------- */
+const VEL_MAX = 46, VEL_TURBO = 64, ACEL = 24, ATRITO = 9, FREIO = 38;
+
+function atualizarKart(k, dt, ctrl) {
+  const { W, N, T } = pista;
+  const facil = estado.modo === 'facil';
+  let maxV = (k.euSou ? (facil ? 40 : VEL_MAX) : VEL_MAX * k.ia.habil);
+  const naGrama = Math.abs(k.lateral) > W / 2 + 0.6;
+  if (naGrama) maxV *= 0.55;
+  if (k.turbo > 0) { maxV = VEL_TURBO; k.turbo -= dt; }
+
+  // aceleração
+  if (ctrl.gas && !ctrl.freio) k.vel += ACEL * (1 - clamp(k.vel / maxV, -1, 1.2)) * dt * (k.vel > maxV ? 0 : 1);
+  if (k.vel > maxV) k.vel = lerp(k.vel, maxV, 1 - Math.exp(-dt * 2.5));
+  if (ctrl.freio) k.vel -= FREIO * dt * (k.vel > 0 ? 1 : 0.4);
+  if (!ctrl.gas && !ctrl.freio) k.vel -= Math.sign(k.vel) * Math.min(Math.abs(k.vel), ATRITO * dt);
+  if (k.turbo > 0) k.vel += 40 * dt;
+  k.vel = clamp(k.vel, -10, VEL_TURBO + 4);
+
+  // direção (quanto mais rápido, mais estável)
+  const fatorV = clamp(Math.abs(k.vel) / 14, 0, 1) * (1 - clamp(k.vel / (VEL_TURBO * 1.6), 0, 0.35));
+  k.volante = lerp(k.volante, ctrl.direcao, 1 - Math.exp(-dt * 10));
+  k.rumo += k.volante * 2.05 * fatorV * dt * Math.sign(k.vel || 1);
+
+  // ajuda na direção (modo fácil, só para o jogador): olha a curva um pouco à frente
+  // e puxa o kart de volta para o meio da pista
+  if (k.euSou && facil) {
+    const tf = T[(k.idx + 7) % N];
+    const corr = clamp(-k.lateral * 0.06, -0.45, 0.45);
+    const alvo = Math.atan2(tf.x, tf.z) + corr;
+    const puxa = Math.abs(ctrl.direcao) < 0.1 ? 3.2 : 0.8;
+    k.rumo += angDif(k.rumo, alvo) * Math.min(1, puxa * dt);
+  }
+
+  // movimento
+  k.pos.x += Math.sin(k.rumo) * k.vel * dt;
+  k.pos.z += Math.cos(k.rumo) * k.vel * dt;
+  const idxAntes = k.idx;
+  localizar(k);
+
+  // cerca
+  const limite = W / 2 + 3.3 - 1.4;
+  if (Math.abs(k.lateral) > limite) {
+    const exc = Math.abs(k.lateral) - limite, s = Math.sign(k.lateral);
+    const l = pista.L[k.idx];
+    k.pos.x -= l.x * s * exc; k.pos.z -= l.z * s * exc;
+    const rumoPista = Math.atan2(T[k.idx].x, T[k.idx].z);
+    k.rumo += angDif(k.rumo, rumoPista) * 0.35;
+    if (k.impacto <= 0 && Math.abs(k.vel) > 12) {
+      k.vel *= 0.72; k.impacto = 0.45;
+      if (k.euSou) { Audio.batida(); estado.camShake = 0.35; }
+      faiscas(k.pos, 0xffd56b, 10);
+    }
+    localizar(k);
+  }
+  k.impacto -= dt;
+
+  // altura (segue a pista com um pouco de mola)
+  const alvoY = k.alturaPista;
+  if (k.y < alvoY) { k.y = alvoY; k.vy = Math.max(0, k.vy); } else { k.vy -= 40 * dt; k.y += k.vy * dt; if (k.y < alvoY) { k.y = alvoY; k.vy = 0; } }
+  if (Math.abs(k.y - alvoY) < 0.6) { k.y = lerp(k.y, alvoY, 1 - Math.exp(-dt * 12)); }
+
+  // voltas
+  if (idxAntes > N * 0.85 && k.idx < N * 0.15) { if (k.meio) { k.volta++; k.meio = false; aoCompletarVolta(k); } }
+  else if (idxAntes < N * 0.15 && k.idx > N * 0.85) { k.volta--; k.meio = true; }
+  if (k.idx > N * 0.45 && k.idx < N * 0.55) k.meio = true;
+  k.progresso = k.volta * N + k.idx + k.t;
+
+  // placas de turbo
+  for (const tb of pista.turbos) {
+    const dentro = tb.de < tb.ate ? (k.idx >= tb.de && k.idx <= tb.ate) : (k.idx >= tb.de || k.idx <= tb.ate);
+    if (dentro && Math.abs(k.lateral - tb.lat) < 2.8 && k.turbo < 0.9) {
+      k.turbo = 1.2;
+      if (k.euSou) { Audio.turbo(); mostrarAviso('TURBO!', 0.7, true); }
+    }
+  }
+  // estrelas
+  for (const s of pista.estrelas) {
+    if (!s.ativo) continue;
+    const dx = s.m.position.x - k.pos.x, dz = s.m.position.z - k.pos.z;
+    if (dx * dx + dz * dz < 5.5) {
+      s.ativo = false; s.m.visible = false; s.volta = 6;
+      k.carga = Math.min(1, k.carga + 0.34); k.vel += 4; k.estrelas++;
+      if (k.euSou) { Audio.estrela(); faiscas(s.m.position, 0xffd56b, 16); }
+    }
+  }
+  // turbo de estrelas
+  if (ctrl.turbo && k.carga >= 1) { k.carga = 0; k.turbo = 2.6; if (k.euSou) { Audio.turbo(); mostrarAviso('SUPER TURBO!', 0.9, true); estado.camShake = 0.25; } }
+
+  // visual
+  k.grupo.position.set(k.pos.x, k.y, k.pos.z);
+  k.grupo.rotation.set(0, k.rumo, 0);
+  k.corpo.rotation.z = lerp(k.corpo.rotation.z, -k.volante * clamp(k.vel / VEL_MAX, 0, 1) * 0.12, 0.2);
+  k.corpo.rotation.x = -k.inclinacao;
+  k.rodaGiro += k.vel * dt / 0.45;
+  k.rodas.forEach((r, n) => { r.rotation.x = k.rodaGiro; if (n < 2) r.rotation.y = k.volante * 0.35; });
+
+  // fogo do turbo
+  if (k.turbo > 0 && Math.random() < 0.9) chama(k);
+  if (naGrama && Math.abs(k.vel) > 10 && Math.random() < 0.4) poeira(k);
+}
+
+function controleIA(k, dt) {
+  const { N, P, L, T, W } = pista;
+  const look = Math.round(9 + Math.abs(k.vel) * 0.32);
+  const j = (k.idx + look) % N;
+  // faixa que muda devagar + desvia de quem está na frente
+  let faixa = k.ia.faixa + Math.sin(estado.tempo * 0.35 + k.ia.fase) * 2.2;
+  for (const o of estado.karts) {
+    if (o === k) continue;
+    const frente = ((o.progresso - k.progresso) + N * 10) % N;
+    if (frente > 0 && frente < 8 && Math.abs(o.lateral - faixa) < 2.6) faixa += (o.lateral > faixa ? -1 : 1) * 3;
+  }
+  // mira em estrelas próximas
+  for (const s of pista.estrelas) {
+    if (!s.ativo) continue;
+    const d = (s.i - k.idx + N) % N;
+    if (d > 4 && d < 30) { faixa = lerp(faixa, s.lat, 0.5); break; }
+  }
+  faixa = clamp(faixa, -W / 2 + 2.2, W / 2 - 2.2);
+  const alvoX = P[j].x + L[j].x * faixa, alvoZ = P[j].z + L[j].z * faixa;
+  const desejado = Math.atan2(alvoX - k.pos.x, alvoZ - k.pos.z);
+  const direcao = clamp(angDif(k.rumo, desejado) * 2.4, -1, 1);
+  // diminui nas curvas fechadas
+  const a = T[k.idx], b = T[(k.idx + 22) % N];
+  const curva = Math.acos(clamp(a.x * b.x + a.z * b.z, -1, 1));
+  let alvoVel = VEL_MAX * k.ia.habil * (1 - Math.min(0.32, curva * 0.42));
+  // elástico: não deixa ninguém sumir na frente nem ficar muito para trás
+  const eu = estado.eu;
+  if (eu) {
+    const dif = (k.progresso - eu.progresso) / N;
+    if (dif > 0.12) alvoVel *= 0.88; else if (dif < -0.1) alvoVel *= 1.1;
+  }
+  const gas = k.vel < alvoVel, freio = k.vel > alvoVel * 1.15;
+  k.ia.turboEspera -= dt;
+  const turbo = k.carga >= 1 && k.ia.turboEspera < 0 && curva < 0.25;
+  if (turbo) k.ia.turboEspera = 3 + Math.random() * 4;
+  return { gas, freio, direcao, turbo };
+}
+
+function colisoesEntreKarts() {
+  const ks = estado.karts;
+  for (let a = 0; a < ks.length; a++) for (let b = a + 1; b < ks.length; b++) {
+    const A = ks[a], B = ks[b];
+    const dx = B.pos.x - A.pos.x, dz = B.pos.z - A.pos.z, d2 = dx * dx + dz * dz;
+    if (d2 < 5.3 && d2 > 0.0001) {
+      const d = Math.sqrt(d2), sobra = (2.3 - d) / 2, nx = dx / d, nz = dz / d;
+      A.pos.x -= nx * sobra; A.pos.z -= nz * sobra; B.pos.x += nx * sobra; B.pos.z += nz * sobra;
+      const media = (A.vel + B.vel) / 2; A.vel = lerp(A.vel, media, 0.3); B.vel = lerp(B.vel, media, 0.3);
+      if ((A.euSou || B.euSou) && (A.impacto <= 0 || B.impacto <= 0)) { Audio.batida(); estado.camShake = 0.2; A.impacto = B.impacto = 0.4; }
+    }
+  }
+}
+
+/* ---------------- Partículas (cubinhos) ---------------- */
+const MAXP = 400;
+const particulas = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 }), MAXP);
+particulas.frustumCulled = false; scene.add(particulas);
+const pDados = Array.from({ length: MAXP }, () => ({ vida: 0, pos: new THREE.Vector3(), vel: new THREE.Vector3(), tam: 1, cor: new THREE.Color() }));
+let pProx = 0;
+function emitir(pos, vel, cor, tam, vida) {
+  const p = pDados[pProx]; pProx = (pProx + 1) % MAXP;
+  p.pos.copy(pos); p.vel.copy(vel); p.cor.set(cor); p.tam = tam; p.vida = p.max = vida;
+}
+const _v = new THREE.Vector3();
+function chama(k) {
+  const tras = _v.set(-Math.sin(k.rumo) * 2.1, 0.95, -Math.cos(k.rumo) * 2.1).add(k.grupo.position);
+  for (let s of [-0.35, 0.35]) emitir(new THREE.Vector3(tras.x + Math.cos(k.rumo) * s, tras.y, tras.z - Math.sin(k.rumo) * s),
+    new THREE.Vector3((Math.random() - 0.5) * 2, Math.random() * 2, (Math.random() - 0.5) * 2), Math.random() < 0.5 ? 0xffd56b : 0xff7a2e, 0.35 + Math.random() * 0.3, 0.35);
+}
+function poeira(k) {
+  emitir(new THREE.Vector3(k.pos.x - Math.sin(k.rumo) * 1.5, k.y + 0.3, k.pos.z - Math.cos(k.rumo) * 1.5),
+    new THREE.Vector3((Math.random() - 0.5) * 3, 2 + Math.random() * 2, (Math.random() - 0.5) * 3), pista.def.tema === 'dia' ? 0x9c6b3a : 0x8a7fd0, 0.4, 0.6);
+}
+function faiscas(pos, cor, n) {
+  if (reduzido) n = Math.ceil(n / 3);
+  for (let i = 0; i < n; i++) emitir(new THREE.Vector3(pos.x, (pos.y || 0) + 0.8, pos.z),
+    new THREE.Vector3((Math.random() - 0.5) * 12, 3 + Math.random() * 6, (Math.random() - 0.5) * 12), cor, 0.3, 0.6);
+}
+const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3();
+function atualizarParticulas(dt) {
+  for (let i = 0; i < MAXP; i++) {
+    const p = pDados[i];
+    if (p.vida > 0) {
+      p.vida -= dt; p.vel.y -= 9 * dt; p.pos.addScaledVector(p.vel, dt);
+      const t = Math.max(0, p.vida / p.max) * p.tam;
+      _m.compose(p.pos, _q, _s.set(t, t, t));
+    } else _m.compose(p.pos, _q, _s.set(0, 0, 0));
+    particulas.setMatrixAt(i, _m); particulas.setColorAt(i, p.cor);
+  }
+  particulas.instanceMatrix.needsUpdate = true; if (particulas.instanceColor) particulas.instanceColor.needsUpdate = true;
+}
+
+/* ---------------- HUD ---------------- */
+const mapa = $('mapa'), mctx = mapa.getContext('2d');
+let mapaBase = null, mapaEsc = 1, mapaOff = [0, 0];
+function desenharMinimapaBase() {
+  const { P } = pista;
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (const p of P) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); }
+  mapaEsc = 250 / Math.max(maxX - minX, maxZ - minZ); mapaOff = [minX, minZ];
+  const c = document.createElement('canvas'); c.width = c.height = 300; const g = c.getContext('2d');
+  const pt = (p) => [25 + (p.x - minX) * mapaEsc + (250 - (maxX - minX) * mapaEsc) / 2, 25 + (p.z - minZ) * mapaEsc + (250 - (maxZ - minZ) * mapaEsc) / 2];
+  pista.mapaPt = pt;
+  g.lineJoin = 'round'; g.lineCap = 'round';
+  for (const [w, cor] of [[22, '#193337'], [14, '#fffdf7']]) {
+    g.beginPath(); P.forEach((p, i) => { const [x, y] = pt(p); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath();
+    g.lineWidth = w; g.strokeStyle = cor; g.stroke();
+  }
+  const [sx, sy] = pt(P[0]); g.fillStyle = '#193337'; g.fillRect(sx - 8, sy - 8, 16, 16); g.fillStyle = '#b9ed80'; g.fillRect(sx - 5, sy - 5, 10, 10);
+  mapaBase = c;
+}
+function desenharMinimapa() {
+  mctx.clearRect(0, 0, 300, 300); mctx.drawImage(mapaBase, 0, 0);
+  for (const k of estado.karts) {
+    const [x, y] = pista.mapaPt(k.pos), r = k.euSou ? 13 : 9;
+    mctx.fillStyle = '#193337'; mctx.fillRect(x - r - 2, y - r - 2, (r + 2) * 2, (r + 2) * 2);
+    mctx.fillStyle = '#' + new THREE.Color(k.cfg.cor).getHexString(); mctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+}
+const fmt = (s) => { if (!isFinite(s)) return '—'; const m = Math.floor(s / 60), r = s - m * 60; return m + ':' + r.toFixed(2).padStart(5, '0'); };
+let avisoTimer = 0;
+function mostrarAviso(txt, dur = 1, pequeno = false) {
+  const a = $('aviso'); a.textContent = txt; a.className = (pequeno ? 'pequeno ' : '') + 'pop';
+  void a.offsetWidth; a.classList.add('pop'); avisoTimer = dur;
+}
+function posicoes() {
+  return [...estado.karts].sort((a, b) => {
+    if (a.terminou && b.terminou) return a.tempoFinal - b.tempoFinal;
+    if (a.terminou) return -1; if (b.terminou) return 1;
+    return b.progresso - a.progresso;
+  });
+}
+function atualizarHUD() {
+  const eu = estado.eu, voltas = pista.def.voltas;
+  const pos = posicoes().indexOf(eu) + 1;
+  $('hPos').innerHTML = pos + 'º<small>/' + estado.karts.length + '</small>';
+  $('hVolta').textContent = 'VOLTA ' + clamp(eu.volta + 1, 1, voltas) + '/' + voltas;
+  const rec = guardar.ler('recorde:' + estado.pistaChave, null);
+  $('hTempo').innerHTML = fmt(estado.tempo) + '<span>melhor volta ' + fmt(Math.min(estado.melhorVoltaCorrida, rec?.volta ?? Infinity)) + '</span>';
+  $('kmh').textContent = Math.round(Math.abs(eu.vel) * 3.2);
+  const b = $('barraTurbo'); b.querySelector('i').style.width = Math.round(eu.carga * 100) + '%';
+  b.classList.toggle('cheia', eu.carga >= 1);
+  $('tTurbo').classList.toggle('pronto', eu.carga >= 1);
+  $('txtTurbo').textContent = eu.carga >= 1 ? '🚀 TURBO PRONTO! (espaço)' : '⭐ pegue estrelas para o turbo';
+  $('velocidade').classList.toggle('on', eu.turbo > 0);
+  desenharMinimapa();
+}
+function aoCompletarVolta(k) {
+  const voltas = pista.def.voltas;
+  if (k.volta <= 0) return;   // a primeira passagem é só a largada (o grid fica antes da linha)
+  if (!k.euSou) {
+    if (k.volta >= voltas && !k.terminou) { k.terminou = true; k.tempoFinal = estado.tempo; }
+    return;
+  }
+  const tVolta = estado.tempo - estado.voltaAtualInicio; estado.voltaAtualInicio = estado.tempo;
+  estado.melhorVoltaCorrida = Math.min(estado.melhorVoltaCorrida, tVolta);
+  if (k.volta >= voltas) { terminarCorrida(); return; }
+  Audio.volta();
+  mostrarAviso(k.volta === voltas - 1 ? 'ÚLTIMA VOLTA!' : 'VOLTA ' + (k.volta + 1) + '!', 1.4, true);
+}
+
+/* ---------------- Fluxo do jogo ---------------- */
+function mostrar(id) { for (const t of ['telaInicio', 'telaPausa', 'telaFim']) $(t).hidden = t !== id; }
+function prepararMenu() {
+  estado.fase = 'menu'; mostrar('telaInicio');
+  $('hud').hidden = true; $('topoBtns').hidden = true; $('toque').hidden = true;
+  marcar('selPiloto', 'piloto', estado.piloto); marcar('selPista', 'pista', estado.pistaChave); marcar('selModo', 'modo', estado.modo);
+  for (const [ch, el] of [['ilha', 'recIlha'], ['estrelas', 'recEstrelas']]) {
+    const r = guardar.ler('recorde:' + ch, null);
+    $(el).textContent = (ch === 'ilha' ? 'dia · cachoeiras' : 'noite · cristais') + (r?.corrida ? ' · recorde ' + fmt(r.corrida) : '');
+  }
+  if (!pista || pista.def !== PISTAS[estado.pistaChave]) construirMundo(estado.pistaChave);
+  if (!estado.karts.length) novaCorrida();
+  $('btnCorrer').focus();
+}
+function marcar(grupo, attr, valor) { document.querySelectorAll('#' + grupo + ' [data-' + attr + ']').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === valor))); }
+for (const [grupo, attr, chave] of [['selPiloto', 'piloto', 'piloto'], ['selPista', 'pista', 'pistaChave'], ['selModo', 'modo', 'modo']]) {
+  $(grupo).addEventListener('click', (e) => {
+    const b = e.target.closest('[data-' + attr + ']'); if (!b) return;
+    estado[chave] = b.dataset[attr]; guardar.gravar(attr, estado[chave]); marcar(grupo, attr, estado[chave]);
+    Audio.iniciar(); Audio.nota(660, 0.08, 'square', 0.1);
+    if (attr === 'pista') { construirMundo(estado.pistaChave); novaCorrida(); }
+    if (attr === 'piloto') novaCorrida();
+  });
+}
+function comecar() {
+  Audio.iniciar();
+  Musica.iniciar();   // o volume da música respeita o botão 🎵
+  if (!pista || pista.def !== PISTAS[estado.pistaChave]) construirMundo(estado.pistaChave);
+  novaCorrida();
+  mostrar(null); $('hud').hidden = false; $('topoBtns').hidden = false;
+  $('toque').hidden = !toqueAtivo;
+  estado.fase = 'contagem'; estado.contagem = 3.999; estado.voltaAtualInicio = 0;
+  estado.ultimoNumero = 4; estado.largadaBoa = 0;
+  posicionarCameraAtras(true);
+}
+$('btnCorrer').addEventListener('click', comecar);
+$('btnDeNovo').addEventListener('click', comecar);
+$('btnReiniciar').addEventListener('click', comecar);
+$('btnOutra').addEventListener('click', prepararMenu);
+$('btnMenu').addEventListener('click', prepararMenu);
+$('btnContinuar').addEventListener('click', () => pausar(false));
+$('btnPausa').addEventListener('click', () => pausar(true));
+function pausar(sim) {
+  if (sim && (estado.fase === 'corrida' || estado.fase === 'contagem')) { estado.faseAntes = estado.fase; estado.fase = 'pausa'; mostrar('telaPausa'); $('btnContinuar').focus(); Audio.motorAtualiza(0, 0, false); }
+  else if (!sim && estado.fase === 'pausa') { estado.fase = estado.faseAntes; mostrar(null); }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) pausar(true); });
+function atualizarBotoesSom() { $('btnSom').textContent = Audio.somLigado ? '🔊' : '🔇'; $('btnMusica').style.opacity = Audio.musicaLigada ? 1 : 0.4; }
+$('btnSom').addEventListener('click', () => { Audio.alternarSom(); atualizarBotoesSom(); });
+$('btnMusica').addEventListener('click', () => { Audio.alternarMusica(); atualizarBotoesSom(); });
+atualizarBotoesSom();
+
+function terminarCorrida() {
+  const eu = estado.eu;
+  eu.terminou = true; eu.tempoFinal = estado.tempo;
+  estado.fase = 'fim'; estado.fimTempo = 0;
+  const pos = posicoes().indexOf(eu) + 1;
+  Audio.fim(pos === 1);
+  mostrarAviso(pos === 1 ? '1º LUGAR!' : 'CHEGOU!', 2.5, pos !== 1);
+  // recorde
+  const chave = 'recorde:' + estado.pistaChave, rec = guardar.ler(chave, {}) || {};
+  let novo = false;
+  if (!rec.corrida || eu.tempoFinal < rec.corrida) { rec.corrida = eu.tempoFinal; novo = true; }
+  if (!rec.volta || estado.melhorVoltaCorrida < rec.volta) rec.volta = estado.melhorVoltaCorrida;
+  guardar.gravar(chave, rec);
+  setTimeout(() => {
+    const lista = posicoes();
+    // quem não terminou ainda recebe um tempo estimado
+    lista.forEach((k) => { if (!k.terminou) k.tempoFinal = estado.tempo + ((pista.def.voltas * pista.N - k.progresso) / pista.N) * (estado.tempo / pista.def.voltas); });
+    lista.sort((a, b) => a.tempoFinal - b.tempoFinal);
+    const medalha = ['🥇', '🥈', '🥉'];
+    $('podio').innerHTML = lista.map((k, n) => `<li class="${k.euSou ? 'eu' : ''}"><span class="n">${medalha[n] || (n + 1) + 'º'}</span>${k.cfg.ic} ${k.cfg.nome}<span class="t">${fmt(k.tempoFinal)}</span></li>`).join('');
+    const p = lista.indexOf(eu) + 1;
+    $('fimTitulo').textContent = p === 1 ? 'Campeão da pista!' : p <= 3 ? 'No pódio! ' + p + 'º lugar' : 'Você chegou em ' + p + 'º!';
+    $('fimRecorde').innerHTML = novo ? '<span class="recorde">★ NOVO RECORDE!</span>' : '';
+    $('fimInfo').textContent = `Você pegou ${eu.estrelas} estrelas. Melhor volta: ${fmt(estado.melhorVoltaCorrida)}.`;
+    $('hud').hidden = true; $('toque').hidden = true; $('velocidade').classList.remove('on');
+    mostrar('telaFim'); $('btnDeNovo').focus();
+  }, 2600);
+}
+
+/* ---------------- Câmera ---------------- */
+const camPos = new THREE.Vector3(), camAlvo = new THREE.Vector3();
+function posicionarCameraAtras(imediato) {
+  const k = estado.eu; if (!k) return;
+  const fx = Math.sin(k.rumo), fz = Math.cos(k.rumo);
+  const alvoPos = new THREE.Vector3(k.pos.x - fx * 9.5, k.y + 4.4, k.pos.z - fz * 9.5);
+  const olhar = new THREE.Vector3(k.pos.x + fx * 7, k.y + 1.6, k.pos.z + fz * 7);
+  if (imediato) { camPos.copy(alvoPos); camAlvo.copy(olhar); }
+  return [alvoPos, olhar];
+}
+function atualizarCamera(dt) {
+  if (estado.fase === 'menu') {
+    estado.camOrbita += dt * 0.12;
+    const p = pista.P[0];
+    camera.position.set(p.x + Math.cos(estado.camOrbita) * 42, p.y + 16, p.z + Math.sin(estado.camOrbita) * 42);
+    camera.lookAt(p.x, p.y + 2, p.z);
+    camera.fov = 55 + (camera.aspect < 1 ? (1 - camera.aspect) * 30 : 0); camera.updateProjectionMatrix();
+    return;
+  }
+  const k = estado.eu;
+  if (estado.fase === 'fim') {
+    estado.fimTempo += dt;
+    const a = k.rumo + Math.PI * 0.75 + estado.fimTempo * 0.3;
+    camPos.lerp(new THREE.Vector3(k.pos.x + Math.sin(a) * 10, k.y + 4, k.pos.z + Math.cos(a) * 10), 1 - Math.exp(-dt * 2));
+    camera.position.copy(camPos); camera.lookAt(k.pos.x, k.y + 1.5, k.pos.z);
+    return;
+  }
+  const [alvoPos, olhar] = posicionarCameraAtras(false);
+  const sua = 1 - Math.exp(-dt * 7);
+  camPos.lerp(alvoPos, sua); camAlvo.lerp(olhar, 1 - Math.exp(-dt * 10));
+  camera.position.copy(camPos);
+  if (estado.camShake > 0) { camera.position.x += (Math.random() - 0.5) * estado.camShake; camera.position.y += (Math.random() - 0.5) * estado.camShake; estado.camShake -= dt; }
+  camera.lookAt(camAlvo);
+  const fovAlvo = 62 + clamp(Math.abs(k.vel) / VEL_TURBO, 0, 1) * 12 + (k.turbo > 0 ? 6 : 0) + (camera.aspect < 1 ? (1 - camera.aspect) * 30 : 0);
+  camera.fov = lerp(camera.fov, fovAlvo, 1 - Math.exp(-dt * 4)); camera.updateProjectionMatrix();
+  // sombra acompanha o jogador
+  const s = pista.sol, d = pista.tema.solDir;
+  s.position.set(k.pos.x + d[0], k.y + d[1], k.pos.z + d[2]); s.target.position.set(k.pos.x, k.y, k.pos.z);
+}
+
+/* ---------------- Entrada ---------------- */
+const teclas = {};
+addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  teclas[k] = true;
+  if (['arrowleft', 'arrowright', 'arrowup', 'arrowdown', ' '].includes(k) && estado.fase !== 'menu') e.preventDefault();
+  if (k === 'p' || k === 'escape') pausar(estado.fase !== 'pausa');
+  if (k === ' ' || k === 'shift') entrada.turboPedido = true;   // toque rápido também vale
+});
+addEventListener('keyup', (e) => { teclas[e.key.toLowerCase()] = false; });
+addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; });
+const toqueAtivo = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+document.body.classList.toggle('toque', toqueAtivo);
+const botoesToque = { tEsq: 'esq', tDir: 'dir', tGas: 'gas', tFreio: 'freio', tTurbo: 'turbo' };
+for (const [id, campo] of Object.entries(botoesToque)) {
+  const b = $(id);
+  const on = (e) => { e.preventDefault(); entrada[campo] = true; if (campo === 'turbo') entrada.turboPedido = true; b.classList.add('on'); Audio.iniciar(); };
+  const off = (e) => { e.preventDefault(); entrada[campo] = false; b.classList.remove('on'); };
+  b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
+  b.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+function lerControleJogador() {
+  const esq = teclas['arrowleft'] || teclas['a'] || entrada.esq, dir = teclas['arrowright'] || teclas['d'] || entrada.dir;
+  const facil = estado.modo === 'facil';
+  const freio = teclas['arrowdown'] || teclas['s'] || entrada.freio;
+  const gas = (facil && !freio) || teclas['arrowup'] || teclas['w'] || entrada.gas;
+  const turbo = teclas[' '] || teclas['shift'] || entrada.turbo || entrada.turboPedido;
+  entrada.turboPedido = false;
+  return { gas, freio, direcao: (esq ? 1 : 0) - (dir ? 1 : 0), turbo };
+}
+
+/* ---------------- Laço principal ---------------- */
+const relogio = new THREE.Clock();
+let mediaQuadro = 16, ajusteTempo = 0;
+function quadro() {
+  requestAnimationFrame(quadro);
+  let dt = Math.min(relogio.getDelta(), 0.05);
+  // qualidade adaptativa: se o aparelho estiver sofrendo, reduz resolução e sombras
+  mediaQuadro = lerp(mediaQuadro, dt * 1000, 0.05); ajusteTempo += dt;
+  if (ajusteTempo > 4 && mediaQuadro > 30 && qualidade > 1) { qualidade = 1; renderer.setPixelRatio(1); redimensionar(); ajusteTempo = 0; }
+  else if (ajusteTempo > 8 && mediaQuadro > 34 && renderer.shadowMap.enabled) { renderer.shadowMap.enabled = false; scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); }
+
+  if (estado.fase !== 'pausa') {
+    for (const f of animaveis) f(dt);
+    for (const s of pista.estrelas) {
+      s.m.rotation.y += dt * 2.5; s.m.position.y = s.base + Math.sin(estado.tempo * 3 + s.lat) * 0.25;
+      if (!s.ativo) { s.volta -= dt; if (s.volta <= 0) { s.ativo = true; s.m.visible = true; } }
+    }
+  }
+
+  if (estado.fase === 'contagem') {
+    estado.contagem -= dt;
+    const n = Math.ceil(estado.contagem);
+    if (n !== estado.ultimoNumero && n >= 1) { estado.ultimoNumero = n; mostrarAviso(String(n), 1); Audio.bip(false); }
+    const c = lerControleJogador();
+    if (c.gas && estado.contagem < 1) estado.largadaBoa += dt; else if (c.gas && estado.contagem > 1.6) estado.largadaBoa = -1;
+    for (const k of estado.karts) { localizar(k); k.grupo.position.set(k.pos.x, k.y = k.alturaPista, k.pos.z); k.grupo.rotation.y = k.rumo; }
+    if (estado.contagem <= 0) {
+      estado.fase = 'corrida'; mostrarAviso('JÁ!', 1); Audio.bip(true);
+      if (estado.largadaBoa > 0.2) { estado.eu.turbo = 1.3; Audio.turbo(); setTimeout(() => mostrarAviso('LARGADA TURBO!', 1, true), 600); }
+    }
+    Audio.motorAtualiza(c.gas ? 25 : 0, 0, true);
+    desenharMinimapa();
+  } else if (estado.fase === 'corrida' || estado.fase === 'fim') {
+    estado.tempo += dt;
+    for (const k of estado.karts) {
+      let ctrl;
+      if (k.euSou && estado.fase === 'corrida') ctrl = lerControleJogador();
+      else if (k.euSou) ctrl = { gas: false, freio: k.vel > 8, direcao: 0, turbo: false };
+      else ctrl = controleIA(k, dt);
+      atualizarKart(k, dt, ctrl);
+    }
+    colisoesEntreKarts();
+    // contramão / preso: ajuda a voltar
+    const eu = estado.eu, T = pista.T[eu.idx];
+    const frente = Math.sin(eu.rumo) * T.x + Math.cos(eu.rumo) * T.z;
+    if (estado.fase === 'corrida' && (frente < -0.3 && Math.abs(eu.vel) > 3)) { estado.contraMao += dt; if (estado.contraMao > 1.2 && avisoTimer <= 0) mostrarAviso('↺ VIRE! CONTRAMÃO', 1.2, true); }
+    else estado.contraMao = Math.max(0, estado.contraMao - dt);
+    if (estado.contraMao > 4) { // recoloca na pista
+      const i = eu.idx; eu.pos.set(pista.P[i].x, pista.P[i].y, pista.P[i].z); eu.rumo = Math.atan2(pista.T[i].x, pista.T[i].z); eu.vel = 0; estado.contraMao = 0;
+      faiscas(eu.pos, 0xceb7ef, 20);
+    }
+    Audio.motorAtualiza(eu.vel, eu.turbo > 0 ? 1 : 0, estado.fase === 'corrida');
+    atualizarHUD();
+  } else {
+    Audio.motorAtualiza(0, 0, false);
+  }
+  if (avisoTimer > 0) { avisoTimer -= dt; if (avisoTimer <= 0) $('aviso').textContent = ''; }
+  atualizarParticulas(estado.fase === 'pausa' ? 0 : dt);
+  atualizarCamera(estado.fase === 'pausa' ? 0 : dt);
+  renderer.render(scene, camera);
+}
+
+prepararMenu();
+quadro();
+window.__turbo = { estado, pista: () => pista, PISTAS };   // usado só nos testes automáticos
+</script>
+</body>
+</html>

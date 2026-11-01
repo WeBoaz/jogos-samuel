@@ -72,3 +72,5 @@ textarea.campo-texto{resize:vertical;min-height:110px}
 .player-carregando[hidden]{display:none}
 .player-carregando .btn{margin:14px 6px 0}
 .so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Player em telas pequenas ou deitadas: o jogo ocupa a tela toda */
+@media(max-width:760px),(max-height:560px){.player-frame iframe{height:calc(100dvh - 44px)}}

@@ -3,6 +3,27 @@
   "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e só abrem com a família logada. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
   "games": [
     {
+      "slug": "turbo-dos-blocos",
+      "title": "Turbo dos Blocos",
+      "category": "Corrida",
+      "description": "Acelere seu kart 3D pela ilha flutuante e pela rota das estrelas. Pegue as estrelas e solte o super turbo!",
+      "cover": "turbo-dos-blocos.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Celular ou tablet: ◀ ▶ para virar, ▲ acelera, ▼ freia, 🚀 turbo.",
+        "Computador: setas (ou WASD) para pilotar, ESPAÇO solta o turbo, P pausa.",
+        "Pegue 3 estrelas ⭐ para encher o super turbo. Passe nas setas amarelas!",
+        "Modo Fácil: o kart acelera sozinho e ajuda na direção."
+      ],
+      "input": [
+        "touch",
+        "keyboard"
+      ],
+      "status": "pronto",
+      "novo": true,
+      "version": "1.0"
+    },
+    {
       "slug": "dragoes-e-blocos",
       "title": "Dragões & Blocos",
       "category": "Ação",
@@ -14,9 +35,13 @@
         "Computador: setas ou A/D, ou o mouse. P pausa.",
         "O dragão cospe fogo sozinho. Pegue as gemas 💎 e os poderes ⚡ 🔱 🛡️!"
       ],
-      "input": ["touch", "mouse", "keyboard"],
+      "input": [
+        "touch",
+        "mouse",
+        "keyboard"
+      ],
       "status": "pronto",
-      "novo": true,
+      "novo": false,
       "version": "1.0"
     },
     {
@@ -31,7 +56,11 @@
         "No teclado: Tab para escolher a estrela e Enter para pegar.",
         "Pegue todas para cumprir a missão. Cada missão tem mais estrelas!"
       ],
-      "input": ["touch", "mouse", "keyboard"],
+      "input": [
+        "touch",
+        "mouse",
+        "keyboard"
+      ],
       "status": "pronto",
       "version": "1.0"
     },

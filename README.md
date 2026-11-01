@@ -15,7 +15,7 @@
 | `/admin/` | responsável (senha de novo) | Catálogo: cadastrar jogo por .zip, capa, status, testar, excluir |
 | `/sair/` | — | Sai deste aparelho |
 
-Jogos: **Dragões & Blocos** e **Caça às estrelas** (jogáveis); **A turma dos pets** e **Ilha dos blocos** (em breve).
+Jogos: **Turbo dos Blocos** (corrida 3D), **Dragões & Blocos** e **Caça às estrelas** (jogáveis); **A turma dos pets** e **Ilha dos blocos** (em breve).
 
 ## Adicionar um jogo (sem código)
 1. Entre no site → **Área do responsável** (na tela “Quem vai explorar?”) → digite a senha.
