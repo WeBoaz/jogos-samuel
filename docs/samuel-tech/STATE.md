@@ -11,7 +11,11 @@ Vale o que está aqui e no Notion, não a memória do chat.
 - **REV-01 rodada 1:** reprovado (P1 mundo aberto; P1 avisos de licença) → código da ilha fora do Git/JS + Origin +
   limites no nginx; avisos gerados do bundle real. Mais P2: logs sem IP, `/info` fechado, volta do vazio, aviso de
   reconexão, fallback do pointer lock, backup robusto.
-- **NEXT:** revisão da candidata corrigida → publicar → conferir em samuel.tech.
+- **Publicado:** `ilha-dos-blocos@0.1+ed6a828` em samuel.tech desde 2026-11-01 16:43 (-03:00); pacote `af544fc4…f9ba`
+  (= `git archive b8a4f47`); produção = zip (30/30 arquivos de jogos); REV-01 rodada 2 Aprovado; G3 em
+  `docs/qa/ilha-dos-blocos/0.1+ed6a828/`. Sessão real em samuel.tech com o código: entrou, colocou e tirou um bloco.
+- **NEXT:** Ilha 0.1.1 com os P2 da G3 (servidor só em dev pelo `?debug`, 503 não apagar código, Enter no tablet,
+  avisos das crates do wasm, segredo vazio recusado) → depois BLK-030 incremento 2 e BLK-040 (toque).
 
 ## 2026-11-01 — Claude (BLK-030 — Ilha dos Blocos, incremento 1)
 
