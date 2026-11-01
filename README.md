@@ -1,6 +1,6 @@
 # samuel.tech — portal de jogos da família
 
-“Aperte o play na imaginação.” Home pública + biblioteca privada com login da família, no visual do kit
+“Aperte o play na imaginação.” Home + biblioteca de jogos com acesso livre (sem senha), no visual do kit
 (retrô anos 90 + mundo voxel). Detalhes técnicos e regras: **`CLAUDE.md`**. Kit original: **`kit/`**.
 
 ## Rotas
