@@ -38,15 +38,20 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const inputs = new VOXELIZE.Inputs<'jogo' | 'menu'>();
-const opcoesControle = { initialPosition: [0.5, 48, 0.5] as VOXELIZE.Coords3, flyForce: 300 };
+// velocidades para criança: voo a 12 blocos/s (o motor usa 40) com força menor (sobe e desce devagar)
+const opcoesControle = { initialPosition: [0.5, 48, 0.5] as VOXELIZE.Coords3, flySpeed: 12, flyForce: 60 };
 const controls: VOXELIZE.RigidControls = MODO_TOQUE
   ? new VOXELIZE.MobileRigidControls(camera, renderer.domElement, world, opcoesControle)
   : new VOXELIZE.RigidControls(camera, renderer.domElement, world, opcoesControle);
-if (MODO_TOQUE) controls.options.alwaysSprint = false;   // o modo de celular do motor corre sempre; criança anda
+if (MODO_TOQUE) {
+  controls.options.alwaysSprint = false;   // o modo de celular do motor corre sempre; criança anda
+  controls.options.maxSpeed = 4.5;          // o joystick é digital (sempre no máximo): andar um pouco mais devagar
+}
 else controls.connect(inputs, 'jogo');
 const movel = controls as VOXELIZE.MobileRigidControls;
 let emJogo = false;   // no toque não há "mouse preso": o jogo guarda se está jogando ou num menu
-let voando = false;   // espelho do voo do motor (lá é gravityMultiplier === 0, que muda 100 ms depois)
+let voando = false;   // estado do voo LIDO do motor a cada quadro (gravityMultiplier === 0; ele desliga sozinho ao pousar)
+let soltarOlhar = () => {};
 const interacao = new VOXELIZE.VoxelInteract(controls.object, world, {
   highlightType: 'outline', highlightColor: new THREE.Color('#193337'), highlightOpacity: 0.7, reachDistance: ALCANCE,
   inverseDirection: true,   // o objeto dos controles aponta para +Z; a câmera olha para -Z
@@ -123,9 +128,11 @@ function voltarAoJogo() {
   if (MODO_TOQUE) { emJogo = true; inputs.setNamespace('jogo'); mostrar(null); return; }
   mostrar(null);
   controls.lock();
+  // o navegador pode recusar prender o mouse (só aceita logo depois de um clique): volta a mostrar a pausa
+  setTimeout(() => { if (conectado && !controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
 }
 function sairDoJogo() {
-  if (MODO_TOQUE) { emJogo = false; toque?.soltarTudo(); movel.resetMovements(); inputs.setNamespace('menu'); return; }
+  if (MODO_TOQUE) { emJogo = false; toque?.soltarTudo(); soltarOlhar(); movel.resetMovements(); inputs.setNamespace('menu'); return; }
   controls.unlock();
 }
 function pausar() { sairDoJogo(); mostrar('tPausa'); }
@@ -154,9 +161,12 @@ function colocar() {
   inv = r.inv;
   world.updateVoxel(vx, vy, vz, r.id, { rotation: pot.rotation, yRotation: pot.yRotation });
 }
-inputs.click('left', quebrar, 'jogo');
-inputs.click('right', colocar, 'jogo');
-inputs.bind('KeyF', () => { controls.toggleFly(); voando = !voando; }, 'jogo');
+// No toque, o navegador gera um mousedown depois de cada toque (barra, ▦, II…): quebrar/colocar só pelos botões ⛏ 🧱.
+if (!MODO_TOQUE) {
+  inputs.click('left', quebrar, 'jogo');
+  inputs.click('right', colocar, 'jogo');
+}
+inputs.bind('KeyF', controls.toggleFly, 'jogo');
 
 let avisoTimer = 0;
 let semConexao = false;
@@ -245,7 +255,6 @@ function entrar() {
       // o navegador só prende o mouse logo depois de um clique; a conexão pode demorar mais que isso.
       // Se não prender, a tela de pausa oferece "Continuar" (um clique novo, que prende de verdade).
       voltarAoJogo();
-      if (!MODO_TOQUE) setTimeout(() => { if (!controls.isLocked) { inputs.setNamespace('menu'); mostrar('tPausa'); } }, 600);
     })
     .catch((erro) => {
       iniciando = null;
@@ -288,7 +297,7 @@ const toque = MODO_TOQUE ? (() => {
       if (!emJogo) return;
       if (nome === 'quebrar') quebrar();
       else if (nome === 'colocar') colocar();
-      else if (nome === 'voar') { controls.toggleFly(); voando = !voando; $('toque').classList.toggle('voando', voando); }
+      else if (nome === 'voar') controls.toggleFly();
     },
   });
   // olhar: arrastar um dedo na metade direita (fora dos botões) vira a câmera
@@ -305,6 +314,8 @@ const toque = MODO_TOQUE ? (() => {
     ultimo = { x: e.clientX, y: e.clientY };
   });
   for (const tipo of ['pointerup', 'pointercancel', 'lostpointercapture']) zona.addEventListener(tipo, (e) => { if ((e as PointerEvent).pointerId === dedo) dedo = null; });
+  soltarOlhar = () => { if (dedo !== null) { try { zona.releasePointerCapture(dedo); } catch { /* já soltou */ } dedo = null; } };
+  addEventListener('blur', soltarOlhar);
   document.addEventListener('visibilitychange', () => { if (document.hidden && emJogo) pausar(); });
   return c;
 })() : null;
@@ -321,6 +332,8 @@ redimensionar();
 const direcao = new THREE.Vector3();
 function passo() {
   if (!world.isInitialized) return;
+  const voandoAgora = controls.body?.gravityMultiplier === 0;
+  if (voandoAgora !== voando) { voando = voandoAgora; $('toque').classList.toggle('voando', voando); }
   if (toque) {
     const { eixo, botoes } = toque.estado;
     if (emJogo) {

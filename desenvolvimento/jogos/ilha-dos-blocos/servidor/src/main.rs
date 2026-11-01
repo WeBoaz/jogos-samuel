@@ -39,7 +39,14 @@ fn mundo_ilha(dados: &str, seed: u32) -> World {
     let mut mundo = World::new("ilha", &config);
     mundo.pipeline_mut().add_stage(terreno::EstagioIlha);
     // o mundo salvo guarda a hora em stats.json; com o relógio parado, começa sempre de manhã
-    mundo.stats_mut().set_time(MANHA);
+    {
+        let mut stats = mundo.stats_mut();
+        stats.set_time(MANHA);
+        // com o relógio parado o `tick` congela; o motor grava stats.json quando tick % save_interval == 0 —
+        // num tick congelado múltiplo do intervalo isso viraria 60 gravações por segundo. Ímpar nunca é múltiplo
+        // de 300 (os blocos são salvos por outro caminho, que não depende do tick).
+        stats.tick |= 1;
+    }
     mundo
 }
 

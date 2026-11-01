@@ -29,7 +29,8 @@
 .grade-catalogo button:hover, .grade-catalogo button:focus-visible { background: var(--play); }
 .dica-catalogo { margin: 0 0 10px; }
 
-#toast { position: fixed; top: max(12px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 7; }
+#toast { position: fixed; top: max(12px, env(safe-area-inset-top)); bottom: auto; left: 50%; transform: translateX(-50%); z-index: 7;
+  white-space: normal; text-align: center; width: max-content; max-width: min(520px, calc(100vw - 32px)); font-size: 16px; }
 
 @media (max-width: 560px) {
   .vaga { width: 36px; height: 36px; }
@@ -81,8 +82,6 @@ body.ilha-toque .mira::after { top: 12px; width: 26px; }
   body.ilha-toque .barra-rapida { top: max(8px, env(safe-area-inset-top)); left: 50%; }
   body.ilha-toque .nome-bloco { top: calc(max(8px, env(safe-area-inset-top)) + 54px); }
   body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 54px); }
-  body.ilha-toque .vaga { width: 40px; height: 40px; }
-  body.ilha-toque .vaga canvas, body.ilha-toque .vaga img { width: 30px !important; height: 30px !important; }
   body.ilha-toque .vaga b { display: none; }
   .toque .acao { width: 64px; height: 64px; font-size: 26px; }
   .toque .acao.principal { width: 84px; height: 84px; font-size: 34px; }
@@ -92,8 +91,24 @@ body.ilha-toque .mira::after { top: 12px; width: 26px; }
 }
 /* celular em pé estreito */
 @media (max-width: 430px) {
-  body.ilha-toque .vaga { width: 34px; height: 34px; }
-  body.ilha-toque .vaga img { width: 26px !important; height: 26px !important; }
   body.ilha-toque .barra-rapida { gap: 2px; padding: 4px; }
   .acoes-voo { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 184px); }
+}
+
+/* vagas da barra com 44 px ou mais no toque (regra do kit) */
+body.ilha-toque .vaga { width: 48px; height: 48px; }
+body.ilha-toque .vaga img { width: 36px !important; height: 36px !important; }
+@media (max-width: 560px) {   /* celular em pé: duas fileiras (5 + 4) */
+  body.ilha-toque .barra-rapida { display: grid; grid-template-columns: repeat(5, 48px); gap: 4px; padding: 5px; }
+  body.ilha-toque .vaga { width: 48px; height: 48px; }
+  body.ilha-toque .vaga img { width: 36px !important; height: 36px !important; }
+  body.ilha-toque .vaga b { display: none; }
+  body.ilha-toque .nome-bloco, body.ilha-toque #toast { top: calc(max(10px, env(safe-area-inset-top)) + 190px); }
+  #toast { font-size: 13px; padding: 6px 10px; }
+}
+@media (max-height: 500px) {   /* deitado: barra no alto à esquerda, livre dos botões ▦ e II */
+  body.ilha-toque .barra-rapida { display: flex; left: max(12px, env(safe-area-inset-left)); transform: none; top: max(8px, env(safe-area-inset-top)); }
+  body.ilha-toque .vaga { width: 44px; height: 44px; }
+  body.ilha-toque .vaga img { width: 32px !important; height: 32px !important; }
+  body.ilha-toque .nome-bloco, body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 64px); }
 }

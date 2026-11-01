@@ -38,10 +38,12 @@ export function criarControlesToque({ raiz, aoApertar = () => {}, aoSoltar = () 
     dedoJoy = e.pointerId;
     try { zona.setPointerCapture(e.pointerId); } catch {}
     const r = zona.getBoundingClientRect();
+    // a base desenhada fica dentro da tela, mas o centro lógico é onde o dedo encostou:
+    // polegar parado perto da borda não anda sozinho
     const x = Math.min(Math.max(e.clientX - r.left, 76), r.width - 40);
     const y = Math.min(Math.max(e.clientY - r.top, 40), r.height - 76);
     base.style.left = x + 'px'; base.style.top = y + 'px';
-    centro = { x: r.left + x, y: r.top + y };
+    centro = { x: e.clientX, y: e.clientY };
     zona.classList.add('ativo');
   });
   ouvir(zona, 'pointermove', (e) => {
