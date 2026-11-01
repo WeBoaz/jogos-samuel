@@ -3,6 +3,14 @@
 Portal familiar com os jogos que o papai cria para o **Samuel**. Publicado em **https://samuel.tech**.
 Idioma: **português do Brasil**, sempre. O briefing visual original está em `kit/` (leia `kit/PROMPT-PARA-CLAUDE.md`).
 
+## Plano em andamento: Hordas dos Blocos → Dungeons dos Blocos
+- Antes de mexer: [`docs/samuel-tech/README.md`](docs/samuel-tech/README.md) (fila no Notion, protocolo de sessão),
+  [`docs/samuel-tech/STATE.md`](docs/samuel-tech/STATE.md) (último estado e NEXT) e
+  [`docs/samuel-tech/DECISOES.md`](docs/samuel-tech/DECISOES.md).
+- Material de desenvolvimento e procedência de código de terceiros: [`desenvolvimento/`](desenvolvimento/README.md) (não publicado).
+- Antes de commitar um jogo: `python3 ferramentas/verificar_jogo.py <slug>` (recusa CDN, caminho absoluto, analytics, arquivo que o `jogo.php` não entrega).
+- Sem PHP no Mac: portal pelo Docker (`php:8.3-cli`), comando em `desenvolvimento/README.md`.
+
 ## Stack
 - **PHP puro (7.4+/8.x), sem framework, sem banco, sem build.** Roda na hospedagem compartilhada da Hostinger.
 - Testar localmente:
