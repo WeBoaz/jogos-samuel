@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "release_id": "minigolfe-dos-pets@1.0.1+c0b67d9.producao",
+  "game_slug": "minigolfe-dos-pets",
+  "version": "1.0.1",
+  "source_commit": "c0b67d939defbf188b8dd6a07a44de4858e5a24b",
+  "environment": "producao",
+  "built_at": "2026-11-01T13:43:32-03:00",
+  "public_url": "https://samuel.tech/jogar/?jogo=minigolfe-dos-pets",
+  "files_base_url": "https://samuel.tech/jogo/minigolfe-dos-pets/",
+  "files": {
+    "THIRD_PARTY_NOTICES.txt": "b46f723179cdd8861eee88e991145eb0d7c89dd986bbd4678a3ddccaf55a70db",
+    "assets/index-B7yEyLEs.js": "8dd233c26d890eced8e85a158c449658fa88a5ebcf8759fbde0fe44c6b3da052",
+    "assets/index-CE_SRpX7.css": "8f80caa9379197a08daffda570e348249c2b182d71ba4acff7b632a0e367f216",
+    "index.html": "1f7ee30b4e783d481970e4802a1051843a1ca1daf60d814b9b6d7f139b19b0a0"
+  }
+}

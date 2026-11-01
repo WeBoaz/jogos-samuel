@@ -1,0 +1,124 @@
+/* Ilha dos Blocos — HUD e telas próprias (o resto vem de ui-blocos.css). */
+#jogo { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: #a9dcf2; }
+
+.mira { position: fixed; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; z-index: 5; pointer-events: none; }
+.mira::before, .mira::after { content: ''; position: absolute; background: #fff; box-shadow: 0 0 0 1.5px var(--ink); }
+.mira::before { left: 10px; top: 0; width: 2px; height: 22px; }
+.mira::after { top: 10px; left: 0; height: 2px; width: 22px; }
+
+.ilha-topo { position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); z-index: 6; }
+
+.barra-rapida { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 6; display: flex; gap: 4px; padding: 6px; background: rgba(245, 242, 232, .92); border: var(--line); box-shadow: var(--shadow); }
+.vaga { position: relative; width: 56px; height: 56px; border: 2px solid rgba(25, 51, 55, .35); background: var(--cream);
+  display: grid; place-items: center; padding: 0; }
+.vaga canvas { width: 40px; height: 40px; image-rendering: pixelated; }
+.vaga b { position: absolute; left: 3px; top: 1px; font: 700 11px var(--mono); color: var(--muted); }
+.vaga[aria-pressed="true"] { border: 3px solid var(--ink); background: var(--play); transform: translateY(-4px); }
+
+.nome-bloco { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(max(12px, env(safe-area-inset-bottom)) + 82px);
+  z-index: 6; font: 800 16px var(--sans); color: var(--ink); background: var(--paper); border: var(--line); padding: 4px 12px;
+  pointer-events: none; transition: opacity .3s; }
+.nome-bloco:empty { opacity: 0; }
+
+.grade-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; max-height: min(52vh, 460px);
+  overflow: auto; padding: 4px; }
+.grade-catalogo button { border: var(--line); background: var(--cream); box-shadow: 3px 3px 0 var(--ink); padding: 6px 4px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font: 700 13px var(--sans); min-height: var(--alvo); }
+.grade-catalogo button canvas { width: 44px; height: 44px; image-rendering: pixelated; }
+.grade-catalogo button:hover, .grade-catalogo button:focus-visible { background: var(--play); }
+.dica-catalogo { margin: 0 0 10px; }
+
+#toast { position: fixed; top: max(12px, env(safe-area-inset-top)); bottom: auto; left: 50%; transform: translateX(-50%); z-index: 7;
+  white-space: normal; text-align: center; width: max-content; max-width: min(520px, calc(100vw - 32px)); font-size: 16px; }
+
+@media (max-width: 560px) {
+  .vaga { width: 36px; height: 36px; }
+  .vaga canvas { width: 28px; height: 28px; }
+  .vaga b { display: none; }
+  .nome-bloco { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 58px); }
+}
+
+.caixa-codigo { text-align: left; margin: 4px auto 6px; max-width: 360px; }
+.caixa-codigo label { display: block; font: 700 13px var(--mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.caixa-codigo input { width: 100%; min-height: 52px; border: var(--line); box-shadow: var(--shadow); background: var(--cream);
+  font: 700 20px var(--mono); padding: 8px 12px; user-select: text; -webkit-user-select: text; }
+.caixa-codigo input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.caixa-codigo small { display: block; margin-top: 8px; color: var(--muted); font: 13px var(--sans); }
+.msg-codigo { min-height: 1em; margin: 8px 0 0; color: var(--heart); font: 700 14px var(--sans); }
+.msg-codigo:empty { display: none; }
+.trocar-codigo { margin: 10px 0 0; }
+button.link { background: none; border: 0; padding: 6px; font: 700 13px var(--sans); color: var(--forest); text-decoration: underline; min-height: 44px; }
+
+/* ---------- modo toque (celular e tablet) ---------- */
+body.ilha-toque .toque { display: block; z-index: 4; }   /* abaixo da barra, da mira e dos botões do topo (z 5–7) */
+body:not(.ilha-toque) .toque { display: none !important; }
+#hud[hidden] ~ .toque { display: none !important; }
+.olhar-zona { position: absolute; right: 0; top: 0; width: 50%; height: 100%; pointer-events: auto; touch-action: none; }
+.toque .joy-zona { width: 46%; height: 60%; }
+.toque .acoes-toque { grid-template-columns: auto auto; gap: 12px; }
+.toque .acoes-toque .acao[data-acao="quebrar"] { grid-column: 1; grid-row: 1; }
+.toque .acoes-toque .acao.principal { grid-column: 2; grid-row: 1 / span 2; }
+.toque .acoes-toque .acao[data-acao="colocar"] { grid-column: 1; grid-row: 2; }
+.acoes-voo { position: absolute; right: max(16px, env(safe-area-inset-right)); display: flex; gap: 10px; pointer-events: auto;
+  bottom: calc(max(16px, env(safe-area-inset-bottom)) + 200px); }
+.acao.mini-acao { width: 64px; height: 64px; font-size: 28px; }
+.acoes-voo .descer { display: none; }
+.toque.voando .acoes-voo .descer { display: grid; }
+.toque.voando [data-acao="voar"] { background: var(--imagination); }
+.acao { color: var(--ink); }
+
+/* no toque a barra vai para o alto (embaixo ficam o joystick e os botões) */
+body.ilha-toque .barra-rapida { bottom: auto; top: calc(max(10px, env(safe-area-inset-top)) + 70px); }
+body.ilha-toque .nome-bloco { bottom: auto; top: calc(max(10px, env(safe-area-inset-top)) + 140px); }
+body.ilha-toque .ilha-topo { display: flex; gap: 10px; }
+body.ilha-toque #toast { top: calc(max(10px, env(safe-area-inset-top)) + 150px); }
+body.ilha-toque .mira { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+body.ilha-toque .mira::before { left: 12px; height: 26px; }
+body.ilha-toque .mira::after { top: 12px; width: 26px; }
+
+/* celular deitado: pouca altura — barra no alto à esquerda dos botões de cima, ações menores */
+@media (max-height: 500px) {
+  body.ilha-toque .barra-rapida { top: max(8px, env(safe-area-inset-top)); left: 50%; }
+  body.ilha-toque .nome-bloco { top: calc(max(8px, env(safe-area-inset-top)) + 54px); }
+  body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 54px); }
+  body.ilha-toque .vaga b { display: none; }
+  .toque .acao { width: 64px; height: 64px; font-size: 26px; }
+  .toque .acao.principal { width: 84px; height: 84px; font-size: 34px; }
+  .acoes-voo { bottom: auto; top: calc(max(8px, env(safe-area-inset-top)) + 84px); }
+  .acao.mini-acao { width: 56px; height: 56px; font-size: 24px; }
+  .toque .joy-zona { height: 70%; }
+}
+/* celular em pé estreito */
+@media (max-width: 430px) {
+  body.ilha-toque .barra-rapida { gap: 2px; padding: 4px; }
+  .acoes-voo { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 184px); }
+}
+
+/* vagas da barra com 44 px ou mais no toque (regra do kit) */
+body.ilha-toque .vaga { width: 48px; height: 48px; }
+body.ilha-toque .vaga img { width: 36px !important; height: 36px !important; }
+@media (max-width: 560px) {   /* celular em pé: duas fileiras (5 + 4) */
+  body.ilha-toque .barra-rapida { display: grid; grid-template-columns: repeat(5, 48px); gap: 4px; padding: 5px; }
+  body.ilha-toque .vaga { width: 48px; height: 48px; }
+  body.ilha-toque .vaga img { width: 36px !important; height: 36px !important; }
+  body.ilha-toque .vaga b { display: none; }
+  body.ilha-toque .nome-bloco { top: calc(max(10px, env(safe-area-inset-top)) + 190px); }
+  body.ilha-toque #toast { top: calc(max(10px, env(safe-area-inset-top)) + 232px); }
+  #toast { font-size: 15px; padding: 6px 10px; }
+}
+@media (max-height: 500px) {   /* deitado: barra no alto à esquerda, livre dos botões ▦ e II */
+  body.ilha-toque .barra-rapida { display: flex; left: max(12px, env(safe-area-inset-left)); transform: none; top: max(8px, env(safe-area-inset-top)); }
+  body.ilha-toque .vaga { width: 44px; height: 44px; }
+  body.ilha-toque .vaga img { width: 32px !important; height: 32px !important; }
+  body.ilha-toque .nome-bloco { top: calc(max(8px, env(safe-area-inset-top)) + 64px); }
+  body.ilha-toque #toast { top: calc(max(8px, env(safe-area-inset-top)) + 104px); }
+  /* catálogo deitado: grade rola e o Pronto fica à vista */
+  .grade-catalogo { max-height: calc(100vh - 190px); }
+  #tCatalogo .titulo { font-size: 24px; margin-bottom: 4px; }
+  #tCatalogo .dica-catalogo { margin-bottom: 6px; }
+}
+
+/* aviso no toque: logo abaixo da mira (nunca em cima dela), sem invadir o joystick nem os botões */
+body.ilha-toque #toast { top: calc(50% + 30px) !important; max-width: min(420px, calc(100vw - 32px)); }
+@media (max-height: 500px) { body.ilha-toque #toast { max-width: 44vw; font-size: 14px; padding: 6px 10px; } }

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Ilha dos Blocos — samuel.tech</title>
+  <script type="module" crossorigin src="./assets/index-ByPRRX1C.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BPYrT67Z.css">
+</head>
+<body>
+<canvas id="jogo" aria-label="Ilha dos Blocos"></canvas>
+
+<!-- HUD do jogo -->
+<div id="hud" hidden>
+  <div class="mira" aria-hidden="true"></div>
+  <div class="topo-btns ilha-topo"><button class="mini so-toque" id="bCatalogoToque" aria-label="Catálogo de blocos">▦</button><button class="mini" id="bPausa" aria-label="Pausar">II</button></div>
+  <div class="nome-bloco" id="nomeBloco" aria-live="polite"></div>
+  <div class="barra-rapida" id="barra" role="toolbar" aria-label="Barra de blocos"></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<!-- Controles de toque (celular e tablet): joystick à esquerda, olhar arrastando à direita, botões -->
+<div class="toque" id="toque">
+  <div class="olhar-zona" id="olharZona"></div>
+  <div class="joy-zona"><div class="joy-base"><div class="joy-pino"></div></div></div>
+  <div class="acoes-toque">
+    <button class="acao" data-acao="quebrar" aria-label="Quebrar bloco">⛏</button>
+    <button class="acao principal" data-acao="pular" aria-label="Pular / subir">⤒</button>
+    <button class="acao" data-acao="colocar" aria-label="Colocar bloco">🧱</button>
+  </div>
+  <div class="acoes-voo">
+    <button class="acao mini-acao" data-acao="voar" aria-label="Voar">🪽</button>
+    <button class="acao mini-acao descer" data-acao="descer" aria-label="Descer">⤓</button>
+  </div>
+</div>
+
+<!-- Começo -->
+<div class="tela" id="tInicio">
+  <div class="cartao">
+    <div class="barra"><span>ilha_dos_blocos.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="logo">ILHA<br>DOS BLOCOS<small>modo criativo · prévia</small></div>
+      <div class="dica-icones so-teclado"><span>🖱️ olhar</span><span>WASD andar</span><span>espaço pular</span><span>clique quebra · botão direito põe</span><span>1–9 / rodinha troca</span><span>E catálogo</span></div>
+      <div class="dica-icones so-toque"><span>🕹️ esquerda anda</span><span>👆 arraste à direita para olhar</span><span>⛏ quebra · 🧱 põe</span><span>⤒ pula · 🪽 voa</span><span>▦ catálogo</span></div>
+      <div class="caixa-codigo" id="caixaCodigo" hidden>
+        <label for="campoCodigo">Código da ilha</label>
+        <input id="campoCodigo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="peça para um adulto">
+        <p class="msg-codigo" id="msgCodigo" role="alert"></p>
+        <small>O código fica guardado só neste aparelho.</small>
+      </div>
+      <div class="acoes"><button class="btn grande" id="bEntrar">▶ ENTRAR NA ILHA</button></div>
+      <p class="trocar-codigo"><button class="link" id="bTrocarCodigo" hidden>trocar o código da ilha</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- Conectando / ilha dormindo -->
+<div class="tela" id="tConexao" hidden>
+  <div class="cartao">
+    <div class="barra"><span>conexao.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="titulo" id="conexaoTitulo">Chegando na ilha…</div>
+      <p id="conexaoTexto">Preparando os blocos.</p>
+      <div class="acoes" id="conexaoAcoes" hidden><button class="btn" id="bTentar">↻ Tentar de novo</button><a class="btn sec" href="/jogos/" target="_top">← Jogos</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Pausa -->
+<div class="tela" id="tPausa" hidden>
+  <div class="cartao">
+    <div class="barra"><span>pausa.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="titulo">PAUSA</div>
+      <p>Tudo que você construiu fica guardado na ilha.</p>
+      <div class="acoes"><button class="btn grande" id="bContinuar">▶ Continuar</button></div>
+      <div class="acoes"><button class="btn sec" id="bCatalogoPausa">▦ Catálogo</button><a class="btn sec" href="/jogos/" target="_top">← Jogos</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Catálogo (Criativo) -->
+<div class="tela" id="tCatalogo" hidden>
+  <div class="cartao largo">
+    <div class="barra"><span>catalogo.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="titulo">CATÁLOGO</div>
+      <p class="dica-catalogo">Escolha um bloco para a vaga <b id="vagaCatalogo">1</b> da barra.</p>
+      <div class="grade-catalogo" id="gradeCatalogo"></div>
+      <div class="acoes"><button class="btn" id="bFecharCatalogo">✓ Pronto</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

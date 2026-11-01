@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Protótipo de interface — Hordas e Dungeons dos Blocos</title>
+<link rel="stylesheet" href="../compartilhado/ui-blocos.css">
+<style>
+  /* só do protótipo: barra para trocar de tela (não vai para os jogos) */
+  #dev { position: fixed; left: 50%; bottom: 6px; transform: translateX(-50%); z-index: 50; display: flex; gap: 4px;
+    flex-wrap: wrap; justify-content: center; max-width: 96vw; background: #193337dd; padding: 4px; font: 11px var(--mono); }
+  #dev button { background: var(--paper); border: 1px solid var(--ink); padding: 3px 6px; font: 11px var(--mono); }
+  #dev button[aria-current="true"] { background: var(--play); }
+  body.limpo #dev { display: none; }
+  canvas#fundo { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<canvas id="fundo"></canvas>
+
+<!-- HUD -->
+<div class="hud" id="hud" hidden>
+  <div class="hud-linha">
+    <div class="painel vida" aria-label="Vida"><span class="ic">❤️</span><span id="vidaNum">82</span><div class="medidor" style="--v:82%"><i></i></div></div>
+    <div class="painel" id="hTempo" data-jogo="hordas"><span class="ic">⏱</span>2:15</div>
+    <div class="painel" id="hCristais" data-jogo="hordas"><span class="ic">💎</span>37</div>
+    <div class="painel" data-jogo="dungeons"><span class="ic">🚪</span>3/8</div>
+    <div class="painel" data-jogo="dungeons"><span class="ic chave tem">🔑</span><span class="ic">🧪</span>2</div>
+    <div class="topo-btns empurra">
+      <button class="mini" id="bSom" aria-label="Som ligado">🔊</button>
+      <button class="mini" id="bPausa" aria-label="Pausar">II</button>
+    </div>
+  </div>
+  <div class="barra-xp" data-jogo="hordas"><b>NÍV 4</b><div class="medidor xp" style="--v:62%"><i></i></div></div>
+  <div class="chefe-barra" id="chefe" hidden><b>👑 REI GOSMA</b><div class="medidor chefe" style="--v:74%"><i></i></div></div>
+</div>
+<div class="aviso pop" id="aviso" hidden>ONDA 3!<small>eles estão vindo</small></div>
+<div class="toast" id="toast" hidden>🎁 Espada de cristal!</div>
+
+<!-- Controles de toque -->
+<div class="toque" id="toque">
+  <div class="joy-zona"><div class="joy-base"><div class="joy-pino"></div></div></div>
+  <div class="acoes-toque" id="acoesHordas" data-jogo="hordas">
+    <button class="acao principal" data-acao="especial" aria-label="Poder especial">✨<i class="recarga"></i><kbd>Q</kbd></button>
+    <button class="acao" data-acao="pulo-rapido" aria-label="Correr rápido">💨<i class="recarga"></i><kbd>E</kbd></button>
+  </div>
+  <div class="acoes-toque" id="acoesDungeons" data-jogo="dungeons">
+    <button class="acao" data-acao="poder" aria-label="Poder">✨<i class="recarga"></i><kbd>Q</kbd></button>
+    <button class="acao principal" data-acao="golpe" aria-label="Golpe de espada">⚔️<i class="recarga"></i><kbd>J</kbd></button>
+    <button class="acao" data-acao="esquiva" aria-label="Esquivar">💨<i class="recarga"></i><kbd>K</kbd></button>
+  </div>
+</div>
+
+<!-- Menu -->
+<section class="tela" id="tMenu" hidden>
+  <div class="cartao">
+    <div class="barra"><span id="exe">hordas_dos_blocos.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="logo" id="logo">HORDAS DOS BLOCOS<small>aguente firme até o fim</small></div>
+      <div class="dica-icones some-baixo" id="dicas"><span>🕹️ ande</span><span>⚔️ ataca sozinho</span><span>💎 pegue cristais</span></div>
+      <div class="escolhas">
+      <div>
+      <div class="secao">1 · herói</div>
+      <div class="opcoes">
+        <button class="opcao" aria-pressed="true"><span class="ic">🧡</span><span>Samuel<small>jaqueta laranja</small></span></button>
+        <button class="opcao" aria-pressed="false"><span class="ic">💜</span><span>Player 2<small>jardineira lilás</small></span></button>
+      </div>
+      </div>
+      <div>
+      <div class="secao">2 · jeito de jogar</div>
+      <div class="opcoes">
+        <button class="opcao" aria-pressed="true"><span class="ic">🐢</span><span>Explorador<small id="mExp">3 min · mais fácil</small></span></button>
+        <button class="opcao" aria-pressed="false"><span class="ic">⭐</span><span>Desafio<small id="mDes">8 min · chefe forte</small></span></button>
+      </div>
+      </div>
+      </div>
+      </div>
+      <div class="acoes rodape-menu">
+        <a class="btn sec" href="/jogos/" target="_top">← Jogos</a>
+        <button class="btn grande" id="bJogar">▶ JOGAR!</button>
+        <span class="selo" id="recorde">🏆 recorde 2:41</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Melhoria (pausa a simulação) -->
+<section class="tela" id="tMelhoria" hidden>
+  <div class="cartao largo">
+    <div class="barra"><span>subiu_de_nivel.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="titulo">SUBIU DE NÍVEL! ⭐</div>
+      <div class="melhorias">
+        <button class="melhoria"><span class="ic">🔥</span><div><b>Fogo forte</b><span>+ dano</span></div><kbd>1</kbd></button>
+        <button class="melhoria"><span class="ic">👟</span><div><b>Tênis veloz</b><span>+ rápido</span></div><kbd>2</kbd></button>
+        <button class="melhoria"><span class="ic">🧲</span><div><b>Ímã</b><span>puxa cristais</span></div><kbd>3</kbd></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pausa -->
+<section class="tela" id="tPausa" hidden>
+  <div class="cartao">
+    <div class="barra"><span>pausa.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="titulo">PAUSA</div>
+      <button class="btn grande" id="bContinuar">▶ Continuar</button>
+      <div class="acoes">
+        <button class="btn sec">↻ Recomeçar</button>
+        <button class="btn sec" aria-label="Som">🔊 Som</button>
+        <a class="btn sec" href="/jogos/" target="_top">← Jogos</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Fim -->
+<section class="tela" id="tFim" hidden>
+  <div class="cartao">
+    <div class="barra"><span>fim_da_rodada.exe</span><span><i></i><i></i><i></i></span></div>
+    <div class="corpo">
+      <div class="titulo" id="fimTitulo">VOCÊ AGUENTOU! 🎉</div>
+      <div class="selo" id="fimSelo">🏆 novo recorde!</div>
+      <div class="resultado" id="fimResultado">
+        <span>3:00<small>tempo</small></span><span>214<small>derrotados</small></span><span>7<small>nível</small></span>
+      </div>
+      <div class="acoes">
+        <button class="btn grande" id="bDeNovo">↻ Jogar de novo</button>
+        <button class="btn sec" id="bMenu">☰ Menu</button><a class="btn sec" href="/jogos/" target="_top">← Jogos</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<nav id="dev" aria-label="Telas do protótipo"></nav>
+
+<script type="module">
+import { criarControlesToque } from '../compartilhado/controles-toque.js';
+
+const TELAS = {
+  'hordas-menu':     { jogo: 'hordas', tela: 'tMenu' },
+  'hordas-jogo':     { jogo: 'hordas', hud: true },
+  'hordas-onda':     { jogo: 'hordas', hud: true, aviso: ['ONDA 3!', 'eles estão vindo'] },
+  'hordas-melhoria': { jogo: 'hordas', hud: true, tela: 'tMelhoria' },
+  'hordas-chefe':    { jogo: 'hordas', hud: true, chefe: true, aviso: ['CHEFÃO!', 'cuidado com o pulo'] },
+  'hordas-pausa':    { jogo: 'hordas', hud: true, tela: 'tPausa' },
+  'hordas-vitoria':  { jogo: 'hordas', tela: 'tFim', fim: ['VOCÊ AGUENTOU! 🎉', '🏆 novo recorde!', [['3:00', 'tempo'], ['214', 'derrotados'], ['7', 'nível']]] },
+  'hordas-derrota':  { jogo: 'hordas', tela: 'tFim', fim: ['FIM DA RODADA', '🏆 recorde 2:41', [['1:52', 'tempo'], ['96', 'derrotados'], ['4', 'nível']]] },
+  'dungeons-menu':   { jogo: 'dungeons', tela: 'tMenu' },
+  'dungeons-jogo':   { jogo: 'dungeons', hud: true },
+  'dungeons-bau':    { jogo: 'dungeons', hud: true, toast: true },
+  'dungeons-chefe':  { jogo: 'dungeons', hud: true, chefe: true, aviso: ['SALA DO CHEFE', 'pegue a chave antes'] },
+  'dungeons-pausa':  { jogo: 'dungeons', hud: true, tela: 'tPausa' },
+  'dungeons-vitoria':{ jogo: 'dungeons', tela: 'tFim', fim: ['MASMORRA VENCIDA! 🎉', '🏆 8 de 8 salas', [['8/8', 'salas'], ['2', 'baús'], ['6:40', 'tempo']]] },
+  'dungeons-derrota':{ jogo: 'dungeons', tela: 'tFim', fim: ['QUASE LÁ!', 'volta na sala 3', [['3/8', 'salas'], ['1', 'baú'], ['2:10', 'tempo']]] },
+};
+const TEXTO = {
+  hordas:   { exe: 'hordas_dos_blocos.exe', logo: 'HORDAS DOS BLOCOS<small>aguente firme até o fim</small>',
+              dicas: ['🕹️ ande', '⚔️ ataca sozinho', '💎 pegue cristais'], exp: '3 min · mais fácil', des: '8 min · chefe forte' },
+  dungeons: { exe: 'dungeons_dos_blocos.exe', logo: 'DUNGEONS DOS BLOCOS<small>8 salas e um chefão</small>',
+              dicas: ['🕹️ ande', '⚔️ golpe', '💨 esquiva', '🔑 ache a chave'], exp: 'com setas de ajuda', des: 'mais inimigos' },
+};
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+if (params.has('limpo')) document.body.classList.add('limpo');
+if (params.has('toque')) document.body.classList.add('modo-toque');
+let atual = TELAS[params.get('tela')] ? params.get('tela') : 'hordas-menu';
+
+function mostrar(nome) {
+  atual = nome; const t = TELAS[nome], tx = TEXTO[t.jogo];
+  history.replaceState(null, '', '?' + new URLSearchParams({ ...Object.fromEntries(params), tela: nome }));
+  document.body.dataset.jogo = t.jogo;
+  for (const el of document.querySelectorAll('[data-jogo]')) el.hidden = el.dataset.jogo !== t.jogo;
+  for (const id of ['tMenu', 'tMelhoria', 'tPausa', 'tFim']) $(id).hidden = t.tela !== id;
+  $('hud').hidden = !t.hud; $('chefe').hidden = !t.chefe; $('toast').hidden = !t.toast;
+  $('toque').style.visibility = t.hud && !t.tela ? 'visible' : 'hidden';
+  $('aviso').hidden = !t.aviso;
+  if (t.aviso) { $('aviso').innerHTML = `${t.aviso[0]}<small>${t.aviso[1]}</small>`; $('aviso').classList.remove('pop'); void $('aviso').offsetWidth; $('aviso').classList.add('pop'); }
+  $('exe').textContent = tx.exe; $('logo').innerHTML = tx.logo;
+  $('dicas').innerHTML = tx.dicas.map((d) => `<span>${d}</span>`).join('');
+  $('mExp').textContent = tx.exp; $('mDes').textContent = tx.des;
+  if (t.fim) {
+    $('fimTitulo').textContent = t.fim[0]; $('fimSelo').textContent = t.fim[1];
+    $('fimResultado').innerHTML = t.fim[2].map(([v, r]) => `<span>${v}<small>${r}</small></span>`).join('');
+  }
+  for (const b of $('dev').children) b.setAttribute('aria-current', b.dataset.t === nome);
+  desenhar();
+}
+$('dev').innerHTML = Object.keys(TELAS).map((k) => `<button data-t="${k}">${k}</button>`).join('');
+$('dev').addEventListener('click', (e) => { if (e.target.dataset.t) mostrar(e.target.dataset.t); });
+
+// navegação do protótipo pelos próprios botões
+$('bJogar').onclick = () => mostrar(TELAS[atual].jogo + '-jogo');
+$('bPausa').onclick = () => mostrar(TELAS[atual].jogo + '-pausa');
+$('bContinuar').onclick = () => mostrar(TELAS[atual].jogo + '-jogo');
+$('bDeNovo').onclick = () => mostrar(TELAS[atual].jogo + '-jogo');
+$('bMenu').onclick = () => mostrar(TELAS[atual].jogo + '-menu');
+for (const m of document.querySelectorAll('.melhoria')) m.onclick = () => mostrar('hordas-jogo');
+for (const grupo of document.querySelectorAll('.opcoes')) grupo.addEventListener('click', (e) => {
+  const b = e.target.closest('.opcao'); if (!b) return;
+  for (const o of grupo.children) o.setAttribute('aria-pressed', o === b);
+});
+$('bSom').onclick = (e) => { const on = e.currentTarget.textContent === '🔊'; e.currentTarget.textContent = on ? '🔇' : '🔊'; e.currentTarget.setAttribute('aria-label', on ? 'Som desligado' : 'Som ligado'); };
+addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if ((k === 'p' || k === 'escape') && TELAS[atual].hud) mostrar(TELAS[atual].jogo + (TELAS[atual].tela === 'tPausa' ? '-jogo' : '-pausa'));
+  if (atual === 'hordas-melhoria' && ['1', '2', '3'].includes(k)) mostrar('hordas-jogo');
+});
+
+// controles de toque de verdade (para testar multitoque no protótipo)
+const toque = criarControlesToque({ raiz: $('toque'), aoApertar: (n) => { ultimo = n; } });
+let ultimo = '';
+window.__prototipo = { toque, mostrar, get tela() { return atual; } };
+toque.recarga('especial', 0.4); toque.recarga('poder', 0.7);
+
+// fundo: arena de blocos (hordas) ou sala de pedra (dungeons), só para dar contexto
+const cv = $('fundo'), cx = cv.getContext('2d');
+function desenhar() {
+  const dpr = Math.min(devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
+  cv.width = w * dpr; cv.height = h * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const dung = TELAS[atual].jogo === 'dungeons', T = 40;
+  for (let y = 0; y < h / T + 1; y++) for (let x = 0; x < w / T + 1; x++) {
+    const par = (x + y) % 2 === 0;
+    cx.fillStyle = dung ? (par ? '#5d5a66' : '#55525e') : (par ? '#8fcf6a' : '#86c562');
+    cx.fillRect(x * T, y * T, T, T);
+  }
+  if (dung) { cx.fillStyle = '#3c3946'; cx.fillRect(0, 0, w, T * 1.5); cx.fillRect(0, 0, T, h); cx.fillRect(w - T, 0, T, h); }
+  const bloco = (x, y, s, cor, topo) => { cx.fillStyle = '#193337'; cx.fillRect(x + 3, y + 3, s, s); cx.fillStyle = cor; cx.fillRect(x, y, s, s); cx.fillStyle = topo; cx.fillRect(x, y, s, s * .3); cx.strokeStyle = '#193337'; cx.lineWidth = 2; cx.strokeRect(x, y, s, s); };
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < (dung ? 6 : 26); i++) { const a = rnd() * 6.28, r = 110 + rnd() * Math.min(w, h) * .4; bloco(w / 2 + Math.cos(a) * r, h / 2 + Math.sin(a) * r, 26, '#a479e0', '#ceb7ef'); }
+  for (let i = 0; i < 8; i++) { const a = rnd() * 6.28, r = 60 + rnd() * 140; cx.fillStyle = '#4ee6e0'; cx.strokeStyle = '#193337'; cx.beginPath(); const px = w / 2 + Math.cos(a) * r, py = h / 2 + Math.sin(a) * r; cx.moveTo(px, py - 9); cx.lineTo(px + 7, py); cx.lineTo(px, py + 9); cx.lineTo(px - 7, py); cx.closePath(); cx.fill(); cx.stroke(); }
+  bloco(w / 2 - 18, h / 2 - 18, 36, '#ff9d52', '#ffd56b');
+  if (dung) { bloco(w * .2, h * .3, 34, '#c98a3c', '#ffd56b'); }
+}
+addEventListener('resize', desenhar);
+mostrar(atual);
+</script>
+</body>
+</html>

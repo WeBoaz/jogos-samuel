@@ -1,0 +1,17 @@
+diff --git a/examples/client/src/main.ts b/examples/client/src/main.ts
+index 418f75d..eae188d 100644
+--- a/examples/client/src/main.ts
++++ b/examples/client/src/main.ts
+@@ -1441,7 +1441,11 @@ if (BACKEND_SERVER_INSTANCE.origin.includes("localhost")) {
+   BACKEND_SERVER_INSTANCE.port = "4000";
+ }
+ 
+-const BACKEND_SERVER = BACKEND_SERVER_INSTANCE.toString();
++// PROVA samuel.tech (BLK-010): ?servidor=<url> conecta a outro host (cliente estático em outra origem)
++const SERVIDOR_PROVA = new URLSearchParams(window.location.search).get("servidor");
++const BACKEND_SERVER = SERVIDOR_PROVA ?? BACKEND_SERVER_INSTANCE.toString();
++if (new URLSearchParams(window.location.search).has("debug"))
++  (window as any).__vx = { world, network, controls, VOXELIZE };
+ 
+ class Box extends VOXELIZE.Entity<{
+   position: VOXELIZE.Coords3;

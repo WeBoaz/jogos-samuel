@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "release_id": "ilha-dos-blocos@0.2+a2d073f.producao",
+  "game_slug": "ilha-dos-blocos",
+  "version": "0.2",
+  "source_commit": "a2d073f06646f2fac4c203c52aff3f12cf67af9a",
+  "environment": "producao",
+  "built_at": "2026-11-01T19:51:35-03:00",
+  "public_url": "https://samuel.tech/jogar/?jogo=ilha-dos-blocos",
+  "files_base_url": "https://samuel.tech/jogo/ilha-dos-blocos/",
+  "files": {
+    "THIRD_PARTY_NOTICES.txt": "f10e4f032910d87089eee227056a3413726fa4dc6b4c31eaef3c4d0b99800bc3",
+    "assets/index-BPYrT67Z.css": "fbb65efd28b39fac61d05a02f68493567dd177cd1711ee94c8dd02b1d7c939ec",
+    "assets/index-ByPRRX1C.js": "7fcb4014469b2dec2d91ef9850179986b7f12e63466d499a6917dc793957c38c",
+    "assets/light-worker-COQyqOMz-1ZwvvRTn.js": "f09be7ff9bd9ef325e112975390633e53f686f11cc44e7dd62b13022047ac20a",
+    "assets/mesh-worker-DHcFKpZ1-ChWRxrWQ.js": "a5e314023198bd5b945ba50e7464e621596ad0f46bf83d42c2820176137a415f",
+    "index.html": "49aa72b3688e39f74e0632657310df91a5372f755f70ce8c6b624f73dd206cc0"
+  }
+}

@@ -12,7 +12,8 @@ if (!$g || !jogo_jogavel($g)) {
     exit;
 }
 
-$src = '/jogo/' . rawurlencode($g['slug']) . '/' . ($g['entry'] ?? 'index.html');
+// ?perfil= deixa o jogo separar recordes por explorador (o cookie samuel_perfil é HttpOnly)
+$src = '/jogo/' . rawurlencode($g['slug']) . '/' . ($g['entry'] ?? 'index.html') . '?perfil=' . rawurlencode((string) $p['id']);
 cabecalho(['titulo' => $g['title'] . ' — Samuel.tech', 'privado' => true]);
 ?>
 <section class="wrap player">

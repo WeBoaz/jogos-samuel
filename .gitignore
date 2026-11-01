@@ -3,3 +3,9 @@
 
 samuel-site.zip
 _preview/
+
+# clones de provas técnicas (commit fixado em docs/blocos/)
+desenvolvimento/provas/
+
+# arquivos de ambiente com segredos (ex.: ilha.env da VPS) nunca entram no Git
+*.env
