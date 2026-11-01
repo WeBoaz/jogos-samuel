@@ -1,7 +1,29 @@
 {
   "schemaVersion": 1,
-  "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e só abrem com a família logada. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
+  "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e abrem para qualquer visitante pelo jogo.php (acesso livre). Ordem = ordem de exibição; a home mostra os 3 primeiros.",
   "games": [
+    {
+      "slug": "minigolfe-dos-pets",
+      "title": "Minigolfe dos Pets",
+      "category": "Esporte",
+      "description": "Minigolfe 3D com o Doguinho e o Gatinho: 6 pistas com rampa, túnel, gira-gira e ponte. Até 4 jogadores no mesmo aparelho!",
+      "cover": "minigolfe-dos-pets.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Puxe para trás a partir da bola e solte para dar a tacada. Quanto mais longe puxar, mais forte.",
+        "Computador: setas ← → miram, ↑ ↓ mudam a força, ENTER ou ESPAÇO dá a tacada, P pausa.",
+        "Modo Assistido mostra o caminho da bola e ajuda perto do buraco. Modo Normal vale cada tacada.",
+        "De 1 a 4 jogadores: cada um joga a pista até acertar, depois passa a vez."
+      ],
+      "input": [
+        "touch",
+        "mouse",
+        "keyboard"
+      ],
+      "status": "pronto",
+      "novo": true,
+      "version": "1.0"
+    },
     {
       "slug": "reino-dos-blocos",
       "title": "Reino dos Blocos",
