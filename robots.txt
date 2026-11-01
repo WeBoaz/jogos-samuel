@@ -6,3 +6,4 @@ Disallow: /jogar/
 Disallow: /jogo/
 Disallow: /conta/
 Disallow: /sair/
+Disallow: /admin/

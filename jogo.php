@@ -23,7 +23,8 @@ if (!sessao()) {
 
 $partes = explode('/', $caminho);
 $slug = array_shift($partes);
-if (!preg_match('/^[a-z0-9-]+$/', (string) $slug) || !jogo($slug) || (jogo($slug)['status'] ?? '') !== 'pronto') {
+$g = preg_match('/^[a-z0-9-]+$/', (string) $slug) ? jogo($slug) : null;
+if (!$g || !jogo_jogavel($g)) {
     negar(404, 'Esse mundo ainda não foi descoberto.');
 }
 foreach ($partes as $p) {
@@ -32,23 +33,13 @@ foreach ($partes as $p) {
     }
 }
 
-$base = realpath(RAIZ . '/_privado/jogos/' . $slug);
+$base = realpath(pasta_jogo($g));
 $arq = $partes ? realpath($base . '/' . implode('/', $partes)) : false;
 if (!$base || !$arq || strpos($arq, $base . DIRECTORY_SEPARATOR) !== 0 || !is_file($arq)) {
     negar(404, 'Arquivo não encontrado.');
 }
 
-$tipos = [
-    'html' => 'text/html; charset=utf-8', 'htm' => 'text/html; charset=utf-8',
-    'js' => 'text/javascript; charset=utf-8', 'mjs' => 'text/javascript; charset=utf-8',
-    'css' => 'text/css; charset=utf-8', 'json' => 'application/json', 'txt' => 'text/plain; charset=utf-8',
-    'png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif',
-    'webp' => 'image/webp', 'svg' => 'image/svg+xml', 'ico' => 'image/x-icon',
-    'mp3' => 'audio/mpeg', 'ogg' => 'audio/ogg', 'wav' => 'audio/wav', 'm4a' => 'audio/mp4',
-    'woff' => 'font/woff', 'woff2' => 'font/woff2', 'ttf' => 'font/ttf',
-    'wasm' => 'application/wasm', 'data' => 'application/octet-stream', 'bin' => 'application/octet-stream',
-    'glb' => 'model/gltf-binary', 'gltf' => 'model/gltf+json',
-];
+$tipos = EXTENSOES_JOGO;
 $ext = strtolower(pathinfo($arq, PATHINFO_EXTENSION));
 if (!isset($tipos[$ext])) {
     negar(404, 'Arquivo não encontrado.');   // .php e desconhecidos nunca são entregues

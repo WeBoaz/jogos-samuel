@@ -48,3 +48,27 @@
 .navlinks .plain-btn{display:inline-flex;align-items:center;text-decoration:underline}
 .navlinks .btn{white-space:nowrap}
 @media(max-width:760px){.navlinks>a.userchip{display:none}}
+/* Área do responsável */
+.admin-lista{display:grid;gap:18px;margin-top:10px}
+.admin-item{display:grid;grid-template-columns:240px 1fr auto;gap:20px;align-items:center;padding:14px;box-shadow:4px 4px 0 #d3d6c9}
+.admin-item img{width:240px;height:135px;object-fit:cover;border:var(--line)}
+.admin-info h3{margin:4px 0 8px}
+.admin-acoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;max-width:420px}
+.admin-status{display:flex;gap:8px;align-items:center}
+.admin-status select,.campo-texto{border:var(--line);background:#fffdf7;padding:10px 12px;min-height:44px;border-radius:0;font:inherit;width:100%}
+.admin-status select{width:auto}
+textarea.campo-texto{resize:vertical;min-height:110px}
+.selo-status{display:inline-block;font:700 11px var(--mono);text-transform:uppercase;padding:4px 8px;border:1.5px solid var(--ink);background:var(--paper)}
+.st-pronto{background:var(--green)}.st-em-breve{background:#fff0cd}.st-rascunho{background:var(--purple)}.st-arquivado{background:#ddd9cd}.st-erro{background:#ffe0d6}
+.campo-grupo{border:var(--line);padding:10px 14px;display:flex;gap:18px;flex-wrap:wrap;margin:0}
+.campo-grupo legend{font:700 12px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:0 6px}
+.check{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px}
+.check input{width:20px;height:20px;accent-color:#326344}
+.capa-atual{margin-top:8px;max-width:240px;border:var(--line)}
+@media(max-width:760px){.admin-item{grid-template-columns:1fr}.admin-item img{width:100%;height:auto;aspect-ratio:16/9}.admin-acoes{justify-content:flex-start;max-width:none}}
+/* Player: carregando / demorando */
+.player-frame{position:relative}
+.player-carregando{position:absolute;inset:40px 0 0;display:grid;place-items:center;background:#1b1440;color:var(--paper);font:700 18px var(--mono);text-align:center;padding:20px}
+.player-carregando[hidden]{display:none}
+.player-carregando .btn{margin:14px 6px 0}
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

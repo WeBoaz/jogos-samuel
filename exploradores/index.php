@@ -28,7 +28,7 @@ cabecalho(['titulo' => 'Quem vai explorar? — Samuel.tech', 'privado' => true])
 <?php endforeach; ?>
         </div>
       </form>
-      <p class="fine login-note"><a href="/conta/">Trocar a senha da família</a> · <a href="/sair/">Sair deste aparelho</a></p>
+      <p class="fine login-note"><a href="/admin/">Área do responsável</a> · <a href="/conta/">Trocar a senha</a> · <a href="/sair/">Sair deste aparelho</a></p>
     </div>
   </div>
 </div>

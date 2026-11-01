@@ -17,6 +17,12 @@
     clearTimeout(timer); timer = setTimeout(() => (t.hidden = true), 2400);
   }
 
+  // ---------- Confirmação antes de ações sem volta ----------
+  document.addEventListener('submit', (e) => {
+    const f = e.target.closest('[data-confirmar]');
+    if (f && !window.confirm(f.dataset.confirmar)) e.preventDefault();
+  });
+
   // ---------- Diálogos ----------
   document.addEventListener('click', (e) => {
     const abre = e.target.closest('[data-open]');
@@ -78,10 +84,26 @@
   // ---------- Player ----------
   const jogo = $('#jogo');
   if (jogo) {
-    $('[data-recomecar]').addEventListener('click', () => {
+    const carregando = $('#carregando');
+    let espera;
+    function aguardar() {
+      if (!carregando) return;
+      carregando.hidden = false;
+      $('[data-demora]', carregando).hidden = true;
+      clearTimeout(espera);
+      espera = setTimeout(() => { $('[data-demora]', carregando).hidden = false; }, 15000);
+    }
+    $$('[data-recomecar]').forEach((b) => b.addEventListener('click', () => {
+      aguardar();
       jogo.src = jogo.src;   // recarrega o jogo do zero
       jogo.focus();
-    });
+    }));
+    jogo.addEventListener('load', () => { clearTimeout(espera); if (carregando) carregando.hidden = true; });
+    aguardar();
+    try {   // o jogo pode ter carregado antes deste script rodar
+      const d = jogo.contentDocument;
+      if (d && d.readyState === 'complete' && jogo.contentWindow.location.href !== 'about:blank') { clearTimeout(espera); carregando.hidden = true; }
+    } catch {}
     const moldura = $('#moldura');
     const tela = $('[data-tela-cheia]');
     if (document.fullscreenEnabled && moldura.requestFullscreen) {

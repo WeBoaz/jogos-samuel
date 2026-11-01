@@ -120,16 +120,47 @@ function sessao(): ?array
     return $d;
 }
 
-function gravar_sessao(?string $perfil): void
+/**
+ * @param ?string $perfil  explorador escolhido (ou null)
+ * @param ?int    $adm     validade do “modo responsável” (timestamp); null = mantém o atual
+ */
+function gravar_sessao(?string $perfil, ?int $adm = null): void
 {
     $c = config();
+    if ($adm === null) {
+        $atual = sessao();
+        $adm = (int) ($atual['adm'] ?? 0);
+    }
     $d = ['f' => 1, 'p' => $perfil, 'v' => $c['versao'] ?? 1, 'exp' => time() + DIAS_SESSAO * 86400];
+    if ($adm > time()) {
+        $d['adm'] = $adm;
+    }
     $p = b64u((string) json_encode($d));
     $token = $p . '.' . b64u(hash_hmac('sha256', $p, $c['segredo'], true));
     setcookie(COOKIE_SESSAO, $token, [
         'expires' => $d['exp'], 'path' => '/', 'secure' => https(), 'httponly' => true, 'samesite' => 'Lax',
     ]);
     $_COOKIE[COOKIE_SESSAO] = $token;
+}
+
+/** O responsável confirmou a senha há menos de 30 minutos? */
+function modo_responsavel(): bool
+{
+    $s = sessao();
+    return $s && (int) ($s['adm'] ?? 0) > time();
+}
+
+/** Token contra envio de formulário por outro site (área do responsável). */
+function token_csrf(): string
+{
+    $c = config();
+    $s = sessao();
+    return hash_hmac('sha256', 'csrf|' . ($s['exp'] ?? 0) . '|' . ($s['adm'] ?? 0), $c['segredo'] ?? '');
+}
+
+function conferir_csrf(): bool
+{
+    return hash_equals(token_csrf(), (string) ($_POST['csrf'] ?? ''));
 }
 
 function encerrar_sessao(): void
@@ -199,24 +230,133 @@ function registrar_tentativa(bool $acertou): void
 }
 
 /* ---------- Catálogo e perfis -------------------------------------------- */
-function jogos(): array
+// Dois catálogos somados:
+//  • “site”: _app/jogos.json + arquivos em _privado/jogos/ (vem do repositório)
+//  • “responsável”: cadastrados em /admin. Ficam em samuel-dados/ FORA da pasta
+//    pública (ao lado do samuel-config.php), então sobrevivem às publicações.
+const STATUS_VISIVEIS = ['pronto', 'em-breve'];
+const STATUS_TODOS = ['rascunho', 'pronto', 'em-breve', 'arquivado'];
+const EXTENSOES_JOGO = [
+    'html' => 'text/html; charset=utf-8', 'htm' => 'text/html; charset=utf-8',
+    'js' => 'text/javascript; charset=utf-8', 'mjs' => 'text/javascript; charset=utf-8',
+    'css' => 'text/css; charset=utf-8', 'json' => 'application/json', 'txt' => 'text/plain; charset=utf-8',
+    'png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif',
+    'webp' => 'image/webp', 'svg' => 'image/svg+xml', 'ico' => 'image/x-icon',
+    'mp3' => 'audio/mpeg', 'ogg' => 'audio/ogg', 'wav' => 'audio/wav', 'm4a' => 'audio/mp4',
+    'mp4' => 'video/mp4', 'webm' => 'video/webm',
+    'woff' => 'font/woff', 'woff2' => 'font/woff2', 'ttf' => 'font/ttf', 'otf' => 'font/otf',
+    'wasm' => 'application/wasm', 'data' => 'application/octet-stream', 'bin' => 'application/octet-stream',
+    'pck' => 'application/octet-stream', 'glb' => 'model/gltf-binary', 'gltf' => 'model/gltf+json',
+    'atlas' => 'text/plain; charset=utf-8', 'fnt' => 'text/plain; charset=utf-8', 'xml' => 'application/xml',
+];
+
+function pasta_dados(): string
+{
+    return dirname(caminho_config()) . '/samuel-dados';
+}
+
+function catalogo_responsavel(): array
+{
+    $d = json_decode((string) @file_get_contents(pasta_dados() . '/catalogo.json'), true);
+    return [
+        'games' => is_array($d['games'] ?? null) ? $d['games'] : [],
+        'status_site' => is_array($d['status_site'] ?? null) ? $d['status_site'] : [],   // status trocado dos jogos do site
+    ];
+}
+
+function salvar_catalogo_responsavel(array $d): bool
+{
+    $dir = pasta_dados();
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true)) {
+        return false;
+    }
+    $ok = @file_put_contents($dir . '/catalogo.json', json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX) !== false;
+    jogos_todos(true);
+    return $ok;
+}
+
+/** Todos os jogos, de qualquer status. Cada um ganha 'origem' => 'site' | 'responsavel'. */
+function jogos_todos(bool $recarregar = false): array
 {
     static $j = null;
-    if ($j === null) {
+    if ($j === null || $recarregar) {
         $d = json_decode((string) @file_get_contents(__DIR__ . '/jogos.json'), true);
-        $j = is_array($d['games'] ?? null) ? $d['games'] : [];
+        $site = is_array($d['games'] ?? null) ? $d['games'] : [];
+        $resp = catalogo_responsavel();
+        $j = [];
+        $vistos = [];
+        foreach ($resp['games'] as $g) {             // os do responsável aparecem primeiro (mais novos)
+            $g['origem'] = 'responsavel';
+            $j[] = $g;
+            $vistos[$g['slug']] = true;
+        }
+        foreach ($site as $g) {
+            if (isset($vistos[$g['slug']])) {
+                continue;
+            }
+            $g['origem'] = 'site';
+            if (isset($resp['status_site'][$g['slug']]) && in_array($resp['status_site'][$g['slug']], STATUS_TODOS, true)) {
+                $g['status'] = $resp['status_site'][$g['slug']];
+            }
+            $j[] = $g;
+        }
     }
     return $j;
 }
 
+/** Jogos que a família vê (pronto + em breve). */
+function jogos(): array
+{
+    return array_values(array_filter(jogos_todos(), function ($g) {
+        return in_array($g['status'] ?? '', STATUS_VISIVEIS, true);
+    }));
+}
+
 function jogo(string $slug): ?array
 {
-    foreach (jogos() as $g) {
+    foreach (jogos_todos() as $g) {
         if (($g['slug'] ?? '') === $slug) {
             return $g;
         }
     }
     return null;
+}
+
+/** Pasta dos arquivos do jogo no servidor. */
+function pasta_jogo(array $g): string
+{
+    return ($g['origem'] ?? 'site') === 'responsavel'
+        ? pasta_dados() . '/jogos/' . $g['slug']
+        : RAIZ . '/_privado/jogos/' . $g['slug'];
+}
+
+/** A família pode abrir este jogo agora? (rascunho/arquivado só no modo responsável) */
+function jogo_jogavel(array $g): bool
+{
+    $st = $g['status'] ?? '';
+    $existe = is_file(pasta_jogo($g) . '/' . ($g['entry'] ?? 'index.html'));
+    return $existe && ($st === 'pronto' || (in_array($st, ['rascunho', 'arquivado'], true) && modo_responsavel()));
+}
+
+/** Arquivo da capa de um jogo do responsável (.webp ou .jpg), ou null. */
+function capa_arquivo(string $slug): ?string
+{
+    foreach (['webp', 'jpg'] as $ext) {
+        $f = pasta_dados() . '/capas/' . $slug . '.' . $ext;
+        if (is_file($f)) {
+            return $f;
+        }
+    }
+    return null;
+}
+
+function capa_url(array $g): string
+{
+    if (($g['origem'] ?? 'site') === 'responsavel') {
+        $f = capa_arquivo($g['slug']);
+        return $f ? '/capa.php?j=' . rawurlencode($g['slug']) . '&v=' . filemtime($f) : '/assets/img/ilha-dos-blocos.webp';
+    }
+    return !empty($g['cover']) ? '/assets/img/' . $g['cover'] : '/assets/img/ilha-dos-blocos.webp';
 }
 
 function perfis(): array

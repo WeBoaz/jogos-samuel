@@ -12,9 +12,15 @@
 | `/jogos/` | família | Biblioteca com busca, filtro e favoritos |
 | `/jogar/?jogo=<slug>` | família | Player (voltar, recomeçar, tela cheia) |
 | `/conta/` | família | Trocar a senha |
+| `/admin/` | responsável (senha de novo) | Catálogo: cadastrar jogo por .zip, capa, status, testar, excluir |
 | `/sair/` | — | Sai deste aparelho |
 
 Jogos: **Dragões & Blocos** e **Caça às estrelas** (jogáveis); **A turma dos pets** e **Ilha dos blocos** (em breve).
+
+## Adicionar um jogo (sem código)
+1. Entre no site → **Área do responsável** (na tela “Quem vai explorar?”) → digite a senha.
+2. **＋ Novo jogo** → nome, frase, dicas, o **.zip** do jogo (com `index.html`) e uma capa.
+3. Deixe como **Rascunho**, clique em **Testar**; se estiver bom, mude para **Publicado**.
 
 ## Rodar no computador
 ```bash

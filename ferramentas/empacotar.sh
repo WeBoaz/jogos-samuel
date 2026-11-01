@@ -4,6 +4,6 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 git archive --format=zip -o samuel-site.zip HEAD \
-  .htaccess index.php 404.php jogo.php robots.txt \
-  _app _privado assets entrar exploradores jogos jogar conta sair
+  .htaccess index.php 404.php jogo.php capa.php robots.txt \
+  _app _privado assets entrar exploradores jogos jogar conta sair admin
 echo "✓ samuel-site.zip ($(du -h samuel-site.zip | cut -f1))"

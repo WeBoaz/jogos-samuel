@@ -36,7 +36,7 @@ function cabecalho(array $o = []): void
 <?php endif; ?>
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/img/icone-180.png">
-<link rel="stylesheet" href="/assets/css/samuel.css?v=3">
+<link rel="stylesheet" href="/assets/css/samuel.css?v=5">
 </head>
 <body>
 <a class="skip" href="#main">Pular para o conteúdo</a>
@@ -70,7 +70,7 @@ function rodape(): void
 <footer class="footer"><div class="wrap footer-inner"><span class="footer-brand">samuel.tech <span aria-hidden="true">▣</span></span><span>Feito com amor e alguns pixels. © <?= date('Y') ?></span><button class="plain-btn" type="button" data-open="#info-dialog">Sobre este portal</button></div></footer>
 <dialog id="info-dialog" aria-labelledby="info-title"><div class="titlebar"><span>sobre_o_portal.txt</span><button class="close" type="button" data-close aria-label="Fechar">×</button></div><div class="dialog-body"><h2 id="info-title">Um universo em construção.</h2><p>Um cantinho da família para guardar os jogos que o papai cria para o Samuel. A biblioteca é privada: só entra quem tem a senha da família.</p><p>Os favoritos ficam guardados neste aparelho. Não há anúncios, chat nem dados pessoais das crianças.</p><p>Os personagens usam roupas de aventura inventadas. Nenhuma foto original faz parte do site.</p></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script src="/assets/js/site.js?v=2" defer></script>
+<script src="/assets/js/site.js?v=4" defer></script>
 </body>
 </html>
 <?php
@@ -83,7 +83,7 @@ function card_jogo(array $g, string $modo, bool $logado): string
     $slug = e($g['slug']);
     $tag = $pronto ? (!empty($g['novo']) ? 'Novo!' : 'Jogável') : 'Em breve';
     $meta = strtoupper((string) ($g['category'] ?? '')) . ' / ' . ($pronto ? 'PRONTO PARA JOGAR' : 'EM CONSTRUÇÃO');
-    $capa = !empty($g['cover']) ? '/assets/img/' . e($g['cover']) : '/assets/img/ilha-dos-blocos.webp';
+    $capa = e(capa_url($g));
     $link = $logado ? '/jogar/?jogo=' . $slug : '/entrar/?voltar=' . rawurlencode('/jogar/?jogo=' . $g['slug']);
 
     if ($modo === 'home') {

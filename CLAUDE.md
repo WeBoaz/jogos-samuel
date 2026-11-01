@@ -18,9 +18,13 @@ jogos/                   Biblioteca: busca, filtro, favoritos por perfil   [priv
 jogar/?jogo=<slug>       Player: iframe + voltar, recomeçar, tela cheia    [privado]
 jogo.php                 “Porteiro”: /jogo/<slug>/<arquivo> → entrega arquivos de _privado/jogos/ só com sessão
 conta/                   Trocar a senha da família                        [privado]
+admin/                   Área do responsável: catálogo, status, excluir   [senha de novo, 30 min]
+admin/jogo/              Cadastrar/editar jogo: .zip + capa + instruções + status
+capa.php                 Capas dos jogos do responsável (públicas só se o jogo estiver visível)
 sair/  404.php  robots.txt  .htaccess
 _app/                    Núcleo PHP (bloqueado na web)
-  inicio.php             config, sessão assinada, proteção de senha, catálogo
+  inicio.php             config, sessão assinada, proteção de senha, catálogo (site + responsável)
+  admin.php              importar .zip com segurança, capa 1200×675, slug
   layout.php             cabeçalho/rodapé/card (HTML do kit)
   jogos.json             CATÁLOGO DE JOGOS
   perfis.php             perfis (apelido + avatar SVG)
@@ -47,6 +51,16 @@ ferramentas/             empacotar.sh, roteador-local.php, novo_codigo.py (NÃO 
 - **Nunca** colocar senha, segredo ou o código de configuração em arquivo do repositório (ele é público).
 - **Nunca** proteger nada só com JavaScript/localStorage. Favoritos no localStorage são só conveniência.
 
+## Catálogo: dois lugares
+- **Jogos do site** (vêm do repositório): `_app/jogos.json` + arquivos em `_privado/jogos/<slug>/`.
+- **Jogos do responsável** (cadastrados em `/admin`): ficam FORA da pasta pública, em
+  `/home/u401945237/domains/samuel.tech/samuel-dados/` → `catalogo.json`, `jogos/<slug>/`, `capas/<slug>.webp`.
+  Sobrevivem às publicações. `status_site` nesse JSON guarda o status trocado de jogos do site.
+- Status: `pronto` (família joga) · `em-breve` (selo, sem jogar) · `rascunho` (só no modo responsável) · `arquivado` (escondido).
+- Import do .zip: rejeita `..`/caminho absoluto, ignora ocultos e `__MACOSX`, só extensões de `EXTENSOES_JOGO`
+  (nunca `.php`/`.htaccess`), máx. 3000 arquivos/300 MB, achata pasta única no topo, troca de versão atômica.
+- Área do responsável: família logada + senha de novo → `adm` no cookie por 30 min; formulários com token CSRF.
+
 ## Regras do kit (resumo — ver `kit/brand/brand-kit.html` e `kit/brand/tokens.json`)
 - Retrô anos 90 + mundo voxel. Papel `#F5F2E8`, tinta `#193337`, verde play `#B9ED80`, laranja `#FF9D52`, lilás `#CEB7EF`.
 - Borda 2px tinta, sombra sólida deslocada, **raio 0**, janelas com barra `.exe`, títulos em Courier New 900.
@@ -58,6 +72,10 @@ ferramentas/             empacotar.sh, roteador-local.php, novo_codigo.py (NÃO 
 - Jogos “em breve” são conceitos: não linkar para nada inventado.
 
 ## Como publicar um jogo novo
+**Jeito fácil (sem código):** `/admin` → Novo jogo → envia o `.zip` (com `index.html`) e a capa → “Rascunho” → Testar → “Publicado”.
+O jogo deve usar caminhos relativos e sair com `<a href="/jogos/" target="_top">`.
+
+**Jeito pelo repositório (jogos fixos do site):**
 1. Colocar os arquivos em `_privado/jogos/<slug>/` (arquivo inicial normalmente `index.html`; caminhos **relativos**).
 2. Links de saída do jogo: `<a href="/jogos/" target="_top">← Voltar aos jogos</a>`.
 3. Adicionar no `_app/jogos.json`: `slug, title, category, description, cover, entry, instructions[], input[], status:"pronto", novo, version`.
