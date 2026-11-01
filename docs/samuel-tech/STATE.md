@@ -3,6 +3,17 @@
 Atualizado ao fim de cada sessão (ST-090). Um bloco por sessão, o mais novo em cima.
 Vale o que está aqui e no Notion, não a memória do chat.
 
+## 2026-11-01 — Claude (Ilha dos Blocos 0.1.1)
+
+- **Publicado:** `ilha-dos-blocos@0.1.1+479f2f1` desde 2026-11-01 17:57 (-03:00); pacote `1244fa66…6629` (= `git archive
+  17a48f1`); produção = zip (30/30); sessão real em samuel.tech com o código (entrou, colocou e tirou um bloco).
+- **O que mudou:** P2 da 0.1 — `?servidor`/`?codigo` só no dev; código guardado não some numa recusa; Enter respeita o
+  aviso de tablet; servidor recusa código fraco em produção (`ILHA_PRODUCAO=1`, sem reinício em laço); nginx 60r/m;
+  avisos das crates do wasm. REV-01 Aprovado; G3 em `docs/qa/ilha-dos-blocos/0.1.1+479f2f1/`.
+- **VPS:** binário 0.1.1 instalado (0.1 guardado em `/opt/ilha/bin/ilha-dos-blocos-servidor.0.1` para voltar atrás).
+- **NEXT:** BLK-030 incremento 2 (porta que abre, girar blocos, exportar/importar, mundos por código) e BLK-040 (toque).
+  P2 restantes listados na G3 da 0.1.1.
+
 ## 2026-11-01 — Claude (Ilha dos Blocos 0.1 — prévia publicada)
 
 - **Pedido do Boaz:** "Publicar não apareceu no site" → publicar a Ilha. DEC-013.

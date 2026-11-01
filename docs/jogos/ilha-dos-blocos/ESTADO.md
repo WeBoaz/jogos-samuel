@@ -5,8 +5,8 @@
 - Base: Voxelize — **@voxelize/core 3.0.0 (npm) + crate `voxelize` =3.0.0 (crates.io)**, par publicado e casado.
   A prova da BLK-010 usou o commit `7ae1c20` (mais novo); a versão publicada também tem `MobileRigidControls`.
   Ver `docs/blocos/ADR-001-base.md`.
-- Etapa atual: **prévia 0.1 publicada** (`ilha-dos-blocos@0.1+ed6a828`, 2026-11-01 16:43) · BLK-030 segue (incremento 2)
-- URL: https://samuel.tech/jogar/?jogo=ilha-dos-blocos · QA: `docs/qa/ilha-dos-blocos/0.1+ed6a828/`
+- Etapa atual: **prévia 0.1.1 publicada** (`ilha-dos-blocos@0.1.1+479f2f1`, 2026-11-01 17:57) · BLK-030 segue (incremento 2)
+- URL: https://samuel.tech/jogar/?jogo=ilha-dos-blocos · QA: `docs/qa/ilha-dos-blocos/0.1+ed6a828/` e `0.1.1+479f2f1/`
 - Fonte: `desenvolvimento/jogos/ilha-dos-blocos/{servidor,cliente}` · build em `_privado/jogos/ilha-dos-blocos/`
 - Servidor: VPS `srv2114451.hstgr.cloud`, serviço `ilha-dos-blocos` atrás do nginx em `https://srv2114451.hstgr.cloud:8443`
   (infra em `desenvolvimento/infra/vps/`); entrada com o **código da ilha** (cópia do Boaz em `~/samuel-tech-ilha-codigo.txt`,
