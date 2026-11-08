@@ -3,6 +3,28 @@
   "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e só abrem com a família logada. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
   "games": [
     {
+      "slug": "mestre-do-cubo",
+      "title": "Mestre do Cubo",
+      "category": "Desafio",
+      "description": "Tire foto do seu cubo mágico (2×2, 3×3, 4×4 ou 5×5) e veja em 3D, passo a passo, como resolver!",
+      "cover": "mestre-do-cubo.webp",
+      "entry": "index.html",
+      "instructions": [
+        "Escolha o tamanho do seu cubo: 2×2, 3×3, 4×4 ou 5×5.",
+        "Tire foto das 6 faces seguindo as dicas e ajuste as bolinhas amarelas nos cantos da face.",
+        "Confira as cores no mapa: toque para corrigir se alguma estiver errada.",
+        "Aperte Resolver e siga cada movimento no cubo 3D. ◀ ▶ voltam e avançam; no computador use as setas e o ESPAÇO."
+      ],
+      "input": [
+        "touch",
+        "mouse",
+        "keyboard"
+      ],
+      "status": "pronto",
+      "novo": true,
+      "version": "1.0"
+    },
+    {
       "slug": "reino-dos-blocos",
       "title": "Reino dos Blocos",
       "category": "Plataforma",
