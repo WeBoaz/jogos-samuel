@@ -36,6 +36,10 @@ _privado/jogos/<slug>/   Arquivos dos jogos (bloqueado na web; só via jogo.php)
   reino-dos-blocos/      Plataforma 2D em canvas (pixel art gerada em código, 3 fases montadas por funções em FASES).
                          Física: coiote 0,1 s, pulo guardado 0,13 s, corte 0,45, queda mais forte, correção de quina.
                          `window.__reino` p/ testes (robô de teste: anda e pula obstáculos).
+  ilha-dos-blocos/       Exploração + construção 3D em voxels (Three.js local em lib/). Mundo 96×96×32 em Uint8Array,
+                         InstancedMesh por tipo de bloco, encostas de no máx. 1 bloco (sobe andando), 12 cristais +
+                         Doguinho e Gatinho para achar; construções salvas em localStorage `ilha:*`. `window.__ilha` p/ testes
+                         (robô com caminho BFS alcança todos os cristais e amigos).
 assets/css/samuel.css    Bloco 1 = CSS original do kit; bloco 2 = páginas novas
 assets/js/site.js        Favoritos, busca, filtro, diálogos, player
 assets/img/              Artes do kit otimizadas (.webp) + capas

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e só abrem com a família logada. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
+  "nota": "Catálogo de jogos. Jogos 'pronto' ficam em _privado/jogos/<slug>/ e abrem para qualquer visitante pelo jogo.php. Ordem = ordem de exibição; a home mostra os 3 primeiros.",
   "games": [
     {
       "slug": "mestre-do-cubo",
@@ -120,11 +120,25 @@
     },
     {
       "slug": "ilha-dos-blocos",
-      "title": "Ilha dos blocos",
+      "title": "Ilha dos Blocos",
       "category": "Exploração",
-      "description": "Um mundo de ilhas e caminhos para soltar a imaginação.",
+      "description": "O Doguinho e o Gatinho se perderam! Explore a ilha 3D, ache os 12 cristais e construa o que quiser.",
       "cover": "ilha-dos-blocos.webp",
-      "status": "em-breve"
+      "entry": "index.html",
+      "instructions": [
+        "Celular ou tablet: a bolinha da esquerda anda; ⤒ pula; 🧱 põe bloco; ⛏ tira bloco. Arraste a tela para girar a câmera.",
+        "Computador: setas ou WASD andam; ESPAÇO pula; F põe bloco; X tira; 1 a 6 trocam o bloco; Q/E giram a câmera; P pausa.",
+        "Siga os feixes de luz azul para achar os cristais 💎 e use o mapa (canto de cima) para achar os amigos.",
+        "Cristal muito alto? Ponha blocos na frente e suba como numa escadinha!"
+      ],
+      "input": [
+        "touch",
+        "keyboard",
+        "gamepad"
+      ],
+      "status": "pronto",
+      "novo": true,
+      "version": "1.0"
     }
   ]
 }
